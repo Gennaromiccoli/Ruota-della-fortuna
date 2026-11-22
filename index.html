@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabellone della Ruota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#030a2b; --bg2:#0a2a7a; --panel:#0b1d5c; --panel2:#102a7d;
+  --gold:#ffd34d; --gold2:#f5a623; --text:#f4f7ff; --muted:#a9b8e8;
+  --tile-empty1:#13896d; --tile-empty2:#0a5c49; --tile:#f8f8f2; --lit:#2f7bff;
+  --blue:#7cc6ee; --orange:#f39a2b; --green:#a8d36b; --pink:#f2b6d8; --white:#f4f4ee; --yellow:#f7df45; --black:#141414;
+  --danger:#e5484d; --ok:#2fbf71;
+  --display:'Anton', Impact, 'Arial Black', sans-serif;
+  --ui:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+html{background:#030a2b}
+body{
+  font-family:var(--ui); color:var(--text);
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(80,140,255,.45), transparent 55%),
+    radial-gradient(ellipse at 85% 0%, rgba(255,80,200,.25), transparent 50%),
+    radial-gradient(ellipse at 50% 120%, rgba(0,200,255,.25), transparent 60%),
+    linear-gradient(180deg,var(--bg2),var(--bg1));
+  background-attachment:fixed;
+}
+button{font-family:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.38}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:clamp(22px,3vw,34px);letter-spacing:1px;
+  background:linear-gradient(180deg,#fff6c8,var(--gold) 45%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #7a4b00) drop-shadow(0 0 12px rgba(255,200,60,.35))}
+.manche-badge{font-family:var(--display);font-size:18px;letter-spacing:1px;padding:4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,211,77,.5);color:var(--gold)}
+.spacer{flex:1}
+.hbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600}
+.hbtn:hover:not(:disabled){background:rgba(255,255,255,.16)}
+
+/* ---------- players ---------- */
+#players{display:flex;gap:10px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:thin}
+.pcard{flex:1 0 150px;max-width:260px;position:relative;border-radius:14px;padding:10px 12px 10px 16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:2px solid rgba(255,255,255,.12);overflow:hidden;transition:transform .25s, border-color .25s, box-shadow .25s}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--pc)}
+.pcard .pname{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .pround{font-family:var(--display);font-size:26px;letter-spacing:.5px;line-height:1.1;margin-top:2px}
+.pcard .ptotal{font-size:13px;color:var(--muted)}
+.pcard .ptotal b{color:var(--text)}
+.pcard.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,211,77,.25),0 0 28px rgba(255,211,77,.35);transform:translateY(-2px)}
+.pcard.active .pname::after{content:"  ◀ di turno";color:var(--gold);font-size:12px;font-weight:600}
+.pcard.out{opacity:.35}
+
+/* ---------- stage ---------- */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:16px;padding:0 16px 16px;align-items:start}
+@media (max-width:980px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+.board-wrap{position:relative;border-radius:22px;padding:clamp(8px,1.6vw,18px);
+  background:linear-gradient(180deg,#0d1f63,#06113d);box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.08)}
+.board-wrap::before{content:"";position:absolute;inset:4px;border-radius:18px;border:5px dotted var(--gold);opacity:.85;pointer-events:none;animation:marquee 1.2s steps(2) infinite}
+@keyframes marquee{50%{border-color:#fff3b0;opacity:1}}
+#board{container-type:inline-size;display:grid;grid-template-columns:repeat(14,1fr);gap:clamp(2px,.5vw,6px);padding:clamp(6px,1.2vw,14px)}
+.tile{aspect-ratio:3/4;border-radius:clamp(2px,.5cqw,6px);display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:clamp(14px,5.2cqw,64px);line-height:1;color:#0b0b0b;position:relative;user-select:none;transition:background .3s, box-shadow .3s}
+.tile.off{visibility:hidden}
+.tile.empty{background:linear-gradient(180deg,var(--tile-empty1),var(--tile-empty2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), inset 0 -3px 0 rgba(0,0,0,.25)}
+.tile.letter,.tile.punct{background:var(--tile);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.2)}
+.tile.letter span{opacity:0;transform:scale(.4);transition:opacity .25s,transform .25s}
+.tile.letter.shown span,.tile.punct span{opacity:1;transform:none}
+.tile.lit{background:var(--lit)!important;box-shadow:0 0 18px 4px rgba(80,150,255,.9), inset 0 0 0 2px #bfe0ff!important}
+.tile.lit span{opacity:0!important}
+
+.category{margin:12px auto 0;max-width:92%;text-align:center;font-family:var(--display);letter-spacing:2px;
+  font-size:clamp(18px,2.4vw,30px);padding:8px 22px;border-radius:999px;color:#1b1300;
+  background:linear-gradient(180deg,#fff2a8,var(--gold) 50%,var(--gold2));box-shadow:0 6px 18px rgba(0,0,0,.35);text-transform:uppercase;min-height:1.6em}
+.category small{font-family:var(--ui);font-weight:800;font-size:.5em;letter-spacing:1px;opacity:.6;margin-right:10px;vertical-align:middle}
+
+.panel{background:linear-gradient(180deg,rgba(16,42,125,.85),rgba(11,29,92,.85));border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#msg{font-size:clamp(16px,1.8vw,21px);font-weight:600;min-height:2.6em;line-height:1.35}
+#msg .big{margin-right:6px}
+#msg .big{font-family:var(--display);letter-spacing:1px;color:var(--gold)}
+#actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.btn{border:none;border-radius:12px;padding:12px 18px;font-weight:800;font-size:16px;color:#1a1200;
+  background:linear-gradient(180deg,#fff2a8,var(--gold) 55%,var(--gold2));box-shadow:0 4px 0 #8a5a00,0 8px 16px rgba(0,0,0,.3);transition:transform .08s}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #8a5a00}
+.btn.blue{color:#fff;background:linear-gradient(180deg,#5aa0ff,#2a62e0);box-shadow:0 4px 0 #173a8f,0 8px 16px rgba(0,0,0,.3)}
+.btn.green{color:#fff;background:linear-gradient(180deg,#4fdc8f,#1f9d5a);box-shadow:0 4px 0 #0f5c33,0 8px 16px rgba(0,0,0,.3)}
+.btn.red{color:#fff;background:linear-gradient(180deg,#ff6b6f,#c9302c);box-shadow:0 4px 0 #7a1714,0 8px 16px rgba(0,0,0,.3)}
+.btn.ghost{color:var(--text);background:rgba(255,255,255,.08);box-shadow:none;border:1px solid rgba(255,255,255,.2);font-weight:600}
+
+#keyboard{margin-top:14px;display:grid;gap:6px}
+.krow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.krow .klabel{width:100%;text-align:center;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.key{width:clamp(34px,4vw,46px);height:clamp(40px,4.6vw,52px);border-radius:9px;border:none;font-family:var(--display);font-size:clamp(18px,2vw,24px);
+  background:#f4f4ee;color:#0b1d5c;box-shadow:0 3px 0 #8d94b3}
+.key.vowel{background:#ffe9a6}
+.key.used{background:#3a4677;color:#7f8bb8;box-shadow:none;text-decoration:line-through}
+.key.hot:not(:disabled){outline:3px solid var(--gold);outline-offset:1px}
+
+/* ---------- wheel ---------- */
+.wheel-panel{display:flex;flex-direction:column;align-items:center;gap:12px}
+.mode-toggle{display:flex;background:rgba(0,0,0,.25);border-radius:999px;padding:4px;gap:4px}
+.mode-toggle button{border:none;background:transparent;color:var(--muted);padding:8px 16px;border-radius:999px;font-weight:800;font-size:14px}
+.mode-toggle button.on{background:var(--gold);color:#1a1200}
+.wheel-box{position:relative;width:100%;max-width:380px;aspect-ratio:1}
+#wheelRot{position:absolute;inset:0;will-change:transform}
+#wheelRot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+.pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;z-index:2;
+  border-left:16px solid transparent;border-right:16px solid transparent;border-top:34px solid #e5484d;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
+.pointer::after{content:"";position:absolute;left:-7px;top:-32px;width:14px;height:14px;border-radius:50%;background:var(--gold)}
+#spinBtn{font-size:20px;padding:14px 30px;font-family:var(--display);letter-spacing:1.5px}
+#manualGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.seg-btn{border:none;border-radius:10px;padding:12px 4px;font-family:var(--display);font-size:20px;letter-spacing:.5px;color:#111;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.seg-btn.wide{grid-column:span 2;font-size:17px}
+.seg-btn:active:not(:disabled){transform:translateY(2px)}
+.hint{font-size:12.5px;color:var(--muted);text-align:center}
+
+/* ---------- modal ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(2,6,25,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal-bg.open{display:flex}
+.modal{width:min(620px,100%);max-height:calc(100vh - 32px);overflow:auto;background:linear-gradient(180deg,#14318f,#0b1d5c);border:2px solid rgba(255,211,77,.6);border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal h2{font-family:var(--display);letter-spacing:1px;font-size:28px;margin:0 0 12px;color:var(--gold)}
+.modal label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px;color:var(--muted)}
+.modal input[type=text],.modal input[type=password],.modal input[type=number]{width:100%;padding:11px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:var(--text);font-size:17px;font-family:inherit}
+.modal input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.row{display:flex;gap:8px;align-items:center}
+.row > input{flex:1}
+.prow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.prow .dot{width:14px;height:14px;border-radius:50%;flex:none}
+.prow input{flex:1}
+.xbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--text);border-radius:8px;width:38px;height:40px;font-size:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.check{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14px;color:var(--text)}
+.err{color:#ff9a9d;font-weight:600;min-height:1.3em;margin-top:10px;font-size:14px}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+details{margin-top:14px;background:rgba(0,0,0,.18);border-radius:12px;padding:8px 12px}
+summary{cursor:pointer;font-weight:800}
+#preview{display:grid;grid-template-columns:repeat(14,1fr);gap:2px;margin-top:10px;container-type:inline-size}
+#preview .tile{font-size:4.6cqw}
+.standings{width:100%;border-collapse:collapse;margin-top:8px}
+.standings td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.1);font-size:16px}
+.standings td:last-child{text-align:right;font-family:var(--display);font-size:20px;letter-spacing:.5px}
+.standings tr.top td{color:var(--gold)}
+.trophy{font-size:56px;text-align:center}
+.solution{font-family:var(--display);font-size:22px;letter-spacing:1px;text-align:center;background:rgba(0,0,0,.2);padding:10px;border-radius:12px;margin:6px 0 4px}
+
+/* confetti */
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">★ TABELLONE DELLA RUOTA ★</div>
+  <div class="manche-badge" id="mancheBadge">—</div>
+  <div class="spacer"></div>
+  <button class="hbtn" id="undoBtn" title="Annulla l'ultima azione (Ctrl+Z)">↶ Annulla</button>
+  <button class="hbtn" id="soundBtn" title="Audio on/off">🔊</button>
+  <button class="hbtn" id="fsBtn" title="Schermo intero">⛶</button>
+  <button class="hbtn" id="newBtn">⚙ Nuova partita</button>
+</header>
+
+<div id="players"></div>
+
+<div class="stage">
+  <main>
+    <div class="board-wrap">
+      <div id="board"></div>
+    </div>
+    <div class="category" id="category"></div>
+
+    <div class="panel" style="margin-top:14px">
+      <div id="msg" aria-live="polite"></div>
+      <div id="actions"></div>
+      <div id="keyboard"></div>
+    </div>
+  </main>
+
+  <aside class="panel wheel-panel">
+    <div class="mode-toggle" role="tablist">
+      <button id="modeDigital">🎡 Ruota digitale</button>
+      <button id="modeManual">✋ Ruota manuale</button>
+    </div>
+    <div class="wheel-box">
+      <div class="pointer"></div>
+      <div id="wheelRot"></div>
+    </div>
+    <button class="btn" id="spinBtn">GIRA LA RUOTA</button>
+    <div id="manualGrid"></div>
+    <div class="hint" id="wheelHint"></div>
+  </aside>
+</div>
+
+<!-- Setup -->
+<div class="modal-bg" id="setupModal">
+  <div class="modal">
+    <h2>Nuova partita</h2>
+    <label>Concorrenti</label>
+    <div id="playerInputs"></div>
+    <button class="btn ghost" id="addPlayer" type="button">+ Aggiungi concorrente</button>
+    <div class="grid2">
+      <div>
+        <label for="numManches">Numero di manche</label>
+        <input type="number" id="numManches" min="1" max="30" value="3">
+      </div>
+      <div>
+        <label for="bonusValue">Valore spicchio BONUS (€)</label>
+        <input type="number" id="bonusValue" min="0" step="50" value="500">
+      </div>
+    </div>
+    <details>
+      <summary>Regole avanzate</summary>
+      <div class="grid2">
+        <div>
+          <label for="vowelCost">Costo vocale (€)</label>
+          <input type="number" id="vowelCost" min="0" step="50" value="200">
+        </div>
+        <div>
+          <label for="winBonus">Premio a chi risolve la manche (€)</label>
+          <input type="number" id="winBonus" min="0" step="100" value="1000">
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
+    </details>
+    <div class="err" id="setupErr"></div>
+    <div class="mfoot">
+      <button class="btn ghost" id="setupCancel" type="button">Chiudi</button>
+      <button class="btn green" id="setupStart" type="button">Inizia ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phrase entry -->
+<div class="modal-bg" id="phraseModal">
+  <div class="modal">
+    <h2 id="phraseTitle">Manche 1</h2>
+    <p class="hint" style="text-align:left;margin:0">Il conduttore scrive titolo e frase. La frase resta nascosta finché non premi 👁.</p>
+    <label for="catInput">Titolo (categoria)</label>
+    <input type="text" id="catInput" placeholder="es. Proverbio" autocomplete="off">
+    <label for="phraseInput">Frase</label>
+    <div class="row">
+      <input type="password" id="phraseInput" placeholder="es. Chi va piano va sano e va lontano" autocomplete="off" spellcheck="false">
+      <button class="xbtn" id="eyeBtn" type="button" title="Mostra / nascondi">👁</button>
+    </div>
+    <div id="preview"></div>
+    <div class="err" id="phraseErr"></div>
+    <div class="mfoot">
+      <button class="btn ghost" id="randomPhrase" type="button">🎲 Frase a sorpresa</button>
+      <button class="btn green" id="phraseStart" type="button">Svela il tabellone ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manche end / Game end -->
+<div class="modal-bg" id="endModal">
+  <div class="modal" id="endContent"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Dati ruota (dalla ruota fisica, senso orario dall'alto) ================= */
+const C = {blue:'#7cc6ee',orange:'#f39a2b',green:'#a8d36b',pink:'#f2b6d8',white:'#f4f4ee',yellow:'#f7df45',black:'#141414'};
+const SEGMENTS = [
+  {t:'BANCAROTTA'},{v:100,c:'blue'},{v:200,c:'orange'},{v:100,c:'blue'},{t:'PASSA'},
+  {v:400,c:'pink'},{v:200,c:'orange'},{v:300,c:'green'},{t:'PASSA'},{t:'BONUS'},
+  {v:250,c:'orange'},{v:300,c:'green'},{v:150,c:'yellow'},{v:250,c:'orange'},{t:'BANCAROTTA'},
+  {v:400,c:'pink'},{v:350,c:'green'},{v:200,c:'orange'},{v:100,c:'blue'},{v:350,c:'green'},
+  {v:200,c:'orange'},{v:100,c:'blue'},{v:200,c:'orange'},{v:300,c:'green'}
+];
+const SEG_DEG = 360 / SEGMENTS.length;
+const VOWELS = 'AEIOU';
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const ROW_CAP = [12,14,14,12];
+const PLAYER_COLORS = ['#ff5d73','#4fc3ff','#7ee06f','#ffb547','#c38bff','#ff7ad9','#3ee0c5','#ffe066','#ff8a5c','#9fb4ff','#b8f06a','#f2f2f2'];
+const STORE_KEY = 'tabellone-ruota-v1';
+
+const SAMPLE = [
+  ['Proverbio','Chi va piano va sano e va lontano'],
+  ["Proverbio","L'erba del vicino è sempre più verde"],
+  ["Proverbio","Tra il dire e il fare c'è di mezzo il mare"],
+  ['Proverbio','Chi dorme non piglia pesci'],
+  ["Proverbio","Il mattino ha l'oro in bocca"],
+  ['Proverbio','Non tutto il male vien per nuocere'],
+  ['Proverbio','Chi trova un amico trova un tesoro'],
+  ['Proverbio','Rosso di sera bel tempo si spera'],
+  ['Proverbio','Patti chiari amicizia lunga'],
+  ['Proverbio','Occhio non vede cuore non duole'],
+  ['Proverbio','A caval donato non si guarda in bocca'],
+  ['Modo di dire','In bocca al lupo'],
+  ['Modo di dire','Avere le mani bucate'],
+  ['Modo di dire','Prendere due piccioni con una fava'],
+  ['Modo di dire','Essere al settimo cielo'],
+  ['Modo di dire','Fare orecchie da mercante'],
+  ['Modo di dire','Cercare un ago in un pagliaio'],
+  ['In cucina','Spaghetti alla carbonara'],
+  ['In cucina','Risotto alla milanese'],
+  ['In cucina','Tiramisù al caffè'],
+  ['Luoghi famosi','La torre pendente di Pisa'],
+  ['Luoghi famosi','Piazza San Marco a Venezia'],
+  ['Luoghi famosi','Il Colosseo di Roma'],
+];
+
+/* ================= Utilità ================= */
+const $ = id => document.getElementById(id);
+const norm = ch => ch.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
+const isLetter = ch => /^[A-Z]$/.test(norm(ch));
+const isVowel = L => VOWELS.includes(L);
+const euro = n => n.toLocaleString('it-IT') + ' €';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* Impagina la frase nelle 4 righe del tabellone (12/14/14/12). Restituisce 56 celle o null. */
+function layoutPhrase(text){
+  const words = text.trim().toUpperCase().replace(/\s+/g,' ').split(' ').filter(Boolean);
+  if (!words.length) return null;
+  const configs = [[1],[1,2],[0,1,2],[1,2,3],[0,1,2,3]];
+  for (const rows of configs){
+    const lines = []; let line = ''; let ok = true; let ri = 0;
+    for (const w of words){
+      const cap = ROW_CAP[rows[ri]];
+      if (!line){ if (w.length > cap){ ok = false; break; } line = w; }
+      else if (line.length + 1 + w.length <= cap){ line += ' ' + w; }
+      else {
+        lines.push(line); ri++;
+        if (ri >= rows.length || w.length > ROW_CAP[rows[ri]]){ ok = false; break; }
+        line = w;
+      }
+    }
+    if (!ok) continue;
+    lines.push(line);
+    if (lines.length !== rows.length) continue;
+    const grid = new Array(56).fill(null);
+    lines.forEach((ln, i) => {
+      const r = rows[i];
+      const chars = [...ln];
+      const start = Math.floor((14 - chars.length) / 2);
+      chars.forEach((ch, j) => { grid[r*14 + start + j] = ch === ' ' ? null : ch; });
+    });
+    return grid;
+  }
+  return null;
+}
+
+/* ================= Audio ================= */
+const Sound = {
+  ctx:null, on: store.get('ruota-sound') !== 'off',
+  ensure(){ if (!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if (this.ctx && this.ctx.state==='suspended') this.ctx.resume(); return this.ctx; },
+  tone(freq, dur, type='sine', vol=.2, when=0){
+    if (!this.on) return; const ctx = this.ensure(); if (!ctx) return;
+    const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + .02);
+  },
+  tick(){ this.tone(1500,.03,'square',.06); },
+  ding(){ this.tone(1046,.5,'sine',.22); this.tone(1568,.4,'sine',.1); },
+  buzz(){ this.tone(110,.55,'sawtooth',.18); this.tone(116,.55,'sawtooth',.12); },
+  pass(){ this.tone(440,.18,'triangle',.18); this.tone(330,.3,'triangle',.18,.16); },
+  fanfare(){ [523,659,784,1046,784,1046].forEach((f,i)=>this.tone(f,.35,'triangle',.18,i*.13)); }
+};
+
+/* ================= Stato ================= */
+let S = null;           // stato di gioco (serializzabile)
+let history = [];       // per "Annulla"
+let busy = false;       // animazioni in corso
+let wheelRot = 0;
+let mode = store.get('ruota-mode') === 'manual' ? 'manual' : 'digital';
+
+function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
+function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); }
+const cur = () => S.players[S.current];
+const isActive = i => !S.tiebreak || S.tiebreak.includes(i);
+
+function newGame(cfg){
+  S = {
+    cfg,
+    players: cfg.names.map((n,i) => ({name:n, color:PLAYER_COLORS[i % PLAYER_COLORS.length], round:0, total:0})),
+    manche: 1, current: 0, phase: 'phrase',
+    category: '', phrase: '', grid: null, used: [], spin: null,
+    msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null
+  };
+  history = [];
+}
+
+function lettersInPhrase(){ return S.grid ? [...new Set(S.grid.filter(c => c && isLetter(c)).map(norm))] : []; }
+function remaining(kind){
+  return lettersInPhrase().filter(L => !S.used.includes(L) && (kind === 'v' ? isVowel(L) : !isVowel(L)));
+}
+function allRevealed(){ return remaining('v').length === 0 && remaining('c').length === 0; }
+
+function nextPlayer(){
+  const n = S.players.length;
+  let i = S.current;
+  for (let k = 0; k < n; k++){ i = (i + 1) % n; if (isActive(i)) break; }
+  S.current = i; S.phase = 'turn'; S.spin = null;
+}
+
+function startManche(category, phrase){
+  snapshot();
+  S.category = category.trim();
+  S.phrase = phrase.trim();
+  S.grid = layoutPhrase(S.phrase);
+  S.used = [];
+  S.players.forEach(p => p.round = 0);
+  const actives = S.players.map((_,i)=>i).filter(isActive);
+  S.current = actives[(S.manche - 1) % actives.length];
+  S.phase = 'turn'; S.spin = null;
+  S.msg = `Tocca a <b>${esc(cur().name)}</b>: gira la ruota!`;
+  buildBoard(); render();
+}
+
+/* ================= Azioni ================= */
+function applySegment(seg){
+  const p = cur();
+  if (seg.t === 'PASSA'){
+    nextPlayer();
+    S.msg = `<span class="big">PASSA!</span> ${esc(p.name)} cede il turno a <b>${esc(cur().name)}</b>.`;
+    Sound.pass();
+  } else if (seg.t === 'BANCAROTTA'){
+    const lost = p.round + p.total;
+    p.round = 0; p.total = 0;
+    nextPlayer();
+    S.msg = `<span class="big" style="color:#ff6b6f">BANCAROTTA!</span> ${esc(p.name)} perde ${euro(lost)}. Tocca a <b>${esc(cur().name)}</b>.`;
+    Sound.buzz();
+  } else {
+    const value = seg.t === 'BONUS' ? S.cfg.bonusValue : seg.v;
+    S.spin = {value, label: seg.t === 'BONUS' ? 'BONUS' : euro(value)};
+    S.phase = 'consonant';
+    S.msg = `<span class="big">${seg.t === 'BONUS' ? 'BONUS · ' + euro(value) : euro(value)}</span> ${esc(p.name)}, chiama una consonante.`;
+    Sound.ding();
+  }
+  save(); render();
+}
+
+function chooseLetter(L){
+  if (busy || !S) return;
+  const vowelPhase = S.phase === 'vowel';
+  if (S.phase !== 'consonant' && !vowelPhase) return;
+  if (vowelPhase !== isVowel(L)) return;
+  const p = cur();
+  if (S.used.includes(L)){
+    if (!confirm(`La lettera ${L} è già stata chiamata.\nTurno perso per ${p.name}?`)) return;
+    snapshot();
+    if (vowelPhase) p.round -= S.cfg.vowelCost;
+    nextPlayer();
+    S.msg = `${L} era già stata chiamata! Turno a <b>${esc(cur().name)}</b>.`;
+    Sound.buzz(); save(); render(); return;
+  }
+  snapshot();
+  S.used.push(L);
+  const count = S.grid.filter(c => c && isLetter(c) && norm(c) === L).length;
+  if (vowelPhase) p.round -= S.cfg.vowelCost;
+  if (count > 0){
+    let gain = 0;
+    if (!vowelPhase){ gain = count * S.spin.value; p.round += gain; }
+    S.phase = 'turn'; S.spin = null;
+    S.msg = (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '') + ` ${esc(p.name)} continua.`;
+    if (allRevealed()) S.msg = `Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`;
+    const anim = animateReveal([L]);
+    save(); render(); anim();
+  } else {
+    nextPlayer();
+    S.msg = `Nessuna <b>${L}</b>. Tocca a <b>${esc(cur().name)}</b>.`;
+    Sound.buzz(); save(); render();
+  }
+}
+
+function buyVowel(){
+  if (busy || S.phase !== 'turn') return;
+  if (cur().round < S.cfg.vowelCost || !remaining('v').length) return;
+  S.phase = 'vowel';
+  S.msg = `${esc(cur().name)} compra una vocale (${euro(S.cfg.vowelCost)}). Quale?`;
+  render();
+}
+
+function solveAttempt(){ if (busy || S.phase !== 'turn') return; S.phase = 'solve'; S.msg = `<b>${esc(cur().name)}</b> prova a risolvere… La risposta è giusta?`; render(); }
+function cancelPhase(){ if (S.phase === 'vowel' || S.phase === 'solve'){ S.phase = 'turn'; S.msg = `Tocca a <b>${esc(cur().name)}</b>.`; render(); } }
+
+function solveWrong(){
+  snapshot();
+  const p = cur(); nextPlayer();
+  S.msg = `Risposta sbagliata di ${esc(p.name)}. Tocca a <b>${esc(cur().name)}</b>.`;
+  Sound.buzz(); save(); render();
+}
+
+function solveRight(){
+  snapshot();
+  const p = cur();
+  const won = p.round + S.cfg.winBonus;
+  S.players.forEach((q,i) => {
+    if (i === S.current) q.total += won;
+    else if (S.cfg.keepOthers) q.total += q.round;
+    q.round = 0;
+  });
+  S.lastWinner = {name: p.name, won};
+  const hidden = lettersInPhrase().filter(L => !S.used.includes(L));
+  S.used.push(...hidden);
+  S.phase = 'mancheEnd';
+  S.msg = `<span class="big">${esc(p.name)} risolve!</span> +${euro(won)}`;
+  const anim = animateReveal(hidden, true);
+  save(); render();
+  Sound.fanfare(); confetti();
+  anim().then(() => setTimeout(showEnd, 700));
+}
+
+function skipTurn(){
+  if (busy || !['turn','consonant','vowel','solve'].includes(S.phase)) return;
+  snapshot(); const p = cur(); nextPlayer();
+  S.msg = `${esc(p.name)} passa. Tocca a <b>${esc(cur().name)}</b>.`;
+  save(); render();
+}
+
+function undo(){
+  if (busy || !history.length) return;
+  S = JSON.parse(history.pop());
+  save(); buildBoard(); render();
+  closeModals(); openModalForPhase();
+}
+
+/* ================= Ruota (SVG) ================= */
+function buildWheel(){
+  const R = 205, cx = 220, cy = 220, hub = 70;
+  const pt = (a, r) => [cx + r * Math.sin(a * Math.PI/180), cy - r * Math.cos(a * Math.PI/180)];
+  let defs = `<defs>
+    <radialGradient id="hubG" cx="45%" cy="40%" r="65%"><stop offset="0" stop-color="#e9f3ff"/><stop offset=".45" stop-color="#5b8fe6"/><stop offset="1" stop-color="#1c3fa8"/></radialGradient>
+    <linearGradient id="bonusG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7cc6ee"/><stop offset=".3" stop-color="#f7df45"/><stop offset=".6" stop-color="#f39a2b"/><stop offset="1" stop-color="#a8d36b"/></linearGradient>
+  </defs>`;
+  let body = `<circle cx="${cx}" cy="${cy}" r="${R+10}" fill="#1a1a1a"/><circle cx="${cx}" cy="${cy}" r="${R+4}" fill="#2b2b2b"/>`;
+  SEGMENTS.forEach((s, i) => {
+    const a0 = i*SEG_DEG - SEG_DEG/2, a1 = a0 + SEG_DEG;
+    const [x0,y0] = pt(a0, R), [x1,y1] = pt(a1, R);
+    const fill = s.t === 'BANCAROTTA' ? C.black : s.t === 'PASSA' ? C.white : s.t === 'BONUS' ? 'url(#bonusG)' : C[s.c];
+    body += `<path d="M${cx},${cy} L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${fill}" stroke="#ffffff" stroke-width="1.2"/>`;
+    const label = s.t || String(s.v);
+    const color = s.t === 'BANCAROTTA' ? '#ffffff' : '#111111';
+    const chars = [...label];
+    let rStart, step, size;
+    if (s.t === 'BANCAROTTA'){ rStart = 192; step = 12.4; size = 14; }
+    else if (s.t){ rStart = 186; step = 22; size = 22; }
+    else { rStart = 180; step = 31; size = 32; }
+    const a = i*SEG_DEG;
+    chars.forEach((ch, k) => {
+      const [x,y] = pt(a, rStart - k*step);
+      body += `<text x="${x}" y="${y}" transform="rotate(${a} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Anton, Impact, Arial Black, sans-serif" font-size="${size}" fill="${color}" ${s.t==='BANCAROTTA'?'':'stroke="#ffffff" stroke-width=".6" paint-order="stroke"'}>${ch}</text>`;
+    });
+    if (!s.t){ const [x,y] = pt(a, rStart - chars.length*step + 4); body += `<text x="${x}" y="${y}" transform="rotate(${a} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="16" fill="#111">€</text>`; }
+  });
+  SEGMENTS.forEach((s, i) => { const [x,y] = pt(i*SEG_DEG - SEG_DEG/2, R - 2); body += `<circle cx="${x}" cy="${y}" r="3.4" fill="#d9d9d9" stroke="#555" stroke-width="1"/>`; });
+  body += `<circle cx="${cx}" cy="${cy}" r="${hub}" fill="url(#hubG)" stroke="#0b1d5c" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="7" fill="#cfd6e4" stroke="#666"/>`;
+  $('wheelRot').innerHTML = `<svg viewBox="0 0 440 440" aria-label="Ruota">${defs}${body}</svg>`;
+  $('wheelRot').style.transform = `rotate(${wheelRot}deg)`;
+}
+
+function rotateWheelTo(index, turns, ms){
+  return new Promise(resolve => {
+    const jitter = (Math.random() - .5) * (SEG_DEG * .7);
+    const target = -index*SEG_DEG + jitter;
+    let delta = ((target - wheelRot) % 360 + 360) % 360;
+    const newRot = wheelRot + turns*360 + delta;
+    const el = $('wheelRot');
+    el.style.transition = `transform ${ms}ms cubic-bezier(.1,.62,.12,1)`;
+    el.style.transform = `rotate(${newRot}deg)`;
+    let lastSeg = null, done = false;
+    const watch = () => {
+      if (done) return;
+      const m = getComputedStyle(el).transform;
+      if (m && m !== 'none'){
+        const [a,b] = m.slice(7,-1).split(',').map(parseFloat);
+        const ang = Math.atan2(b, a) * 180/Math.PI;
+        const seg = Math.floor(((ang + SEG_DEG/2) % 360 + 360) % 360 / SEG_DEG);
+        if (lastSeg !== null && seg !== lastSeg) Sound.tick();
+        lastSeg = seg;
+      }
+      requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
+    setTimeout(() => { done = true; wheelRot = newRot; resolve(); }, ms + 60);
+  });
+}
+
+async function spinDigital(){
+  if (busy || !S || S.phase !== 'turn' || !remaining('c').length) return;
+  Sound.ensure();
+  busy = true; render();
+  const index = Math.floor(Math.random() * SEGMENTS.length);
+  const turns = 4 + Math.floor(Math.random()*3);
+  await rotateWheelTo(index, turns, 4800 + Math.random()*1200);
+  busy = false;
+  snapshot();
+  applySegment(SEGMENTS[index]);
+}
+
+function chooseManual(key){
+  if (busy || !S || S.phase !== 'turn') return;
+  Sound.ensure();
+  const isMoney = typeof key === 'number';
+  if ((isMoney || key === 'BONUS') && !remaining('c').length) return;
+  const idxs = SEGMENTS.map((s,i)=>i).filter(i => isMoney ? SEGMENTS[i].v === key : SEGMENTS[i].t === key);
+  const index = idxs[Math.floor(Math.random()*idxs.length)];
+  rotateWheelTo(index, 1, 900);
+  snapshot();
+  applySegment(SEGMENTS[index]);
+}
+
+/* ================= Tabellone ================= */
+function buildBoard(){
+  const b = $('board'); b.innerHTML = '';
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 14; c++){
+    const d = document.createElement('div');
+    d.className = 'tile';
+    if ((r === 0 || r === 3) && (c === 0 || c === 13)){ d.classList.add('off'); b.appendChild(d); continue; }
+    const ch = S && S.grid ? S.grid[r*14 + c] : null;
+    if (!ch) d.classList.add('empty');
+    else if (isLetter(ch)){ d.classList.add('letter'); d.dataset.n = norm(ch); d.innerHTML = `<span>${esc(ch)}</span>`; }
+    else { d.classList.add('punct'); d.innerHTML = `<span>${esc(ch)}</span>`; }
+    b.appendChild(d);
+  }
+  updateBoard();
+}
+function updateBoard(){
+  if (!S) return;
+  document.querySelectorAll('#board .tile.letter').forEach(t => {
+    if (t.classList.contains('pending')) return;
+    t.classList.toggle('shown', S.used.includes(t.dataset.n));
+  });
+}
+/* Prepara (sincrono) e restituisce la funzione che avvia l'animazione di rivelazione */
+function animateReveal(letters, fast){
+  const tiles = [...document.querySelectorAll('#board .tile.letter')].filter(t => letters.includes(t.dataset.n) && !t.classList.contains('shown'));
+  tiles.forEach(t => t.classList.add('pending'));
+  busy = tiles.length > 0;
+  return () => new Promise(resolve => {
+    if (!tiles.length){ resolve(); return; }
+    const litGap = fast ? 70 : 480, showGap = fast ? 60 : 260;
+    tiles.forEach((t, i) => setTimeout(() => { t.classList.add('lit'); if (!fast || i % 3 === 0) Sound.ding(); }, i*litGap));
+    const afterLit = tiles.length*litGap + (fast ? 400 : 650);
+    tiles.forEach((t, i) => setTimeout(() => { t.classList.remove('lit','pending'); t.classList.add('shown'); Sound.tone(1800,.04,'square',.05); }, afterLit + i*showGap));
+    setTimeout(() => { busy = false; render(); resolve(); }, afterLit + tiles.length*showGap + 120);
+  });
+}
+
+/* ================= Render ================= */
+function render(){
+  // header
+  $('undoBtn').disabled = busy || !history.length;
+  $('soundBtn').textContent = Sound.on ? '🔊' : '🔇';
+  if (!S){ $('mancheBadge').textContent = '—'; $('players').innerHTML=''; $('msg').innerHTML='Crea una nuova partita per iniziare.'; $('actions').innerHTML=''; renderKeyboard(); renderWheelControls(); return; }
+  $('mancheBadge').textContent = S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` : `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}`;
+
+  // players
+  $('players').innerHTML = S.players.map((p,i) => `
+    <div class="pcard ${i===S.current && ['turn','consonant','vowel','solve'].includes(S.phase) ? 'active':''} ${isActive(i)?'':'out'}" style="--pc:${p.color}">
+      <div class="pname">${esc(p.name)}</div>
+      <div class="pround">${euro(p.round)}</div>
+      <div class="ptotal">Totale: <b>${euro(p.total)}</b></div>
+    </div>`).join('');
+  const act = document.querySelector('.pcard.active'); if (act) act.scrollIntoView({block:'nearest',inline:'nearest'});
+
+  // category
+  $('category').innerHTML = S.category ? `<small>TITOLO</small>${esc(S.category)}` : '&nbsp;';
+
+  // message
+  $('msg').innerHTML = S.msg || '';
+
+  // actions
+  const a = [];
+  const ph = S.phase, p = cur();
+  if (ph === 'turn'){
+    const canVowel = p.round >= S.cfg.vowelCost && remaining('v').length > 0;
+    a.push(`<button class="btn blue" data-act="vowel" ${busy||!canVowel?'disabled':''}>Compra vocale (${euro(S.cfg.vowelCost)})</button>`);
+    a.push(`<button class="btn green" data-act="solve" ${busy?'disabled':''}>Risolvi</button>`);
+    a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
+  } else if (ph === 'consonant'){
+    a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
+  } else if (ph === 'vowel'){
+    a.push(`<button class="btn ghost" data-act="cancel">Annulla acquisto</button>`);
+  } else if (ph === 'solve'){
+    a.push(`<button class="btn green" data-act="right">✓ Soluzione esatta</button>`);
+    a.push(`<button class="btn red" data-act="wrong">✗ Sbagliata</button>`);
+    a.push(`<button class="btn ghost" data-act="cancel">Indietro</button>`);
+  } else if (ph === 'mancheEnd' || ph === 'gameOver'){
+    a.push(`<button class="btn" data-act="showEnd" ${busy?'disabled':''}>${ph==='gameOver'?'Classifica finale':'Continua ▶'}</button>`);
+  } else if (ph === 'phrase'){
+    a.push(`<button class="btn" data-act="phrase">Inserisci la frase</button>`);
+  }
+  $('actions').innerHTML = a.join('');
+
+  if (ph === 'turn' && !busy && !remaining('c').length && remaining('v').length && !/Tutte/.test(S.msg))
+    $('msg').innerHTML += ` <span style="color:var(--muted)">(Restano solo vocali: compra una vocale o risolvi.)</span>`;
+
+  renderKeyboard(); renderWheelControls(); updateBoard();
+}
+
+function renderKeyboard(){
+  const ph = S && S.phase;
+  const mk = L => {
+    const used = S && S.used.includes(L);
+    const v = isVowel(L);
+    const enabled = !busy && ((ph === 'consonant' && !v) || (ph === 'vowel' && v));
+    return `<button class="key ${v?'vowel':''} ${used?'used':''} ${enabled && !used ? 'hot':''}" data-letter="${L}" ${enabled?'':'disabled'}>${L}</button>`;
+  };
+  const cons = [...ALPHA].filter(L => !isVowel(L));
+  $('keyboard').innerHTML =
+    `<div class="krow"><div class="klabel">Vocali</div>${[...VOWELS].map(mk).join('')}</div>` +
+    `<div class="krow"><div class="klabel">Consonanti</div>${cons.map(mk).join('')}</div>`;
+}
+
+function renderWheelControls(){
+  $('modeDigital').classList.toggle('on', mode === 'digital');
+  $('modeManual').classList.toggle('on', mode === 'manual');
+  const canSpin = S && S.phase === 'turn' && !busy;
+  const noCons = S && S.grid && !remaining('c').length;
+  $('spinBtn').style.display = mode === 'digital' ? '' : 'none';
+  $('manualGrid').style.display = mode === 'manual' ? '' : 'none';
+  $('spinBtn').disabled = !canSpin || noCons;
+  const vals = [100,150,200,250,300,350,400];
+  const col = {100:C.blue,150:C.yellow,200:C.orange,250:C.orange,300:C.green,350:C.green,400:C.pink};
+  $('manualGrid').innerHTML =
+    vals.map(v => `<button class="seg-btn" data-seg="${v}" style="background:${col[v]}" ${!canSpin||noCons?'disabled':''}>${v}</button>`).join('') +
+    `<button class="seg-btn" data-seg="BONUS" style="background:linear-gradient(135deg,${C.blue},${C.yellow},${C.orange},${C.green})" ${!canSpin||noCons?'disabled':''}>BONUS</button>` +
+    `<button class="seg-btn wide" data-seg="PASSA" style="background:${C.white}" ${!canSpin?'disabled':''}>PASSA</button>` +
+    `<button class="seg-btn wide" data-seg="BANCAROTTA" style="background:${C.black};color:#fff" ${!canSpin?'disabled':''}>BANCAROTTA</button>`;
+  $('wheelHint').textContent = mode === 'digital'
+    ? 'Premi “Gira la ruota” per uno spin digitale.'
+    : 'Gira la ruota vera e tocca lo spicchio uscito.';
+}
+
+/* ================= Modali ================= */
+function closeModals(){ document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open')); }
+function anyModalOpen(){ return !!document.querySelector('.modal-bg.open'); }
+function openModalForPhase(){
+  if (!S){ openSetup(); return; }
+  if (S.phase === 'phrase') openPhrase();
+}
+
+function playerRow(name, i){
+  return `<div class="prow"><span class="dot" style="background:${PLAYER_COLORS[i % PLAYER_COLORS.length]}"></span>
+    <input type="text" value="${esc(name)}" placeholder="Nome concorrente" maxlength="24">
+    <button class="xbtn" type="button" data-rm title="Rimuovi">✕</button></div>`;
+}
+function openSetup(){
+  const names = S ? S.players.map(p => p.name) : ['Giocatore 1','Giocatore 2','Giocatore 3'];
+  $('playerInputs').innerHTML = names.map(playerRow).join('');
+  if (S){ $('numManches').value = S.cfg.manches; $('bonusValue').value = S.cfg.bonusValue; $('vowelCost').value = S.cfg.vowelCost; $('winBonus').value = S.cfg.winBonus; $('keepOthers').checked = S.cfg.keepOthers; }
+  $('setupCancel').style.display = S ? '' : 'none';
+  $('setupErr').textContent = '';
+  closeModals(); $('setupModal').classList.add('open');
+}
+function recolorPlayerRows(){ [...$('playerInputs').children].forEach((r,i) => r.querySelector('.dot').style.background = PLAYER_COLORS[i % PLAYER_COLORS.length]); }
+
+function openPhrase(){
+  $('phraseTitle').textContent = S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}`;
+  $('catInput').value = ''; $('phraseInput').value = ''; $('phraseInput').type = 'password';
+  $('phraseErr').textContent = ''; $('preview').innerHTML = '';
+  closeModals(); $('phraseModal').classList.add('open');
+  setTimeout(() => $('catInput').focus(), 50);
+}
+function updatePreview(){
+  const txt = $('phraseInput').value;
+  const shown = $('phraseInput').type === 'text';
+  const grid = txt.trim() ? layoutPhrase(txt) : null;
+  $('phraseErr').textContent = txt.trim() && !grid ? 'La frase non entra nel tabellone (4 righe da 12/14/14/12 caselle, parole di max 14 lettere).' : '';
+  if (!shown || !grid){ $('preview').innerHTML = ''; return; }
+  let h = '';
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 14; c++){
+    if ((r===0||r===3)&&(c===0||c===13)){ h += '<div class="tile off"></div>'; continue; }
+    const ch = grid[r*14+c];
+    h += ch ? `<div class="tile punct"><span>${esc(ch.toUpperCase())}</span></div>` : '<div class="tile empty"></div>';
+  }
+  $('preview').innerHTML = h;
+}
+
+function standingsTable(){
+  const order = S.players.map((p,i)=>({...p,i})).filter(p => isActive(p.i) || !S.tiebreak).sort((a,b) => b.total - a.total);
+  const top = order[0] ? order[0].total : 0;
+  return `<table class="standings">${order.map((p,k) => `<tr class="${p.total===top?'top':''}"><td>${k+1}. <span style="color:${p.color}">●</span> ${esc(p.name)}</td><td>${euro(p.total)}</td></tr>`).join('')}</table>`;
+}
+
+function showEnd(){
+  const el = $('endContent');
+  const sol = `<div class="solution">${esc(S.phrase.toUpperCase())}</div>`;
+  if (S.phase === 'mancheEnd'){
+    const last = !S.tiebreak && S.manche >= S.cfg.manches;
+    el.innerHTML = `<h2>Manche ${S.manche} conclusa</h2>
+      <p style="margin:0 0 6px"><b>${esc(S.lastWinner.name)}</b> ha risolto e incassa <b>${euro(S.lastWinner.won)}</b> (premio manche ${euro(S.cfg.winBonus)} incluso).</p>
+      ${sol}${standingsTable()}
+      <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Guarda il tabellone</button>
+      <button class="btn green" data-act="${S.tiebreak || last ? 'finish' : 'nextManche'}">${S.tiebreak || last ? 'Classifica finale 🏆' : 'Prossima manche ▶'}</button></div>`;
+  } else if (S.phase === 'gameOver'){
+    const pool = S.players.map((p,i)=>({...p,i})).filter(p => isActive(p.i));
+    const top = Math.max(...pool.map(p => p.total));
+    const winners = pool.filter(p => p.total === top);
+    const tie = winners.length > 1;
+    el.innerHTML = `<div class="trophy">🏆</div>
+      <h2 style="text-align:center">${tie ? 'Parità!' : 'Vince ' + esc(winners[0].name) + '!'}</h2>
+      <p style="text-align:center;margin:0">${tie ? 'Pari merito tra ' + winners.map(w => '<b>'+esc(w.name)+'</b>').join(', ') + ' con ' + euro(top) + '.' : 'Con un montepremi di <b>' + euro(top) + '</b>.'}</p>
+      ${standingsTable()}
+      <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
+      ${tie ? '<button class="btn" data-act="tiebreak">Manche di spareggio</button>' : ''}
+      <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
+  } else return;
+  closeModals(); $('endModal').classList.add('open');
+}
+
+function nextManche(){ snapshot(); S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[]; S.msg = 'Il conduttore inserisce la nuova frase.'; save(); buildBoard(); render(); openPhrase(); }
+function finishGame(){
+  snapshot(); S.phase = 'gameOver'; S.msg = 'Partita terminata!';
+  save(); render(); confetti(); Sound.fanfare(); showEnd();
+}
+function startTiebreak(){
+  snapshot();
+  const pool = S.players.map((p,i)=>({p,i})).filter(o => isActive(o.i));
+  const top = Math.max(...pool.map(o => o.p.total));
+  S.tiebreak = pool.filter(o => o.p.total === top).map(o => o.i);
+  S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[];
+  S.msg = 'Spareggio! Il conduttore inserisce la frase.';
+  save(); buildBoard(); render(); openPhrase();
+}
+
+function confetti(){
+  const cols = ['#ffd34d','#ff5d73','#4fc3ff','#7ee06f','#c38bff','#fff'];
+  for (let i = 0; i < 90; i++){
+    const d = document.createElement('div'); d.className = 'confetti';
+    d.style.left = Math.random()*100 + 'vw'; d.style.background = cols[i % cols.length];
+    d.style.animationDuration = (2.2 + Math.random()*2.2) + 's'; d.style.animationDelay = Math.random()*.6 + 's';
+    d.style.borderRadius = Math.random() < .4 ? '50%' : '2px';
+    document.body.appendChild(d); setTimeout(() => d.remove(), 5200);
+  }
+}
+
+/* ================= Eventi ================= */
+document.addEventListener('click', e => {
+  const k = e.target.closest('[data-letter]'); if (k){ chooseLetter(k.dataset.letter); return; }
+  const sg = e.target.closest('[data-seg]'); if (sg){ const v = sg.dataset.seg; chooseManual(/^\d+$/.test(v) ? +v : v); return; }
+  const rm = e.target.closest('[data-rm]');
+  if (rm){ if ($('playerInputs').children.length > 1){ rm.parentElement.remove(); recolorPlayerRows(); } return; }
+  const ac = e.target.closest('[data-act]'); if (!ac) return;
+  ({
+    vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
+    right: solveRight, wrong: solveWrong, showEnd, phrase: openPhrase,
+    closeEnd: closeModals, nextManche, finish: finishGame, tiebreak: startTiebreak,
+    newGame: openSetup
+  })[ac.dataset.act]?.();
+});
+
+$('spinBtn').onclick = spinDigital;
+$('modeDigital').onclick = () => { mode = 'digital'; store.set('ruota-mode', mode); render(); };
+$('modeManual').onclick = () => { mode = 'manual'; store.set('ruota-mode', mode); render(); };
+$('undoBtn').onclick = undo;
+$('soundBtn').onclick = () => { Sound.on = !Sound.on; store.set('ruota-sound', Sound.on ? 'on' : 'off'); render(); };
+$('fsBtn').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); };
+$('newBtn').onclick = () => { if (S && S.phase !== 'gameOver' && !confirm('Iniziare una nuova partita? La partita in corso andrà persa.')) return; openSetup(); };
+
+$('addPlayer').onclick = () => {
+  const n = $('playerInputs').children.length;
+  $('playerInputs').insertAdjacentHTML('beforeend', playerRow(`Giocatore ${n+1}`, n));
+  const ins = $('playerInputs').querySelectorAll('input'); ins[ins.length-1].select();
+};
+$('setupCancel').onclick = () => { closeModals(); openModalForPhase(); };
+$('setupStart').onclick = () => {
+  const names = [...$('playerInputs').querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+  const num = v => Math.max(0, Math.round(+v || 0));
+  if (names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
+  const manches = Math.max(1, num($('numManches').value));
+  newGame({names, manches, bonusValue:num($('bonusValue').value), vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked});
+  save(); buildBoard(); render(); openPhrase();
+};
+
+$('eyeBtn').onclick = () => { const i = $('phraseInput'); i.type = i.type === 'password' ? 'text' : 'password'; updatePreview(); };
+$('phraseInput').addEventListener('input', updatePreview);
+$('randomPhrase').onclick = () => {
+  const [c, f] = SAMPLE[Math.floor(Math.random()*SAMPLE.length)];
+  $('catInput').value = c; $('phraseInput').value = f; updatePreview();
+};
+$('phraseStart').onclick = () => {
+  const cat = $('catInput').value, txt = $('phraseInput').value;
+  if (!txt.trim()){ $('phraseErr').textContent = 'Scrivi la frase.'; return; }
+  if (![...txt].some(isLetter)){ $('phraseErr').textContent = 'La frase deve contenere almeno una lettera.'; return; }
+  if (!layoutPhrase(txt)){ updatePreview(); return; }
+  closeModals(); startManche(cat, txt);
+};
+['catInput','phraseInput'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('phraseStart').click(); }));
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !anyModalOpen()){ e.preventDefault(); undo(); return; }
+  if (anyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
+  const L = e.key.length === 1 ? norm(e.key) : '';
+  if (/^[A-Z]$/.test(L)) chooseLetter(L);
+});
+
+/* ================= Avvio ================= */
+buildWheel();
+try { const raw = store.get(STORE_KEY); if (raw) S = JSON.parse(raw); } catch(e){ S = null; }
+if (S && (!S.players || !S.cfg)) S = null;
+buildBoard(); render();
+if (S && (S.phase === 'mancheEnd' || S.phase === 'gameOver')) showEnd(); else openModalForPhase();
+
+// API di test (solo per verifica automatica)
+window.__ruota = { layoutPhrase, get state(){ return S; } };
+})();
+</script>
+</body>
+</html>
