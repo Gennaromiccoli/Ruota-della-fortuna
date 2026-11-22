@@ -12,6 +12,14 @@ Tabellone digitale da affiancare alla ruota fisica (Clementoni) per giocare a ca
 4. Con un valore in € si chiama una consonante: le caselle si accendono da sole e si incassa valore × lettere trovate.
 5. **Compra vocale**: 200 €. **Risolvi**: il conduttore conferma se la soluzione è giusta o sbagliata.
 
+## Telecomando dal telefono
+La TV (o il PC collegato alla TV) mostra tabellone, ruota e punteggi; il telefono fa da conduttore.
+1. Apri il tabellone sulla TV e premi **📱 Telecomando** (in alto, o "Collega il telefono" in Nuova partita).
+2. Inquadra il QR code con il telefono (oppure apri il sito sul telefono e inserisci il codice di 5 caratteri).
+3. Dal telefono crei la partita, scrivi la frase (non compare mai sulla TV), giri la ruota o scegli lo spicchio, chiami le lettere, confermi le soluzioni e annulli gli errori. Sul telefono la soluzione è sempre visibile.
+
+Il collegamento è diretto tra TV e telefono (WebRTC con PeerJS); il servizio pubblico gratuito di PeerJS serve solo a farli trovare. Serve internet su entrambi, meglio sullo stesso Wi-Fi. Se il telefono va in standby si ricollega da solo. Funziona dal sito GitHub Pages, non dall'anteprima su claude.ai.
+
 ## Regole predefinite (modificabili in "Regole avanzate")
 - **PASSA** (lo 0 della ruota): il turno passa al concorrente successivo.
 - **BANCAROTTA**: si perdono i soldi della manche **e** quelli conservati nelle manche precedenti.

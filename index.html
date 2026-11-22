@@ -159,6 +159,28 @@ summary{cursor:pointer;font-weight:800}
 .modal select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#0d235f;color:var(--text);font-size:15px;font-family:inherit}
 .key.picked{background:var(--gold);color:#1a1200;outline:3px solid #fff}
 .mancheTag{font-family:var(--ui);font-weight:800;font-size:12px;letter-spacing:.5px;padding:3px 9px;border-radius:999px;background:var(--danger);color:#fff;margin-left:6px;vertical-align:middle}
+#remoteBtn.on{border-color:var(--ok);color:#b9ffd6}
+.remote-pill{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(229,72,77,.25);border:1px solid rgba(229,72,77,.6)}
+.remote-pill.ok{background:rgba(47,191,113,.2);border-color:rgba(47,191,113,.6)}
+.remote-invite{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:rgba(90,160,255,.15);border:1px solid rgba(90,160,255,.4);border-radius:14px;padding:12px;margin-bottom:6px}
+.qr{background:#fff;border-radius:16px;padding:10px;width:min(260px,70vw);margin:0 auto}
+.qr svg{display:block;width:100%;height:auto}
+.code-label{margin-top:12px;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.code-big{font-family:var(--display);font-size:44px;letter-spacing:8px;color:var(--gold)}
+.solution-box{display:none}
+body.remote .tv-only,body.remote .board-wrap,body.remote .wheel-box,body.remote #category,body.remote #fsBtn,body.remote #soundBtn,body.remote #remoteBtn{display:none!important}
+body.remote .logo{font-size:18px}
+body.remote .stage{display:flex;flex-direction:column;gap:12px}
+body.remote .wheel-panel{order:-1}
+body.remote .solution-box{display:block;margin:0 16px 10px;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.3);border:1px dashed rgba(255,211,77,.6)}
+.solution-box .sol-cat{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:800}
+.solution-box .sol-text{font-family:var(--display);font-size:22px;letter-spacing:2px;line-height:1.4;margin:4px 0;word-break:break-word}
+.solution-box .sol-text b{color:#fff;font-weight:400}
+.solution-box .sol-text i{color:#6f7fb3;font-style:normal}
+.solution-box .muted,.muted{color:var(--muted)}
+body.remote .pcard{flex-basis:120px;padding:8px 10px 8px 14px}
+body.remote .pcard .pround{font-size:20px}
+body.remote .key{width:44px;height:50px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .solution{font-family:var(--display);font-size:22px;letter-spacing:1px;text-align:center;background:rgba(0,0,0,.2);padding:10px;border-radius:12px;margin:6px 0 4px}
 
@@ -173,12 +195,15 @@ summary{cursor:pointer;font-weight:800}
   <div class="logo">★ TABELLONE DELLA RUOTA ★</div>
   <div class="manche-badge" id="mancheBadge">—</div>
   <div class="spacer"></div>
+  <span class="remote-pill" id="remotePill" hidden></span>
+  <button class="hbtn" id="remoteBtn" hidden title="Usa il telefono come telecomando">📱 Telecomando</button>
   <button class="hbtn" id="undoBtn" title="Annulla l'ultima azione (Ctrl+Z)">↶ Annulla</button>
   <button class="hbtn" id="soundBtn" title="Audio on/off">🔊</button>
   <button class="hbtn" id="fsBtn" title="Schermo intero">⛶</button>
   <button class="hbtn" id="newBtn">⚙ Nuova partita</button>
 </header>
 
+<div id="solutionBox" class="solution-box"></div>
 <div id="players"></div>
 
 <div class="stage">
@@ -214,6 +239,17 @@ summary{cursor:pointer;font-weight:800}
 <div class="modal-bg" id="setupModal">
   <div class="modal">
     <h2>Nuova partita</h2>
+    <div class="remote-invite tv-only">
+      <div><b>📱 Vuoi fare il conduttore dal telefono?</b><br><span class="hint" style="text-align:left">La TV mostra il tabellone, il telefono gestisce frase, ruota e lettere.</span></div>
+      <button class="btn blue" id="setupRemote" type="button">Collega il telefono</button>
+    </div>
+    <details class="tv-only">
+      <summary>Questo è il telefono: ho il codice della TV</summary>
+      <div class="row" style="margin-top:10px">
+        <input type="text" id="joinCode" placeholder="Codice di 5 caratteri" maxlength="5" autocomplete="off" style="text-transform:uppercase">
+        <button class="btn" id="joinBtn" type="button">Collega</button>
+      </div>
+    </details>
     <label>Concorrenti</label>
     <div id="playerInputs"></div>
     <button class="btn ghost" id="addPlayer" type="button">+ Aggiungi concorrente</button>
@@ -285,6 +321,22 @@ summary{cursor:pointer;font-weight:800}
   </div>
 </div>
 
+<!-- Telecomando (TV) -->
+<div class="modal-bg" id="remoteModal">
+  <div class="modal" style="width:min(520px,100%);text-align:center">
+    <h2>📱 Telecomando</h2>
+    <p style="margin:0 0 12px">Inquadra il QR code con la fotocamera del telefono. Il telefono deve avere internet, meglio se sullo stesso Wi-Fi della TV.</p>
+    <div id="remoteQr" class="qr"></div>
+    <div class="code-label">Codice TV</div>
+    <div id="remoteCode" class="code-big">—</div>
+    <div id="remoteUrl" class="hint" style="word-break:break-all;user-select:all"></div>
+    <p id="remoteState" style="font-weight:700;margin:14px 0 0"></p>
+    <div class="mfoot" style="justify-content:center">
+      <button class="btn ghost" id="remoteClose" type="button">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <!-- Conferma -->
 <div class="modal-bg" id="confirmModal">
   <div class="modal" style="width:min(460px,100%)">
@@ -302,6 +354,8 @@ summary{cursor:pointer;font-weight:800}
   <div class="modal" id="endContent"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js"></script>
 <script>
 (() => {
 'use strict';
@@ -360,6 +414,9 @@ const store = {
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
   del(k){ try{ localStorage.removeItem(k); }catch(e){} }
 };
+
+const REMOTE_CODE = (new URLSearchParams(location.search).get('telecomando') || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const IS_REMOTE = REMOTE_CODE.length === 5;
 
 /* Impagina la frase nelle 4 righe del tabellone (12/14/14/12). Restituisce 56 celle o null. */
 function layoutPhrase(text){
@@ -553,8 +610,8 @@ function bonusValueSpin(value, base){
   save(); render(); anim();
 }
 
-async function chooseLetter(L){
-  if (busy || !S || anyModalOpen()) return;
+async function chooseLetter(L, confirmed){
+  if (busy || !S || (anyModalOpen() && !confirmed && !remoteConnected())) return;
   if (S.phase === 'finalPick') return pickFinal(L);
   if (S.phase === 'bonusPick') return bonusPick(L);
   const vowelPhase = S.phase === 'vowel';
@@ -562,7 +619,7 @@ async function chooseLetter(L){
   if (vowelPhase !== isVowel(L)) return;
   const p = cur();
   if (S.used.includes(L)){
-    const ok = await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${p.name} perde il turno?`, 'Sì, turno perso');
+    const ok = confirmed || await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${p.name} perde il turno?`, 'Sì, turno perso');
     if (!ok) return;
     snapshot();
     if (vowelPhase) p.round -= S.cfg.vowelCost;
@@ -598,9 +655,10 @@ function buyVowel(){
 }
 
 function solveAttempt(){ if (busy || S.phase !== 'turn') return; S.phase = 'solve'; S.msg = `<b>${esc(cur().name)}</b> prova a risolvere… La risposta è giusta?`; render(); }
-function cancelPhase(){ if (S.phase === 'vowel' || S.phase === 'solve'){ S.phase = 'turn'; S.msg = `Tocca a <b>${esc(cur().name)}</b>.`; render(); } }
+function cancelPhase(){ if (busy) return; if (S.phase === 'vowel' || S.phase === 'solve'){ S.phase = 'turn'; S.msg = `Tocca a <b>${esc(cur().name)}</b>.`; render(); } }
 
 function solveWrong(){
+  if (busy || S.phase !== 'solve') return;
   snapshot();
   const p = cur(); nextPlayer();
   S.msg = `Risposta sbagliata di ${esc(p.name)}. Tocca a <b>${esc(cur().name)}</b>.`;
@@ -616,6 +674,7 @@ function revealAllThen(next){
 }
 
 function solveRight(){
+  if (busy || S.phase !== 'solve') return;
   snapshot();
   const p = cur();
   const won = p.round + S.cfg.winBonus;
@@ -652,6 +711,7 @@ function timeUp(){
 function finalGiven(){ return [...new Set([...norm(S.cfg.finalLetters || '')].filter(c => /[A-Z]/.test(c)))]; }
 
 function startFinalSetup(){
+  if (busy || S.phase !== 'gameOver' || !S.cfg.finalOn || S.final) return;
   const top = Math.max(...S.players.map(p => p.total));
   snapshot();
   S.final = {player: S.players.findIndex(p => p.total === top), picks: [], won: null};
@@ -694,6 +754,7 @@ function pickFinal(L){
 }
 
 function finalResult(won){
+  if (busy || S.phase !== 'finalSolve') return;
   snapshot();
   const p = cur();
   S.final.won = won;
@@ -837,9 +898,15 @@ function animateReveal(letters, fast){
 /* ================= Render ================= */
 function render(){
   // header
-  $('undoBtn').disabled = busy || !history.length;
+  $('undoBtn').disabled = busy || !(IS_REMOTE ? remoteCanUndo : history.length);
+  renderSolution();
   $('soundBtn').textContent = Sound.on ? '🔊' : '🔇';
-  if (!S){ $('mancheBadge').textContent = '—'; $('players').innerHTML=''; $('msg').innerHTML='Crea una nuova partita per iniziare.'; $('actions').innerHTML=''; renderKeyboard(); renderWheelControls(); return; }
+  if (!S){
+    $('mancheBadge').textContent = '—'; $('players').innerHTML='';
+    $('msg').innerHTML = remoteConnected() ? '📱 Il conduttore sta creando la partita dal telefono…' : IS_REMOTE ? 'Crea la partita: si aprirà sulla TV.' : 'Crea una nuova partita per iniziare.';
+    $('actions').innerHTML = IS_REMOTE ? '<button class="btn" data-act="newGame">Nuova partita</button>' : '';
+    renderKeyboard(); renderWheelControls(); Remote.broadcast(); return;
+  }
   const sp = spec(), extra = (sp.mult > 1 ? ` · VALORI ×${sp.mult}` : '') + (sp.timer ? ` · ⏱ ${sp.timer}s` : '');
   $('mancheBadge').textContent = S.final ? 'GIOCO FINALE' : S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` : `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${extra}`;
 
@@ -880,7 +947,8 @@ function render(){
   } else if (ph === 'mancheEnd' || ph === 'gameOver' || ph === 'finalDone'){
     a.push(`<button class="btn" data-act="showEnd" ${busy?'disabled':''}>${ph==='mancheEnd'?'Continua ▶':'Classifica finale'}</button>`);
   } else if (ph === 'phrase' || ph === 'finalPhrase'){
-    a.push(`<button class="btn" data-act="phrase">Inserisci la frase</button>`);
+    if (remoteConnected()) $('msg').innerHTML = '📱 Il conduttore sta inserendo la frase dal telefono…';
+    else a.push(`<button class="btn" data-act="openPhrase">Inserisci la frase</button>`);
   }
   $('actions').innerHTML = a.join('');
 
@@ -888,6 +956,7 @@ function render(){
     $('msg').innerHTML += ` <span style="color:var(--muted)">(Restano solo vocali: compra una vocale o risolvi.)</span>`;
 
   renderKeyboard(); renderWheelControls(); updateBoard();
+  Remote.broadcast();
 }
 
 function renderKeyboard(){
@@ -943,6 +1012,7 @@ function playerRow(name, i){
     <button class="xbtn" type="button" data-rm title="Rimuovi">✕</button></div>`;
 }
 function openSetup(){
+  if (remoteConnected()) return;   // con il telefono collegato le impostazioni si fanno lì
   const names = S ? S.players.map(p => p.name) : ['Giocatore 1','Giocatore 2','Giocatore 3'];
   $('playerInputs').innerHTML = names.map(playerRow).join('');
   const c = S ? S.cfg : withDefaults({manches:3});
@@ -973,6 +1043,7 @@ function renderMancheTable(special){
 function recolorPlayerRows(){ [...$('playerInputs').children].forEach((r,i) => r.querySelector('.dot').style.background = PLAYER_COLORS[i % PLAYER_COLORS.length]); }
 
 function openPhrase(){
+  if (remoteConnected()){ closeModals(); render(); return; }   // la frase si scrive sul telefono, mai sulla TV
   $('phraseTitle').textContent = S.final ? `Gioco finale · ${S.players[S.final.player].name}` : S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}`;
   $('catInput').value = ''; $('phraseInput').value = ''; $('phraseInput').type = 'password';
   $('phraseErr').textContent = ''; $('preview').innerHTML = '';
@@ -1035,12 +1106,14 @@ function showEnd(){
   closeModals(); $('endModal').classList.add('open');
 }
 
-function nextManche(){ snapshot(); S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[]; S.msg = 'Il conduttore inserisce la nuova frase.'; save(); buildBoard(); render(); openPhrase(); }
+function nextManche(){ if (busy || S.phase !== 'mancheEnd' || (!S.tiebreak && S.manche >= S.cfg.manches)) return; snapshot(); S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[]; S.msg = 'Il conduttore inserisce la nuova frase.'; save(); buildBoard(); render(); openPhrase(); }
 function finishGame(){
+  if (busy || S.phase !== 'mancheEnd') return;
   snapshot(); S.phase = 'gameOver'; S.msg = 'Partita terminata!';
   save(); render(); confetti(); Sound.fanfare(); showEnd();
 }
 function startTiebreak(){
+  if (busy || S.phase !== 'gameOver') return;
   snapshot();
   const pool = S.players.map((p,i)=>({p,i})).filter(o => isActive(o.i));
   const top = Math.max(...pool.map(o => o.p.total));
@@ -1061,33 +1134,256 @@ function confetti(){
   }
 }
 
+/* ================= Azioni e telecomando ================= */
+// Azioni di gioco: sulla TV vengono eseguite, sul telefono vengono inviate alla TV.
+const ACTIONS = {
+  vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
+  right: solveRight, wrong: solveWrong, nextManche, finish: finishGame, tiebreak: startTiebreak,
+  final: startFinalSetup, finalRight: () => finalResult(true), finalWrong: () => finalResult(false),
+  undo, spin: spinDigital,
+  seg: k => chooseManual(typeof k === 'number' || k === 'BONUS' || k === 'PASSA' || k === 'BANCAROTTA' ? k : null),
+  letter: a => a && /^[A-Z]$/.test(a.L) && chooseLetter(a.L, !!a.confirmed),
+  setup: cfg => applySetup(cfg),
+  phrase: a => a && applyPhrase(String(a.cat || ''), String(a.txt || ''))
+};
+// Azioni che riguardano solo lo schermo di chi le preme
+const LOCAL = { showEnd, openPhrase, closeEnd: closeModals, newGame: () => askNewGame() };
+
+function act(name, arg){
+  if (LOCAL[name]) return LOCAL[name](arg);
+  if (IS_REMOTE) return Remote.send(name, arg);
+  ACTIONS[name]?.(arg);
+}
+
+async function letterClick(L){
+  if (IS_REMOTE && S && (S.phase === 'consonant' || S.phase === 'vowel') && S.used.includes(L)){
+    if (!(await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${cur().name} perde il turno?`, 'Sì, turno perso'))) return;
+    return act('letter', {L, confirmed: true});
+  }
+  act('letter', {L});
+}
+
+function readSetup(){
+  const names = [...$('playerInputs').querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
+  const num = v => Math.max(0, Math.round(+v || 0));
+  return {names, manches: Math.max(1, num($('numManches').value)), vowelCost: num($('vowelCost').value), winBonus: num($('winBonus').value),
+    keepOthers: $('keepOthers').checked, special: readMancheTable(), finalOn: $('finalOn').checked, finalPrize: num($('finalPrize').value),
+    finalSeconds: Math.max(3, num($('finalSeconds').value)), finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')};
+}
+function applySetup(cfg){
+  if (!cfg || !Array.isArray(cfg.names)) return;
+  const names = cfg.names.map(n => String(n).trim().slice(0, 24)).filter(Boolean).slice(0, 20);
+  if (!names.length) return;
+  const n = v => Math.max(0, Math.round(+v || 0));
+  newGame({names, manches: Math.min(30, Math.max(1, n(cfg.manches))), vowelCost: n(cfg.vowelCost), winBonus: n(cfg.winBonus), keepOthers: !!cfg.keepOthers,
+    special: (Array.isArray(cfg.special) ? cfg.special : []).map(s => ({mult: [1,2,3].includes(+s.mult) ? +s.mult : 1, timer: Math.min(120, n(s.timer))})),
+    finalOn: !!cfg.finalOn, finalPrize: n(cfg.finalPrize), finalSeconds: Math.min(120, Math.max(3, n(cfg.finalSeconds))),
+    finalLetters: norm(String(cfg.finalLetters || '')).replace(/[^A-Z]/g,'')});
+  save(); buildBoard(); render(); openPhrase();
+}
+function applyPhrase(cat, txt){
+  if (!S || !layoutPhrase(txt) || ![...txt].some(isLetter)) return;
+  closeModals();
+  if (S.phase === 'finalPhrase') startFinal(cat, txt);
+  else if (S.phase === 'phrase') startManche(cat, txt);
+}
+async function askNewGame(){
+  if (S && !['gameOver','finalDone'].includes(S.phase) && !(await askConfirm('Nuova partita', 'La partita in corso andrà persa. Vuoi ricominciare?', 'Ricomincia'))) return;
+  openSetup(true);
+}
+
+/* ---------- Collegamento TV ⇄ telefono (WebRTC tramite PeerJS) ---------- */
+const PEER_PREFIX = 'tabellone-ruota-v1-';
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const newCode = () => Array.from({length:5}, () => CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]).join('');
+const remoteUrl = code => location.origin + location.pathname + '?telecomando=' + code;
+
+const Remote = {
+  peer: null, conns: new Set(), conn: null, status: 'off', code: null, lastSent: '', retry: null, idTries: 0, wake: null,
+  available: () => typeof window.Peer === 'function',
+
+  /* --- TV --- */
+  startTV(){
+    if (!this.available()) { this.setStatus('unavailable'); return; }
+    this.code = store.get('ruota-room') || newCode();
+    store.set('ruota-room', this.code);
+    this.setStatus('connecting');
+    const peer = this.peer = new Peer(PEER_PREFIX + this.code, {debug: 0});
+    peer.on('open', () => { this.idTries = 0; this.setStatus('ready'); });
+    peer.on('connection', conn => {
+      conn.on('open', () => { this.conns.add(conn); onRemoteChange(); this.sendState(conn, true); });
+      conn.on('data', msg => this.handle(msg));
+      const drop = () => { if (this.conns.delete(conn)) onRemoteChange(); };
+      conn.on('close', drop); conn.on('error', drop);
+    });
+    peer.on('disconnected', () => { if (!peer.destroyed) setTimeout(() => peer.reconnect(), 1500); });
+    peer.on('error', e => {
+      if (e.type === 'unavailable-id'){
+        // codice ancora occupato (es. pagina appena ricaricata): riprova, poi cambia codice
+        peer.destroy();
+        if (++this.idTries > 4){ this.code = null; store.del('ruota-room'); this.idTries = 0; }
+        setTimeout(() => this.startTV(), 3000);
+      } else if (['network','server-error','socket-error','socket-closed','browser-incompatible'].includes(e.type)){
+        this.setStatus(e.type === 'browser-incompatible' ? 'unavailable' : 'offline');
+        if (e.type !== 'browser-incompatible'){ peer.destroy(); setTimeout(() => this.startTV(), 8000); }
+      }
+    });
+  },
+  handle(msg){
+    if (!msg || msg.type !== 'act' || !Object.prototype.hasOwnProperty.call(ACTIONS, msg.name)) return;
+    Sound.ensure();
+    ACTIONS[msg.name](msg.arg);
+    this.broadcast(true);
+  },
+  payload(){ return {type:'state', state: S, busy, canUndo: history.length > 0, timer: timerShown}; },
+  sendState(conn, force){
+    const p = this.payload();
+    try { conn.send(p); } catch(e){}
+  },
+  broadcast(force){
+    if (IS_REMOTE || !this.conns.size) return;
+    const p = this.payload(), str = JSON.stringify(p);
+    if (!force && str === this.lastSent) return;
+    this.lastSent = str;
+    this.conns.forEach(c => { try { if (c.open) c.send(p); } catch(e){} });
+  },
+
+  /* --- Telefono --- */
+  startPhone(code){
+    this.code = code;
+    if (!this.available()) { this.setStatus('unavailable'); return; }
+    this.setStatus('connecting');
+    const go = () => {
+      if (this.conn && this.conn.open) return;
+      if (!this.peer || this.peer.destroyed){
+        this.peer = new Peer({debug: 0});
+        this.peer.on('open', go);
+        this.peer.on('disconnected', () => { if (!this.peer.destroyed) this.peer.reconnect(); });
+        this.peer.on('error', e => { this.setStatus(e.type === 'peer-unavailable' ? 'notfound' : 'offline'); this.later(go); });
+        return;
+      }
+      if (!this.peer.open) return;
+      const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true});
+      const timeout = setTimeout(() => { if (!conn.open){ try { conn.close(); } catch(e){} this.later(go); } }, 9000);
+      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); this.keepAwake(); });
+      conn.on('data', msg => onRemoteState(msg));
+      conn.on('close', () => { clearTimeout(timeout); if (this.conn === conn){ this.setStatus('lost'); this.later(go); } });
+      conn.on('error', () => { this.setStatus('lost'); this.later(go); });
+    };
+    this.reconnect = go;
+    go();
+    document.addEventListener('visibilitychange', () => { if (!document.hidden){ go(); this.keepAwake(); } });
+  },
+  later(fn){ clearTimeout(this.retry); this.retry = setTimeout(fn, 2500); },
+  send(name, arg){
+    if (!this.conn || !this.conn.open){ this.setStatus('lost'); this.reconnect?.(); return; }
+    try { this.conn.send({type:'act', name, arg}); } catch(e){ this.setStatus('lost'); }
+  },
+  async keepAwake(){ try { if (!this.wake && navigator.wakeLock) { this.wake = await navigator.wakeLock.request('screen'); this.wake.addEventListener('release', () => this.wake = null); } } catch(e){} },
+
+  setStatus(s){ this.status = s; renderRemoteStatus(); }
+};
+
+function remoteConnected(){ return !IS_REMOTE && Remote.conns.size > 0; }
+
+function renderRemoteStatus(){
+  const pill = $('remotePill');
+  const tvText = {off:'', unavailable:'', connecting:'📱 …', offline:'📱 offline', ready: Remote.conns.size ? `📱 ${Remote.conns.size} collegat${Remote.conns.size === 1 ? 'o' : 'i'}` : '📱 Telecomando'};
+  const phText = {off:'', unavailable:'Telecomando non disponibile', connecting:'Collegamento alla TV…', offline:'Rete non disponibile, riprovo…', notfound:`TV con codice ${Remote.code} non trovata, riprovo…`, lost:'Collegamento perso, riprovo…', ready:`✓ Collegato alla TV (${Remote.code})`};
+  if (IS_REMOTE){
+    pill.textContent = phText[Remote.status] || '';
+    pill.className = 'remote-pill ' + (Remote.status === 'ready' ? 'ok' : 'warn');
+    pill.hidden = false;
+  } else {
+    $('remoteBtn').hidden = Remote.status === 'unavailable' || Remote.status === 'off';
+    $('remoteBtn').textContent = tvText[Remote.status] || '📱 Telecomando';
+    $('remoteBtn').classList.toggle('on', Remote.conns.size > 0);
+    renderRemoteModal();
+  }
+}
+
+function renderRemoteModal(){
+  if (IS_REMOTE) return;
+  const ok = Remote.status === 'ready';
+  $('remoteState').textContent =
+    Remote.conns.size ? `✓ ${Remote.conns.size} telefono${Remote.conns.size > 1 ? 'i' : ''} collegat${Remote.conns.size > 1 ? 'i' : 'o'}. Il conduttore ora gestisce la partita dal telefono.` :
+    ok ? 'In attesa del telefono…' :
+    Remote.status === 'offline' ? 'Nessuna connessione al servizio di collegamento: controlla internet, riprovo da solo.' :
+    Remote.status === 'unavailable' ? 'Il collegamento non è disponibile in questa pagina: apri il tabellone dal sito su GitHub Pages.' : 'Preparazione del collegamento…';
+  $('remoteCode').textContent = Remote.code || '—';
+  const url = Remote.code ? remoteUrl(Remote.code) : '';
+  $('remoteUrl').textContent = url;
+  if (url && $('remoteQr').dataset.url !== url && typeof window.qrcode === 'function'){
+    const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    $('remoteQr').innerHTML = qr.createSvgTag({cellSize: 6, margin: 2, scalable: true});
+    $('remoteQr').dataset.url = url;
+  }
+}
+
+/* La TV cambia comportamento quando un telefono si collega o si scollega */
+function onRemoteChange(){
+  renderRemoteStatus();
+  if (remoteConnected()){
+    ['setupModal','phraseModal','confirmModal'].forEach(id => $(id).classList.remove('open'));
+    if ($('remoteModal').classList.contains('open')) setTimeout(() => $('remoteModal').classList.remove('open'), 1200);
+  } else if (!anyModalOpen()) openModalForPhase();
+  render();
+}
+
+/* Telefono: arriva lo stato dalla TV */
+let remoteBusy = false, remoteCanUndo = false, remoteTimer = null, autoOpened = '';
+function onRemoteState(msg){
+  if (!msg || msg.type !== 'state') return;
+  S = msg.state; busy = !!msg.busy; remoteCanUndo = !!msg.canUndo; remoteTimer = msg.timer;
+  render();
+  const key = S ? `${S.phase}|${S.manche}|${S.final ? 'f' : ''}` : 'none';
+  if (key === autoOpened) return;
+  if (!S){ autoOpened = key; openSetup(); return; }
+  if (S.phase === 'phrase' || S.phase === 'finalPhrase'){ autoOpened = key; openPhrase(); return; }
+  if (['mancheEnd','gameOver','finalDone'].includes(S.phase) && !busy){ autoOpened = key; showEnd(); return; }
+  if (PLAY_PHASES.includes(S.phase)){
+    autoOpened = key;
+    ['setupModal','phraseModal','endModal'].forEach(id => $(id).classList.remove('open'));
+  }
+}
+
+/* Telefono: soluzione sempre visibile al conduttore */
+function renderSolution(){
+  if (!IS_REMOTE) return;
+  const box = $('solutionBox');
+  if (!S || !S.phrase || !S.grid){ box.innerHTML = '<span class="muted">La soluzione apparirà qui quando inserisci la frase.</span>'; return; }
+  const chars = [...S.phrase.toUpperCase()].map(ch => {
+    if (!isLetter(ch)) return ch === ' ' ? '<span class="sp"> </span>' : `<b>${esc(ch)}</b>`;
+    return S.used.includes(norm(ch)) ? `<b>${esc(ch)}</b>` : `<i>${esc(ch)}</i>`;
+  }).join('');
+  box.innerHTML = `<div class="sol-cat">${esc(S.category || 'Senza titolo')}</div><div class="sol-text">${chars}</div><div class="muted" style="font-size:12px">In chiaro le lettere già scoperte, in grigio quelle ancora coperte.</div>`;
+}
+
 /* ================= Eventi ================= */
 document.addEventListener('click', e => {
-  const k = e.target.closest('[data-letter]'); if (k){ chooseLetter(k.dataset.letter); return; }
-  const sg = e.target.closest('[data-seg]'); if (sg){ const v = sg.dataset.seg; chooseManual(/^\d+$/.test(v) ? +v : v); return; }
+  const k = e.target.closest('[data-letter]'); if (k){ letterClick(k.dataset.letter); return; }
+  const sg = e.target.closest('[data-seg]'); if (sg){ const v = sg.dataset.seg; act('seg', /^\d+$/.test(v) ? +v : v); return; }
   const rm = e.target.closest('[data-rm]');
   if (rm){ if ($('playerInputs').children.length > 1){ rm.parentElement.remove(); recolorPlayerRows(); } return; }
-  const ac = e.target.closest('[data-act]'); if (!ac) return;
-  ({
-    vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
-    right: solveRight, wrong: solveWrong, showEnd, phrase: openPhrase,
-    closeEnd: closeModals, nextManche, finish: finishGame, tiebreak: startTiebreak,
-    newGame: openSetup, final: startFinalSetup,
-    finalRight: () => !busy && finalResult(true), finalWrong: () => !busy && finalResult(false)
-  })[ac.dataset.act]?.();
+  const ac = e.target.closest('[data-act]'); if (ac) act(ac.dataset.act);
 });
 
-$('spinBtn').onclick = spinDigital;
+$('spinBtn').onclick = () => act('spin');
 $('modeDigital').onclick = () => { mode = 'digital'; store.set('ruota-mode', mode); render(); };
 $('modeManual').onclick = () => { mode = 'manual'; store.set('ruota-mode', mode); render(); };
-$('undoBtn').onclick = undo;
+$('undoBtn').onclick = () => act('undo');
 $('soundBtn').onclick = () => { Sound.on = !Sound.on; store.set('ruota-sound', Sound.on ? 'on' : 'off'); render(); };
 $('fsBtn').onclick = () => {
   try { const pr = !document.fullscreenElement ? document.documentElement.requestFullscreen?.() : document.exitFullscreen?.(); pr?.catch?.(() => {}); } catch(e){}
 };
-$('newBtn').onclick = async () => {
-  if (S && !['gameOver','finalDone'].includes(S.phase) && !(await askConfirm('Nuova partita', 'La partita in corso andrà persa. Vuoi ricominciare?', 'Ricomincia'))) return;
-  openSetup();
+$('newBtn').onclick = () => askNewGame();
+$('remoteBtn').onclick = () => { renderRemoteModal(); closeModals(); $('remoteModal').classList.add('open'); };
+$('remoteClose').onclick = () => { $('remoteModal').classList.remove('open'); if (!anyModalOpen()) openModalForPhase(); };
+$('setupRemote').onclick = () => { renderRemoteModal(); closeModals(); $('remoteModal').classList.add('open'); };
+$('joinBtn').onclick = () => {
+  const c = $('joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (c.length !== 5){ $('setupErr').textContent = 'Il codice della TV ha 5 caratteri.'; return; }
+  location.href = remoteUrl(c);
 };
 $('numManches').addEventListener('input', () => renderMancheTable(readMancheTable()));
 
@@ -1096,16 +1392,12 @@ $('addPlayer').onclick = () => {
   $('playerInputs').insertAdjacentHTML('beforeend', playerRow(`Giocatore ${n+1}`, n));
   const ins = $('playerInputs').querySelectorAll('input'); ins[ins.length-1].select();
 };
-$('setupCancel').onclick = () => { closeModals(); openModalForPhase(); };
+$('setupCancel').onclick = () => { closeModals(); if (!IS_REMOTE) openModalForPhase(); };
 $('setupStart').onclick = () => {
-  const names = [...$('playerInputs').querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
-  const num = v => Math.max(0, Math.round(+v || 0));
-  if (names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
-  const manches = Math.max(1, num($('numManches').value));
-  newGame({names, manches, vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked,
-    special: readMancheTable(), finalOn: $('finalOn').checked, finalPrize: num($('finalPrize').value),
-    finalSeconds: Math.max(3, num($('finalSeconds').value)), finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')});
-  save(); buildBoard(); render(); openPhrase();
+  const cfg = readSetup();
+  if (cfg.names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
+  closeModals();
+  act('setup', cfg);
 };
 
 $('eyeBtn').onclick = () => { const i = $('phraseInput'); i.type = i.type === 'password' ? 'text' : 'password'; updatePreview(); };
@@ -1120,27 +1412,20 @@ $('phraseStart').onclick = () => {
   if (![...txt].some(isLetter)){ $('phraseErr').textContent = 'La frase deve contenere almeno una lettera.'; return; }
   if (!layoutPhrase(txt)){ updatePreview(); return; }
   closeModals();
-  if (S.phase === 'finalPhrase') startFinal(cat, txt); else startManche(cat, txt);
+  act('phrase', {cat, txt});
 };
 ['catInput','phraseInput'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('phraseStart').click(); }));
 
 document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !anyModalOpen()){ e.preventDefault(); undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !anyModalOpen()){ e.preventDefault(); act('undo'); return; }
   if (anyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
   if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
   const L = e.key.length === 1 ? norm(e.key) : '';
-  if (/^[A-Z]$/.test(L)) chooseLetter(L);
+  if (/^[A-Z]$/.test(L)) letterClick(L);
 });
 
-/* ================= Avvio ================= */
-buildWheel();
-try { const raw = store.get(STORE_KEY); if (raw) S = JSON.parse(raw); } catch(e){ S = null; }
-if (S && (!S.players || !S.cfg)) S = null;
-if (S){ S.cfg = withDefaults(S.cfg); if (S.final === undefined) S.final = null; }
-buildBoard(); render();
-if (S && ['mancheEnd','gameOver','finalDone'].includes(S.phase)) showEnd(); else openModalForPhase();
-
-/* ================= Timer ================= */
+/* ================= Timer (solo sulla TV) ================= */
+let timerShown = null;
 const timer = {key:null, left:0, last:0, fired:false};
 function timerSecs(){
   if (!S) return 0;
@@ -1148,20 +1433,41 @@ function timerSecs(){
   if (S.final || !['turn','consonant','vowel','bonusPick','bonusSpin'].includes(S.phase)) return 0;
   return spec().timer || 0;
 }
+function showTimer(v){
+  const el = $('timer');
+  if (v === null || v === undefined){ el.hidden = true; return; }
+  el.hidden = false; el.textContent = v; el.classList.toggle('warn', v <= 5);
+}
 setInterval(() => {
-  const el = $('timer'), secs = timerSecs(), now = performance.now();
-  if (!secs){ el.hidden = true; timer.key = null; return; }
+  if (IS_REMOTE){ showTimer(remoteTimer); return; }
+  const secs = timerSecs(), now = performance.now();
+  if (!secs){ timer.key = null; if (timerShown !== null){ timerShown = null; showTimer(null); Remote.broadcast(); } return; }
   const key = actionCount + '|' + S.phase + '|' + S.current;
   if (key !== timer.key){ timer.key = key; timer.left = secs * 1000; timer.last = now; timer.fired = false; }
   if (!busy && !anyModalOpen() && !document.hidden) timer.left -= now - timer.last;
   timer.last = now;
   const shown = Math.max(0, Math.ceil(timer.left / 1000));
-  el.hidden = false; el.textContent = shown; el.classList.toggle('warn', shown <= 5);
+  if (shown !== timerShown){ timerShown = shown; showTimer(shown); Remote.broadcast(); }
   if (timer.left <= 0 && !timer.fired){ timer.fired = true; timeUp(); }
 }, 200);
 
+/* ================= Avvio ================= */
+buildWheel();
+if (IS_REMOTE){
+  document.body.classList.add('remote');
+  S = null; render(); renderRemoteStatus();
+  Remote.startPhone(REMOTE_CODE);
+} else {
+  try { const raw = store.get(STORE_KEY); if (raw) S = JSON.parse(raw); } catch(e){ S = null; }
+  if (S && (!S.players || !S.cfg)) S = null;
+  if (S){ S.cfg = withDefaults(S.cfg); if (S.final === undefined) S.final = null; }
+  buildBoard(); render();
+  if (S && ['mancheEnd','gameOver','finalDone'].includes(S.phase)) showEnd(); else openModalForPhase();
+  Remote.startTV();
+}
+
 // API di test (solo per verifica automatica)
-window.__ruota = { layoutPhrase, get state(){ return S; } };
+window.__ruota = { layoutPhrase, get state(){ return S; }, remote: Remote };
 })();
 </script>
 </body>
