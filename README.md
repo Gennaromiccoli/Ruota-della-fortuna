@@ -12,6 +12,12 @@ Tabellone digitale da affiancare alla ruota fisica (Clementoni) per giocare a ca
 4. Con un valore in € si chiama una consonante: le caselle si accendono da sole e si incassa valore × lettere trovate.
 5. **Compra vocale**: 200 €. **Risolvi**: il conduttore conferma se la soluzione è giusta o sbagliata.
 
+## Control room: iscrizioni dal telefono
+Aprendo il tabellone sulla TV compare la **control room** con due QR code:
+- **Concorrenti**: ognuno inquadra il QR con il proprio telefono, scrive il nome e compare subito sulla TV. Durante le manche lampo il telefono diventa un **pulsante di prenotazione**: vince chi lo preme per primo (vibra quando tocca a te). Ai telefoni dei concorrenti non arriva mai la frase.
+- **Conduttore**: apre il telecomando e trova già i nomi degli iscritti nella schermata Nuova partita.
+Chi non ha il telefono si aggiunge a mano; per lui la prenotazione la segna il conduttore.
+
 ## Telecomando dal telefono
 La TV (o il PC collegato alla TV) mostra tabellone, ruota e punteggi; il telefono fa da conduttore.
 1. Apri il tabellone sulla TV e premi **📱 Telecomando** (in alto, o "Collega il telefono" in Nuova partita).
@@ -24,6 +30,15 @@ Il collegamento è diretto tra TV e telefono (WebRTC con PeerJS); il servizio pu
 - Usa un browser vero: **Silk** su Fire TV, oppure **Fully Kiosk Browser** (Fire TV e Android TV) con l'opzione "Keep Screen On" e l'indirizzo del tabellone come pagina iniziale.
 - Il tabellone chiede allo schermo di restare acceso (Wake Lock + video muto invisibile), ma alcune app con browser integrato (es. Downloader) ignorano la richiesta.
 - In più, sulla Fire TV imposta lo screensaver su "Mai".
+
+## Frasi della serata
+In Nuova partita → **📝 Frasi della serata** si possono preparare tutte le frasi prima di iniziare (una riga per manche, `Titolo | Frase`, più tema e 3 frasi per il gioco finale). Ogni manche parte da sola con la sua frase. Il pulsante 🎲 le pesca da un archivio di oltre 120 frasi in 12 categorie, senza ripetizioni tra una partita e l'altra.
+
+## Ruota, giro finale e atmosfera
+- **Ruota digitale**: tocca il pulsante oppure trascinalo: più forte lo lanci, più giri fa. La lancetta rimbalza sui pioli e a volte la ruota si ferma sul filo.
+- **⏩ Giro finale**: in qualsiasi manche il conduttore può avviarlo. Un solo giro di ruota, quel valore vale per tutti, vocali gratis, e chi trova una lettera ha pochi secondi (8 di default) per risolvere; poi tocca al successivo.
+- Sigla d'apertura, stacchetto tra le manche e rullo di tamburi durante il giro (musiche originali generate dalla pagina). Sulla TV l'audio si attiva al primo tasto premuto.
+- Tra una manche e l'altra la TV mostra la classifica con barre che crescono.
 
 ## Regole predefinite (modificabili in "Nuova partita")
 - **PASSA** (lo 0 della ruota): il turno passa al concorrente successivo.

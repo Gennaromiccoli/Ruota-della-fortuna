@@ -273,6 +273,65 @@ body.remote .pcard .pround{font-size:20px}
 body.remote .key{width:44px;height:50px}
 body.remote #envelopes .env{width:30%}
 
+/* ---------- control room (attesa) ---------- */
+.lobby{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2vh;padding:24px 16px;text-align:center;overflow:auto;
+  background:radial-gradient(ellipse at 50% 0%, rgba(80,140,255,.4), transparent 60%),radial-gradient(ellipse at 80% 100%, rgba(255,90,200,.2), transparent 55%),linear-gradient(180deg,#0a2a7a,#030a2b)}
+.lobby-title{font-family:var(--display);font-size:clamp(34px,6vw,96px);letter-spacing:2px;line-height:1;
+  background:linear-gradient(100deg,#fff6c8 0%,var(--gold) 30%,#fff 45%,var(--gold) 60%,var(--gold2) 100%);background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite;filter:drop-shadow(0 4px 0 #7a4b00) drop-shadow(0 0 24px rgba(255,200,60,.4))}
+.lobby-sub{font-family:var(--display);letter-spacing:4px;font-size:clamp(16px,2.2vw,30px);color:#fff}
+.lobby-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);gap:2vw;width:min(1300px,100%);align-items:center}
+@media (max-width:800px){.lobby-grid{grid-template-columns:1fr}}
+.lobby-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.lobby-card .qr{width:min(230px,60vw)}
+.lobby-h{font-family:var(--display);letter-spacing:2px;font-size:clamp(18px,2vw,30px);color:var(--gold)}
+.names{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-content:flex-start;min-height:140px;padding:10px}
+.names .empty{color:var(--muted);font-size:clamp(15px,1.5vw,20px);align-self:center}
+.name-chip{font-family:var(--display);letter-spacing:1px;font-size:clamp(18px,2.1vw,32px);padding:8px 20px;border-radius:999px;background:var(--pc);color:#0b0b20;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.name-chip.in{animation:chipIn .7s cubic-bezier(.2,1.6,.4,1)}
+.name-chip.off{opacity:.4}
+@keyframes chipIn{from{transform:scale(.2) translateY(30px);opacity:0}}
+.lobby-foot{display:flex;flex-direction:column;gap:10px;align-items:center}
+#lobbyState{font-size:clamp(16px,1.9vw,26px);font-weight:700}
+#audioHint{font-size:14px;color:var(--muted)}
+
+/* ---------- telefono del concorrente ---------- */
+#playerApp{max-width:520px;margin:0 auto;padding:12px 16px 30px;display:flex;flex-direction:column;gap:14px}
+body.player header,body.player #players,body.player .stage,body.player #solutionBox,body.player #splash,body.player #lobby{display:none!important}
+.pl-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pl-head .logo{font-size:22px}
+#playerApp h2{font-family:var(--display);color:var(--gold);margin:0 0 6px;letter-spacing:1px}
+#playerApp label{display:block;font-weight:600;font-size:14px;margin:8px 0 6px;color:var(--muted)}
+#playerApp input{width:100%;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:var(--text);font-size:20px;font-family:inherit;margin-bottom:12px}
+.pl-me{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:2px solid var(--pc)}
+.pl-me .avatar{grid-row:auto;flex:none}
+.pl-me .big{font-family:var(--display);font-size:30px;line-height:1.1}
+.pl-info{font-size:17px;line-height:1.4}
+.pl-info .cat{font-size:12px;letter-spacing:1px;color:var(--gold);font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.buzzer{width:min(78vw,330px);aspect-ratio:1;margin:6px auto;border-radius:50%;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px;text-align:center;
+  font-family:var(--display);font-size:26px;letter-spacing:2px;color:#fff;background:radial-gradient(circle at 35% 30%,#ff8c8f,#d92f34 60%,#8a1013);box-shadow:0 12px 0 #5c0a0c,0 20px 40px rgba(0,0,0,.5);transition:transform .08s;touch-action:manipulation}
+.buzzer .bz-ic{font-size:64px;line-height:1}
+.buzzer:active:not(:disabled){transform:translateY(8px);box-shadow:0 4px 0 #5c0a0c}
+.buzzer:disabled{background:radial-gradient(circle at 35% 30%,#6b7290,#3a4060 60%,#1d2238);box-shadow:0 12px 0 #12152a;opacity:1;cursor:default;font-size:18px}
+.buzzer.win{background:radial-gradient(circle at 35% 30%,#8ff0b8,#1f9d5a 60%,#0d5a31);box-shadow:0 12px 0 #073b1f;animation:pulse .5s ease-in-out infinite alternate;font-size:26px}
+.pl-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pl-list .name-chip{font-size:15px;padding:6px 12px}
+
+/* ---------- classifica animata ---------- */
+.bars{display:grid;gap:10px;margin-top:10px}
+.bar{display:grid;grid-template-columns:minmax(80px,28%) 1fr auto;align-items:center;gap:10px;font-weight:700}
+.bar > span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:24px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar .fill{height:100%;width:var(--w);border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 55%),var(--pc);box-shadow:0 0 14px var(--pc);animation:grow 1.6s cubic-bezier(.2,.9,.3,1) .35s both}
+@keyframes grow{from{width:var(--w0)}}
+.bar .val{font-family:var(--display);font-size:20px;white-space:nowrap}
+.bar.top .val{color:var(--gold)}
+
+.modal textarea{width:100%;padding:11px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:var(--text);font-size:15px;font-family:inherit;resize:vertical}
+.secret{-webkit-text-security:disc;text-security:disc}
+#spinBtn,.wheel-box{touch-action:none}
+.phone-dot{font-size:12px;margin-left:4px}
+
 /* confetti */
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
@@ -328,6 +387,50 @@ body.remote #envelopes .env{width:30%}
   </aside>
 </div>
 
+<div class="lobby" id="lobby" hidden>
+  <div class="lobby-title">★ TABELLONE DELLA RUOTA ★</div>
+  <div class="lobby-sub">CONTROL ROOM · ISCRIZIONI APERTE</div>
+  <div class="lobby-grid">
+    <div class="lobby-card">
+      <div class="lobby-h">🙋 Concorrenti</div>
+      <div class="qr" id="qrPlayers"></div>
+      <div class="hint">Inquadra il QR e scrivi il tuo nome</div>
+    </div>
+    <div class="lobby-card">
+      <div class="lobby-h">Iscritti</div>
+      <div id="lobbyNames" class="names"></div>
+    </div>
+    <div class="lobby-card">
+      <div class="lobby-h">🎤 Conduttore</div>
+      <div class="qr" id="qrHost"></div>
+      <div class="hint">Codice TV <b id="lobbyCode">—</b></div>
+    </div>
+  </div>
+  <div class="lobby-foot">
+    <span id="lobbyState">In attesa del conduttore…</span>
+    <span id="audioHint">🔊 Premi un tasto o tocca lo schermo per attivare l'audio</span>
+    <button class="btn" id="lobbyLocal" type="button">⚙ Crea la partita da qui</button>
+  </div>
+</div>
+
+<div id="playerApp" hidden>
+  <div class="pl-head"><div class="logo">★ LA RUOTA ★</div><span class="remote-pill" id="plStatus"></span></div>
+  <div id="plJoin" class="panel">
+    <h2>Entra in gioco</h2>
+    <label for="plName">Il tuo nome</label>
+    <input type="text" id="plName" maxlength="24" autocomplete="off" placeholder="es. Giulia">
+    <button class="btn green" id="plJoinBtn" type="button">Entra ▶</button>
+    <div class="err" id="plErr"></div>
+  </div>
+  <div id="plMain" hidden>
+    <div id="plMe" class="pl-me"></div>
+    <div id="plInfo" class="panel pl-info"></div>
+    <button id="plBuzz" class="buzzer" type="button" disabled><span class="bz-ic">🔔</span><span id="plBuzzTxt">PRENOTATI</span></button>
+    <div id="plList" class="pl-list"></div>
+    <button class="btn ghost" id="plRename" type="button">Cambia nome</button>
+  </div>
+</div>
+
 <div class="splash" id="splash" aria-hidden="true"><div class="splash-inner"><div class="splash-big"></div><div class="splash-sub"></div></div></div>
 
 <!-- Setup -->
@@ -342,7 +445,8 @@ body.remote #envelopes .env{width:30%}
       <summary>Questo è il telefono: ho il codice della TV</summary>
       <div class="row" style="margin-top:10px">
         <input type="text" id="joinCode" placeholder="Codice di 5 caratteri" maxlength="5" autocomplete="off" style="text-transform:uppercase">
-        <button class="btn" id="joinBtn" type="button">Collega</button>
+        <button class="btn" id="joinBtn" type="button">Conduttore</button>
+        <button class="btn ghost" id="joinPlayerBtn" type="button">Concorrente</button>
       </div>
     </details>
     <label>Concorrenti</label>
@@ -374,7 +478,9 @@ body.remote #envelopes .env{width:30%}
         <div><label for="lampoSpeed">Lampo: secondi tra una lettera e l'altra</label><input type="number" id="lampoSpeed" min="1" max="10" step="0.5" value="2"></div>
         <div><label for="mysteryPrize">Premio del Mistero (€)</label><input type="number" id="mysteryPrize" min="0" step="500" value="10000"></div>
         <div><label for="expressValue">Valore consonante Express (€)</label><input type="number" id="expressValue" min="0" step="100" value="1000"></div>
+        <div><label for="speedSeconds">Giro finale: secondi per risolvere</label><input type="number" id="speedSeconds" min="3" max="30" value="8"></div>
       </div>
+      <p class="hint" style="text-align:left;margin:10px 0 0">⏩ Giro finale: in qualsiasi manche il conduttore può avviarlo. Si gira una volta sola, quel valore vale per tutti, le vocali sono gratis e chi trova una lettera ha pochi secondi per risolvere.</p>
       <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
       <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi gira la ruota; la consonante vale il valore uscito e se ne chiama un'altra allo stesso valore. In quel giro BANCAROTTA, PASSA e gli altri spicchi speciali non contano: si rigira.</p>
     </details>
@@ -388,6 +494,21 @@ body.remote #envelopes .env{width:30%}
       </div>
       <label for="finalPrizes">Premi possibili nelle buste (€), separati da virgola</label>
       <input type="text" id="finalPrizes" value="5000, 10000, 20000, 50000, 100000, 200000" autocomplete="off">
+    </details>
+    <details id="scriptBox">
+      <summary>📝 Frasi della serata (preparate prima)</summary>
+      <p class="hint" style="text-align:left;margin:8px 0">Una riga per manche, nel formato <b>Titolo | Frase</b>. La riga 1 va alla manche 1, la 2 alla manche 2, le righe in più servono per lo spareggio. Le manche senza riga si scrivono al momento. Il testo resta nascosto: 👁 per vederlo.</p>
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+        <button class="btn ghost" id="scriptFill" type="button">🎲 Riempi con frasi a sorpresa</button>
+        <button class="xbtn" data-eye-area="scriptText" type="button" title="Mostra / nascondi">👁</button>
+      </div>
+      <textarea id="scriptText" class="secret" rows="6" spellcheck="false" placeholder="Proverbio | Chi va piano va sano e va lontano" style="margin-top:8px"></textarea>
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <label for="finalScriptText" style="margin:0">Gioco finale: prima riga il tema, poi le 3 frasi</label>
+        <button class="xbtn" data-eye-area="finalScriptText" type="button" title="Mostra / nascondi">👁</button>
+      </div>
+      <textarea id="finalScriptText" class="secret" rows="4" spellcheck="false" placeholder="Tema&#10;Frase busta 1&#10;Frase busta 2&#10;Frase busta 3" style="margin-top:6px"></textarea>
+      <div class="err" id="scriptErr"></div>
     </details>
     <div class="err" id="setupErr"></div>
     <div class="mfoot">
@@ -511,35 +632,134 @@ const TV_PRESET = [
   {type:'normal', mult:2, timer:0, jolly:false, mistero:true, express:true}
 ];
 
-const SAMPLE = [
-  ['Proverbio','Chi va piano va sano e va lontano'],
+const SAMPLE = [["Proverbio","Chi va piano va sano e va lontano"],
   ["Proverbio","L'erba del vicino è sempre più verde"],
   ["Proverbio","Tra il dire e il fare c'è di mezzo il mare"],
-  ['Proverbio','Chi dorme non piglia pesci'],
+  ["Proverbio","Chi dorme non piglia pesci"],
   ["Proverbio","Il mattino ha l'oro in bocca"],
-  ['Proverbio','Non tutto il male vien per nuocere'],
-  ['Proverbio','Chi trova un amico trova un tesoro'],
-  ['Proverbio','Rosso di sera bel tempo si spera'],
-  ['Proverbio','Patti chiari amicizia lunga'],
-  ['Proverbio','Occhio non vede cuore non duole'],
-  ['Proverbio','A caval donato non si guarda in bocca'],
-  ['Modo di dire','In bocca al lupo'],
-  ['Modo di dire','Avere le mani bucate'],
-  ['Modo di dire','Prendere due piccioni con una fava'],
-  ['Modo di dire','Essere al settimo cielo'],
-  ['Modo di dire','Fare orecchie da mercante'],
-  ['Modo di dire','Cercare un ago in un pagliaio'],
-  ['In cucina','Spaghetti alla carbonara'],
-  ['In cucina','Risotto alla milanese'],
-  ['In cucina','Tiramisù al caffè'],
-  ['In cucina','Pizza margherita con basilico'],
-  ['In cucina','Lasagne al forno della nonna'],
-  ['Luoghi famosi','La torre pendente di Pisa'],
-  ['Luoghi famosi','Piazza San Marco a Venezia'],
-  ['Luoghi famosi','Il Colosseo di Roma'],
-  ['Luoghi famosi','Il Duomo di Milano'],
-  ['Luoghi famosi','La reggia di Caserta'],
-];
+  ["Proverbio","Non tutto il male vien per nuocere"],
+  ["Proverbio","Chi trova un amico trova un tesoro"],
+  ["Proverbio","Rosso di sera bel tempo si spera"],
+  ["Proverbio","Patti chiari amicizia lunga"],
+  ["Proverbio","Occhio non vede cuore non duole"],
+  ["Proverbio","A caval donato non si guarda in bocca"],
+  ["Proverbio","Il buongiorno si vede dal mattino"],
+  ["Proverbio","Chi semina vento raccoglie tempesta"],
+  ["Proverbio","L'abito non fa il monaco"],
+  ["Proverbio","Meglio un uovo oggi che una gallina domani"],
+  ["Proverbio","Chi fa da sé fa per tre"],
+  ["Proverbio","Tutte le strade portano a Roma"],
+  ["Proverbio","Can che abbaia non morde"],
+  ["Proverbio","Non è tutto oro quel che luccica"],
+  ["Proverbio","Chi tace acconsente"],
+  ["Proverbio","Ride bene chi ride ultimo"],
+  ["Proverbio","Paese che vai usanza che trovi"],
+  ["Proverbio","Una mela al giorno toglie il medico di torno"],
+  ["Modo di dire","In bocca al lupo"],
+  ["Modo di dire","Avere le mani bucate"],
+  ["Modo di dire","Prendere due piccioni con una fava"],
+  ["Modo di dire","Essere al settimo cielo"],
+  ["Modo di dire","Fare orecchie da mercante"],
+  ["Modo di dire","Cercare un ago in un pagliaio"],
+  ["Modo di dire","Avere la testa tra le nuvole"],
+  ["Modo di dire","Fare un buco nell'acqua"],
+  ["Modo di dire","Essere come il prezzemolo"],
+  ["Modo di dire","Toccare il cielo con un dito"],
+  ["Modo di dire","Dormire sugli allori"],
+  ["Modo di dire","Rompere il ghiaccio"],
+  ["Modo di dire","Avere un diavolo per capello"],
+  ["Modo di dire","Non avere peli sulla lingua"],
+  ["In cucina","Spaghetti alla carbonara"],
+  ["In cucina","Risotto alla milanese"],
+  ["In cucina","Tiramisù al caffè"],
+  ["In cucina","Pizza margherita con basilico"],
+  ["In cucina","Lasagne al forno della nonna"],
+  ["In cucina","Pasta e fagioli"],
+  ["In cucina","Melanzane alla parmigiana"],
+  ["In cucina","Cannoli siciliani"],
+  ["In cucina","Bistecca alla fiorentina"],
+  ["In cucina","Pesto alla genovese"],
+  ["In cucina","Panettone con canditi"],
+  ["In cucina","Gnocchi al pomodoro"],
+  ["In cucina","Arancini di riso"],
+  ["Luoghi d'Italia","La torre pendente di Pisa"],
+  ["Luoghi d'Italia","Piazza San Marco a Venezia"],
+  ["Luoghi d'Italia","Il Colosseo di Roma"],
+  ["Luoghi d'Italia","Il Duomo di Milano"],
+  ["Luoghi d'Italia","La reggia di Caserta"],
+  ["Luoghi d'Italia","Il ponte di Rialto"],
+  ["Luoghi d'Italia","Le Cinque Terre"],
+  ["Luoghi d'Italia","La costiera amalfitana"],
+  ["Luoghi d'Italia","Il lago di Como"],
+  ["Luoghi d'Italia","La valle dei templi"],
+  ["Luoghi d'Italia","I trulli di Alberobello"],
+  ["Luoghi d'Italia","La fontana di Trevi"],
+  ["Nel mondo","La torre Eiffel di Parigi"],
+  ["Nel mondo","Il Big Ben di Londra"],
+  ["Nel mondo","La statua della libertà"],
+  ["Nel mondo","La grande muraglia cinese"],
+  ["Nel mondo","Le piramidi di Giza"],
+  ["Nel mondo","Il ponte di Brooklyn"],
+  ["Nel mondo","Le cascate del Niagara"],
+  ["Nel mondo","Il deserto del Sahara"],
+  ["Sport","Calcio di rigore"],
+  ["Sport","Il giro d'Italia"],
+  ["Sport","Gol in rovesciata"],
+  ["Sport","Medaglia d'oro olimpica"],
+  ["Sport","Partita di pallavolo"],
+  ["Sport","Fuorigioco millimetrico"],
+  ["Sport","Maratona di New York"],
+  ["Sport","Tiro da tre punti"],
+  ["Sport","Gran premio di Formula uno"],
+  ["Animali","Il leone re della foresta"],
+  ["Animali","Pappagallo parlante"],
+  ["Animali","Coccodrillo del Nilo"],
+  ["Animali","Orso polare"],
+  ["Animali","Delfino curioso"],
+  ["Animali","Cavallo al galoppo"],
+  ["Animali","Formica operaia"],
+  ["Animali","Elefante africano"],
+  ["Animali","Gatto che fa le fusa"],
+  ["In casa","Lavatrice in centrifuga"],
+  ["In casa","Divano letto matrimoniale"],
+  ["In casa","Lampada da comodino"],
+  ["In casa","Frigorifero pieno"],
+  ["In casa","Tostapane fumante"],
+  ["In casa","Aspirapolvere senza fili"],
+  ["In casa","Tende della cucina"],
+  ["In casa","Cassetto dei calzini"],
+  ["Mestieri","Idraulico di turno"],
+  ["Mestieri","Vigile del fuoco"],
+  ["Mestieri","Maestra elementare"],
+  ["Mestieri","Panettiere di quartiere"],
+  ["Mestieri","Meccanico di fiducia"],
+  ["Mestieri","Giardiniere"],
+  ["Mestieri","Astronauta"],
+  ["Mestieri","Pasticcere"],
+  ["Natale","Albero di Natale addobbato"],
+  ["Natale","Babbo Natale con la slitta"],
+  ["Natale","Pacchi sotto l'albero"],
+  ["Natale","Il presepe con le statuine"],
+  ["Natale","Tombola in famiglia"],
+  ["Natale","La calza della Befana"],
+  ["Natale","Cenone della vigilia"],
+  ["Natale","Neve sui tetti"],
+  ["Cinema","La vita è bella"],
+  ["Cinema","Nuovo cinema Paradiso"],
+  ["Cinema","La dolce vita"],
+  ["Cinema","Il buono il brutto il cattivo"],
+  ["Cinema","Ladri di biciclette"],
+  ["Cinema","Il postino"],
+  ["Cinema","La grande bellezza"],
+  ["Cinema","Mediterraneo"],
+  ["Musica","Concerto all'aperto"],
+  ["Musica","Festival di Sanremo"],
+  ["Musica","Chitarra elettrica"],
+  ["Musica","Orchestra sinfonica"],
+  ["Musica","Karaoke con gli amici"],
+  ["Musica","Disco in vinile"],
+  ["Musica","Pianoforte a coda"],
+  ["Musica","Coro della domenica"]];
 
 /* ================= Utilità ================= */
 const $ = id => document.getElementById(id);
@@ -557,6 +777,22 @@ const store = {
 
 const REMOTE_CODE = (new URLSearchParams(location.search).get('telecomando') || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
 const IS_REMOTE = REMOTE_CODE.length === 5;
+const PLAYER_CODE = (new URLSearchParams(location.search).get('gioca') || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const IS_PLAYER = !IS_REMOTE && PLAYER_CODE.length === 5;
+
+/* Frasi a sorpresa senza ripetizioni (memoria nel browser) */
+function pickSamples(n, oneCat){
+  let used = [];
+  try { used = JSON.parse(store.get('ruota-used') || '[]'); } catch(e){}
+  let pool = SAMPLE.filter(s => !used.includes(s[1]));
+  const catsOk = list => [...new Set(list.map(s => s[0]))].filter(c => list.filter(s => s[0] === c).length >= n);
+  if ((oneCat && !catsOk(pool).length) || (!oneCat && pool.length < n)){ used = []; pool = SAMPLE.slice(); }
+  if (oneCat){ const cats = catsOk(pool); const c = cats[Math.floor(Math.random() * cats.length)]; pool = pool.filter(s => s[0] === c); }
+  const picks = shuffle(pool).slice(0, n);
+  used.push(...picks.map(s => s[1]));
+  store.set('ruota-used', JSON.stringify(used));
+  return picks;
+}
 
 /* Impagina la frase nelle 4 righe del tabellone (12/14/14/12). Restituisce 56 celle o null. */
 function layoutPhrase(text){
@@ -596,7 +832,7 @@ const Sound = {
   ctx:null, on: store.get('ruota-sound') !== 'off',
   ensure(){ if (!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if (this.ctx && this.ctx.state==='suspended') this.ctx.resume(); return this.ctx; },
   tone(freq, dur, type='sine', vol=.2, when=0){
-    if (!this.on || IS_REMOTE) return; const ctx = this.ensure(); if (!ctx) return;
+    if (!this.on || IS_REMOTE || IS_PLAYER) return; const ctx = this.ensure(); if (!ctx) return;
     const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(freq, t);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
@@ -611,7 +847,28 @@ const Sound = {
   jolly(){ [660,880,1320].forEach((f,i)=>this.tone(f,.3,'square',.1,i*.09)); },
   drum(){ for (let i = 0; i < 14; i++) this.tone(90 + i*4, .08, 'triangle', .14, i*.085); },
   express(){ this.tone(392,.25,'sawtooth',.12); this.tone(523,.4,'sawtooth',.12,.22); },
-  whoosh(){ this.tone(300,.25,'sine',.08); this.tone(600,.2,'sine',.06,.08); }
+  whoosh(){ this.tone(300,.25,'sine',.08); this.tone(600,.2,'sine',.06,.08); },
+  noiseBuf: null,
+  noise(dur, vol, when = 0, freq = 800){
+    if (!this.on || IS_REMOTE || IS_PLAYER) return; const ctx = this.ensure(); if (!ctx) return;
+    if (!this.noiseBuf){ const b = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random()*2 - 1; this.noiseBuf = b; }
+    const t = ctx.currentTime + when, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = this.noiseBuf; f.type = 'bandpass'; f.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(f).connect(g).connect(ctx.destination); src.start(t); src.stop(t + dur + .02);
+  },
+  /* rullo di tamburi che accompagna la ruota */
+  roll(ms){ const n = Math.floor(ms / 70); for (let i = 0; i < n; i++){ const k = i / n; this.noise(.06, .04 + .07*k, i * .07, 280 + 220*k); } this.noise(.5, .12, n * .07, 1200); },
+  /* sigla d'apertura (melodia originale) */
+  sigla(){
+    const L = [[392,.14],[523,.14],[659,.14],[784,.28],[659,.14],[784,.42],[0,.1],[698,.14],[880,.14],[784,.14],[698,.14],[659,.28],[587,.14],[523,.56]];
+    let t = 0;
+    L.forEach(([f,d]) => { if (f){ this.tone(f, d*1.6, 'triangle', .16, t); this.tone(f*2, d*1.2, 'sine', .04, t); } t += d; });
+    [[131,0],[175,.84],[196,1.68],[131,2.52]].forEach(([f,w]) => this.tone(f, .7, 'square', .06, w));
+    for (let k = 0; k < 12; k++) this.noise(.05, .05, k * .28, 4000);
+  },
+  /* stacchetto tra una manche e l'altra */
+  stacchetto(){ [[523,0],[659,.12],[784,.24],[1046,.36]].forEach(([f,w]) => this.tone(f, .3, 'triangle', .15, w)); this.tone(1046, .6, 'sine', .08, .5); this.noise(.3, .06, .36, 2500); }
 };
 
 /* ================= Stato ================= */
@@ -625,7 +882,8 @@ let mode = store.get('ruota-mode') === 'manual' ? 'manual' : 'digital';
 const DEFAULT_SPEC = {type:'normal', mult:1, timer:0, jolly:false, mistero:false, express:false};
 const DEFAULT_CFG = {manches:3, vowelCost:200, winBonus:1000, keepOthers:false, special:[],
   lampoPrize:1000, lampoSpeed:2, mysteryPrize:10000, expressValue:1000,
-  finalOn:true, finalSeconds:60, finalPrizes:[5000,10000,20000,50000,100000,200000], finalLetters:'RSTLNE'};
+  finalOn:true, finalSeconds:60, finalPrizes:[5000,10000,20000,50000,100000,200000], finalLetters:'RSTLNE',
+  speedSeconds:8, script:[], finalScript:null};
 function withDefaults(cfg){
   const c = Object.assign({}, DEFAULT_CFG, cfg);
   c.special = Array.from({length:c.manches}, (_,i) => Object.assign({}, DEFAULT_SPEC, (cfg.special||[])[i]));
@@ -639,7 +897,7 @@ function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
 function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); actionCount++; }
 const cur = () => S.players[S.current];
 const isActive = i => S.final ? i === S.final.player : (!S.tiebreak || S.tiebreak.includes(i));
-const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','jollyAsk','mysteryAsk','expressAsk','express','lampoBuzz','finalIntro','finalPick','finalSolve'];
+const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','jollyAsk','mysteryAsk','expressAsk','express','lampoBuzz','speedSpin','speedTurn','speedSolve','finalIntro','finalPick','finalSolve'];
 const setFx = (kind, big, sub) => { S.fx = {id: Date.now() + Math.random(), kind, big: String(big), sub: sub ? String(sub) : ''}; };
 const nm = p => `<b>${esc(p.name)}</b>`;
 
@@ -649,7 +907,7 @@ function newGame(cfg){
     players: cfg.names.map((n,i) => ({name:n, color:PLAYER_COLORS[i % PLAYER_COLORS.length], round:0, total:0, jolly:false})),
     manche: 1, current: 0, phase: 'phrase',
     category: '', phrase: '', grid: null, used: [], extra: [], spin: null, bonusFirst: null,
-    express: false, pending: null, jollyTaken: false, mysteryDone: false, lampo: null, lastSeg: null,
+    express: false, pending: null, jollyTaken: false, mysteryDone: false, lampo: null, lastSeg: null, speed: null, prevTotals: [],
     msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null, final: null, fx: null
   };
   history = []; actionCount++;
@@ -703,7 +961,8 @@ function startManche(category, phrase){
   S.used = []; S.extra = [];
   S.players.forEach(p => p.round = 0);
   S.spin = null; S.bonusFirst = null; S.express = false; S.pending = null; S.lastSeg = null;
-  S.jollyTaken = false; S.mysteryDone = false; S.lampo = null;
+  S.jollyTaken = false; S.mysteryDone = false; S.lampo = null; S.speed = null;
+  S.prevTotals = S.players.map(p => p.total);
   const actives = S.players.map((_,i)=>i).filter(isActive);
   S.current = actives[(S.manche - 1) % actives.length];
   const sp = spec(), label = mancheLabel(sp);
@@ -716,9 +975,12 @@ function startManche(category, phrase){
     S.msg = (label ? `<span class="big">${esc(label)}</span> ` : '') + `Tocca a ${nm(cur())}: gira la ruota!`;
     setFx('manche', S.tiebreak ? 'SPAREGGIO' : `MANCHE ${S.manche}`, [label, S.category].filter(Boolean).join(' · '));
   }
-  Sound.whoosh();
+  (S.manche === 1 && !S.tiebreak) ? Sound.sigla() : Sound.stacchetto();
   buildBoard(true); save(); render();
 }
+/* Frase preparata per questa manche, se c'è; altrimenti il conduttore la scrive al momento */
+function scriptFor(m){ const e = (S.cfg.script || [])[m - 1]; return e && validPhrase(e.txt) ? e : null; }
+function autoPhraseOrModal(){ const e = scriptFor(S.manche); if (e) startManche(e.cat, e.txt); else openPhrase(); }
 
 /* ================= Spicchi ================= */
 function activeSegments(){
@@ -743,6 +1005,7 @@ const segLabel = seg => seg.v ? euro(seg.v * mult()) : seg.t;
 function applySegment(seg){
   const p = cur();
   S.lastSeg = segLabel(seg);
+  if (S.phase === 'speedSpin') return speedValue(seg);
   if (S.phase === 'bonusSpin'){
     const base = seg.v || null;
     if (!base){
@@ -858,6 +1121,7 @@ async function chooseLetter(L, confirmed){
   if (ph === 'finalPick') return pickFinal(L);
   if (ph === 'bonusPick') return bonusPick(L);
   if (ph === 'express') return expressLetter(L, confirmed);
+  if (ph === 'speedTurn') return speedLetter(L, confirmed);
   const vowelPhase = ph === 'vowel';
   if (ph !== 'consonant' && !vowelPhase) return;
   if (vowelPhase !== isVowel(L)) return;
@@ -939,7 +1203,7 @@ function revealAllThen(next){
 }
 
 function solveRight(){
-  if (busy || S.phase !== 'solve') return;
+  if (busy || (S.phase !== 'solve' && S.phase !== 'speedSolve')) return;
   snapshot();
   const p = cur();
   const won = p.round + S.cfg.winBonus;
@@ -957,13 +1221,15 @@ function solveRight(){
 }
 
 function skipTurn(){
-  if (busy || !['turn','consonant','vowel','solve','bonusPick','bonusSpin','express'].includes(S.phase)) return;
+  if (busy || !['turn','consonant','vowel','solve','bonusPick','bonusSpin','express','speedTurn'].includes(S.phase)) return;
+  if (S.phase === 'speedTurn'){ snapshot(); return speedNext(`${esc(cur().name)} passa.`); }
   snapshot(); const p = cur(); nextPlayer();
   S.msg = `${esc(p.name)} passa. Tocca a ${nm(cur())}.`;
   save(); render();
 }
 
 function timeUp(){
+  if (S.phase === 'speedSolve'){ snapshot(); setFx('time', 'TEMPO SCADUTO', cur().name); Sound.buzz(); return speedNext('<span class="big red">TEMPO SCADUTO!</span>'); }
   snapshot(); const p = cur(); nextPlayer();
   S.msg = `<span class="big red">TEMPO SCADUTO!</span> ${esc(p.name)} perde il turno. Tocca a ${nm(cur())}.`;
   setFx('time', 'TEMPO SCADUTO', p.name);
@@ -1041,6 +1307,52 @@ async function expressLetter(L, confirmed){
   save(); render(); anim();
 }
 
+/* ---------- Giro finale veloce ---------- */
+function speedStart(){
+  if (busy || S.phase !== 'turn' || S.final) return;
+  snapshot();
+  S.phase = 'speedSpin'; S.express = false; S.spin = null;
+  S.msg = `<span class="big">⏩ GIRO FINALE!</span> Si gira una volta sola: il valore vale per tutti, vocali gratis e ${S.cfg.speedSeconds} secondi per risolvere.`;
+  setFx('speed', 'GIRO FINALE', 'un solo giro di ruota'); Sound.stacchetto();
+  save(); render();
+}
+function speedValue(seg){
+  if (!seg.v){ S.msg = `<span class="big">${seg.t}</span> non vale nel giro finale: si rigira.`; setFx('passa', seg.t, 'si rigira!'); Sound.pass(); save(); render(); return; }
+  S.speed = {value: seg.v * mult()};
+  S.phase = 'speedTurn';
+  S.msg = `Giro finale a <span class="big">${euro(S.speed.value)}</span> per consonante, vocali gratis. ${nm(cur())}, chiama una lettera.`;
+  setFx('value', euro(S.speed.value), 'GIRO FINALE'); Sound.ding();
+  save(); render();
+}
+function speedNext(prefix){
+  nextPlayer(); S.phase = 'speedTurn';
+  S.msg = `${prefix} Tocca a ${nm(cur())}: chiama una lettera (consonanti a ${euro(S.speed.value)}).`;
+  save(); render();
+}
+async function speedLetter(L, confirmed){
+  const p = cur();
+  if (S.used.includes(L)){
+    const ok = confirmed || await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. Turno al prossimo?`, 'Conferma');
+    if (!ok) return;
+    snapshot(); Sound.buzz(); return speedNext(`La <b>${L}</b> era già stata chiamata.`);
+  }
+  snapshot();
+  S.used.push(L);
+  const count = countOf(L);
+  if (!count){ setFx('miss', `NESSUNA ${L}`, p.name); Sound.buzz(); return speedNext(`Nessuna <b>${L}</b>.`); }
+  const gain = isVowel(L) ? 0 : count * S.speed.value;
+  p.round += gain;
+  S.phase = 'speedSolve';
+  S.msg = `${foundText(count, L)}${gain ? ` <span class="big">+${euro(gain)}</span>` : ''} ${nm(p)}, hai <b>${S.cfg.speedSeconds} secondi</b> per risolvere!`;
+  const anim = animateReveal([L]);
+  save(); render(); anim();
+}
+function speedWrong(){
+  if (busy || S.phase !== 'speedSolve') return;
+  snapshot(); setFx('miss', 'SBAGLIATO', cur().name); Sound.buzz();
+  speedNext('Risposta sbagliata.');
+}
+
 /* ---------- Manche lampo ---------- */
 function lampoReveal(){
   const hidden = hiddenTiles();
@@ -1114,10 +1426,14 @@ function startFinalSetup(){
   S.final = {player: S.players.findIndex(p => p.total === top), theme:'', phrases:[], prizes:[], idx:-1, results:[null,null,null], picks:[], timeLeft: S.cfg.finalSeconds * 1000, won: 0};
   S.current = S.final.player;
   S.phase = 'finalPhrase'; S.category = ''; S.grid = null; S.used = []; S.extra = []; S.phrase = '';
+  S.prevTotals = S.players.map(p => p.total);
   S.msg = `Gioco finale per ${nm(cur())}! Il conduttore prepara le tre buste.`;
   setFx('final', 'GIOCO FINALE', cur().name);
   Sound.fanfare();
-  save(); buildBoard(true); render(); openFinalPhrase();
+  save(); buildBoard(true); render();
+  const fs = S.cfg.finalScript;
+  if (fs && Array.isArray(fs.phrases) && fs.phrases.length === 3 && fs.phrases.every(validPhrase)) applyFinalPhrases({theme: fs.theme, phrases: fs.phrases});
+  else openFinalPhrase();
 }
 function applyFinalPhrases(a){
   if (!S || S.phase !== 'finalPhrase' || !a || !Array.isArray(a.phrases) || a.phrases.length !== 3) return;
@@ -1291,25 +1607,37 @@ function ensureWheel(){
   if (sig !== wheelSig){ wheelSig = sig; buildWheel(segs); }
 }
 
-function rotateWheelTo(index, turns, ms){
+/* La lancetta viene spinta dai pioli e torna indietro con un piccolo rimbalzo */
+function kickPointer(deg){
+  const ptr = $('pointer');
+  ptr.style.transition = 'none';
+  ptr.style.transform = `translateX(-50%) rotate(${-deg}deg)`;
+  requestAnimationFrame(() => { ptr.style.transition = 'transform .3s cubic-bezier(.3,1.9,.5,1)'; ptr.style.transform = 'translateX(-50%) rotate(0deg)'; });
+}
+function rotateWheelTo(index, turns, ms, edge){
   return new Promise(resolve => {
-    const jitter = (Math.random() - .5) * (SEG_DEG * .7);
+    const half = SEG_DEG / 2;
+    // a volte la ruota si ferma "sul filo" di uno spicchio, per un po' di suspense
+    const jitter = edge ? (Math.random() < .5 ? -1 : 1) * (half - .6 - Math.random() * 1.2) : (Math.random() - .5) * (SEG_DEG * .7);
     const target = -index*SEG_DEG + jitter;
     let delta = ((target - wheelRot) % 360 + 360) % 360;
     const newRot = wheelRot + turns*360 + delta;
-    const el = $('wheelRot'), ptr = $('pointer');
-    el.style.transition = `transform ${ms}ms cubic-bezier(.1,.62,.12,1)`;
+    const el = $('wheelRot');
+    el.style.transition = `transform ${ms}ms cubic-bezier(.06,.72,.08,1)`;
     el.style.transform = `rotate(${newRot}deg)`;
-    let lastSeg = null, done = false;
-    const watch = () => {
+    let lastSeg = null, lastAng = null, lastT = 0, done = false;
+    const watch = t => {
       if (done) return;
       const m = getComputedStyle(el).transform;
       if (m && m !== 'none'){
         const [a,b] = m.slice(7,-1).split(',').map(parseFloat);
         const ang = Math.atan2(b, a) * 180/Math.PI;
         const seg = Math.floor(((ang + SEG_DEG/2) % 360 + 360) % 360 / SEG_DEG);
-        if (lastSeg !== null && seg !== lastSeg){ Sound.tick(); ptr.classList.add('tick'); setTimeout(() => ptr.classList.remove('tick'), 60); }
-        lastSeg = seg;
+        if (lastSeg !== null && seg !== lastSeg){
+          const speed = lastAng === null ? 10 : Math.abs(((ang - lastAng + 540) % 360) - 180) / Math.max(1, t - lastT) * 16;
+          kickPointer(Math.min(30, 9 + speed * 1.6)); Sound.tick();
+        }
+        lastSeg = seg; lastAng = ang; lastT = t;
       }
       requestAnimationFrame(watch);
     };
@@ -1318,15 +1646,20 @@ function rotateWheelTo(index, turns, ms){
   });
 }
 
-const canSpinPhase = () => S && (S.phase === 'turn' || S.phase === 'bonusSpin');
-async function spinDigital(){
-  if (busy || !S || !canSpinPhase() || !remaining('c').length) return;
+const canSpinPhase = () => S && ['turn','bonusSpin','speedSpin'].includes(S.phase);
+/* power 0–1: quanto forte è stata "lanciata" la ruota (trascinando il pulsante); senza, un valore casuale */
+async function spinDigital(arg){
+  if (busy || !S || !canSpinPhase() || (!remaining('c').length && S.phase !== 'speedSpin')) return;
   Sound.ensure();
+  const power = arg && typeof arg.power === 'number' && isFinite(arg.power) ? Math.max(.1, Math.min(1, arg.power)) : .35 + Math.random() * .5;
+  const edge = Math.random() < .3;
   busy = true; render();
   const segs = activeSegments();
   const index = Math.floor(Math.random() * segs.length);
-  const turns = 4 + Math.floor(Math.random()*3);
-  await rotateWheelTo(index, turns, 4800 + Math.random()*1200);
+  const turns = 3 + Math.round(power * 4);
+  const ms = Math.round(4200 + power * 2400 + (edge ? 900 : 0));
+  Sound.roll(ms * .85);
+  await rotateWheelTo(index, turns, ms, edge);
   busy = false;
   snapshot();
   applySegment(segs[index]);
@@ -1336,7 +1669,7 @@ function chooseManual(key){
   Sound.ensure();
   const isMoney = typeof key === 'number';
   if (!isMoney && !SEG_KEYS.includes(key)) return;
-  if (key !== 'PASSA' && key !== 'BANCAROTTA' && !remaining('c').length) return;
+  if (key !== 'PASSA' && key !== 'BANCAROTTA' && !remaining('c').length && S.phase !== 'speedSpin') return;
   const segs = activeSegments();
   const idxs = segs.map((s,i)=>i).filter(i => isMoney ? segs[i].v === key : segs[i].t === key);
   if (!idxs.length) return;
@@ -1465,6 +1798,7 @@ function render(){
   document.body.classList.toggle('tvmode', remoteConnected());
   document.body.classList.toggle('nowheel', !!S && (!!S.final || ['lampo','lampoBuzz'].includes(S.phase)));
   renderSolution();
+  renderLobby();
   ensureWheel();
   if (!S){
     $('mancheBadge').textContent = '—'; $('players').innerHTML = ''; $('category').innerHTML = '&nbsp;'; $('envelopes').hidden = true;
@@ -1477,7 +1811,7 @@ function render(){
 
   const sp = spec(), label = mancheLabel(sp);
   $('mancheBadge').textContent = S.final ? 'GIOCO FINALE' : S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` :
-    `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${label ? ' · ' + label.toUpperCase() : ''}`;
+    `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${label ? ' · ' + label.toUpperCase() : ''}${S.speed || S.phase === 'speedSpin' ? ' · ⏩ GIRO FINALE' : ''}`;
 
   renderPlayers();
 
@@ -1511,7 +1845,7 @@ function renderPlayers(){
     return `<div class="pcard ${i === S.current && showTurn ? 'active' : ''} ${out ? 'out' : ''} ${buzzable ? 'buzzable' : ''}" style="--pc:${p.color}" ${buzzable ? `data-act="buzz" data-arg="${i}" role="button" tabindex="0"` : ''}>
       <span class="turn-tag">TOCCA A TE</span>
       <div class="avatar">${esc([...p.name][0] || '?').toUpperCase()}</div>
-      <div class="pname">${esc(p.name)}${p.jolly ? '<span class="jolly-badge">🃏 JOLLY</span>' : ''}</div>
+      <div class="pname">${esc(p.name)}${phoneOnline(p.cid) ? '<span class="phone-dot" title="Collegato dal telefono">📱</span>' : ''}${p.jolly ? '<span class="jolly-badge">🃏 JOLLY</span>' : ''}</div>
       <div class="pround" data-pr="${i}">${euro(shown)}</div>
       <div class="ptotal">Totale: <b>${euro(p.total)}</b>${lampo && !out ? ' · 🔔' : ''}</div>
     </div>`;
@@ -1540,7 +1874,9 @@ function renderActions(){
   switch (ph){
     case 'turn':
       a.push(btn('vowel', `Compra vocale (${euro(cost())})`, 'blue', p.round < cost() || !remaining('v').length),
-             btn('solve', 'Risolvi', 'green'), btn('skip', 'Passa turno', 'ghost')); break;
+             btn('solve', 'Risolvi', 'green'), btn('skip', 'Passa turno', 'ghost'), btn('speedStart', '⏩ Giro finale', 'ghost')); break;
+    case 'speedTurn': a.push(btn('skip', 'Passa turno', 'ghost')); break;
+    case 'speedSolve': a.push(btn('right', '✓ Esatta', 'green'), btn('speedWrong', '✗ Sbagliata', 'red')); break;
     case 'consonant': case 'bonusPick': case 'bonusSpin':
       a.push(btn('skip', 'Passa turno', 'ghost')); break;
     case 'vowel': a.push(btn('cancel', 'Annulla acquisto', 'ghost')); break;
@@ -1573,6 +1909,7 @@ function renderKeyboard(){
       if (ph === 'consonant' || ph === 'bonusPick') enabled = !v;
       else if (ph === 'vowel') enabled = v;
       else if (ph === 'express') enabled = !v || cur().round >= cost();
+      else if (ph === 'speedTurn') enabled = true;
       else if (ph === 'finalPick'){
         const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
         enabled = !used && !S.final.picks.includes(L) && (v ? nc === 3 && nv === 0 : nc < 3);
@@ -1609,8 +1946,8 @@ function renderWheelControls(){
        `<button class="seg-btn wide" data-seg="BANCAROTTA" style="background:${C.black};color:#fff" ${dis(false)}>BANCAROTTA</button>`;
   $('manualGrid').innerHTML = h;
   const lampo = S && ['lampo','lampoBuzz'].includes(S.phase);
-  $('wheelHint').textContent = lampo ? 'Manche lampo: la ruota non si usa.' : mode === 'digital'
-    ? 'Premi “Gira la ruota” per uno spin digitale.'
+  $('wheelHint').textContent = lampo ? 'Manche lampo: la ruota non si usa.' : S && S.phase === 'speedSpin' ? 'Giro finale: un solo giro, il valore vale per tutti.' : mode === 'digital'
+    ? 'Tocca il pulsante, oppure trascinalo: più forte lo lanci, più giri fa la ruota.'
     : 'Gira la ruota vera e tocca lo spicchio uscito. Jolly, Mistero ed Express compaiono qui quando sono attivi.';
 }
 
@@ -1618,7 +1955,7 @@ function renderWheelControls(){
 function closeModals(){ document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open')); }
 function anyModalOpen(){ return !!document.querySelector('.modal-bg.open'); }
 function openModalForPhase(){
-  if (!S){ openSetup(); return; }
+  if (!S){ renderLobby(); return; }
   if (S.phase === 'phrase') openPhrase();
   if (S.phase === 'finalPhrase') openFinalPhrase();
 }
@@ -1630,13 +1967,18 @@ function playerRow(name, i){
 }
 function openSetup(){
   if (remoteConnected()) return;   // con il telefono collegato le impostazioni si fanno lì
-  const names = S ? S.players.map(p => p.name) : ['Giocatore 1','Giocatore 2','Giocatore 3'];
+  let names = S ? S.players.map(p => p.name) : [];
+  lobbyList().forEach(l => { if (!names.some(x => x.toLowerCase() === l.name.toLowerCase())) names.push(l.name); });
+  if (!names.length) names = ['Giocatore 1','Giocatore 2','Giocatore 3'];
   $('playerInputs').innerHTML = names.map(playerRow).join('');
+  $('scriptText').value = ''; $('finalScriptText').value = ''; $('scriptErr').textContent = '';
+  $('scriptText').classList.add('secret'); $('finalScriptText').classList.add('secret');
   const c = S ? S.cfg : withDefaults({manches:3});
   $('numManches').value = c.manches; $('vowelCost').value = c.vowelCost; $('winBonus').value = c.winBonus; $('keepOthers').checked = c.keepOthers;
   $('lampoPrize').value = c.lampoPrize; $('lampoSpeed').value = c.lampoSpeed; $('mysteryPrize').value = c.mysteryPrize; $('expressValue').value = c.expressValue;
   $('finalOn').checked = c.finalOn; $('finalSeconds').value = c.finalSeconds; $('finalLetters').value = [...c.finalLetters].join(' ');
   $('finalPrizes').value = c.finalPrizes.join(', ');
+  $('speedSeconds').value = c.speedSeconds;
   renderMancheTable(c.special);
   $('setupCancel').style.display = S ? '' : 'none';
   $('setupErr').textContent = '';
@@ -1665,6 +2007,17 @@ function renderMancheTable(special){
     </div>`;
   }
   $('mancheTable').innerHTML = h;
+}
+/* Chi si iscrive dal telefono compare subito tra i concorrenti della schermata Nuova partita */
+function mergeLobbyIntoSetup(){
+  if (!$('setupModal').classList.contains('open')) return;
+  const inputs = () => [...$('playerInputs').querySelectorAll('input')];
+  lobbyList().forEach(l => {
+    if (inputs().some(i => i.value.trim().toLowerCase() === l.name.toLowerCase())) return;
+    const placeholder = inputs().find(i => /^Giocatore \d+$/.test(i.value.trim()));
+    if (placeholder) placeholder.value = l.name;
+    else { const n = inputs().length; $('playerInputs').insertAdjacentHTML('beforeend', playerRow(l.name, n)); }
+  });
 }
 function recolorPlayerRows(){ [...$('playerInputs').children].forEach((r,i) => r.querySelector('.dot').style.background = PLAYER_COLORS[i % PLAYER_COLORS.length]); }
 
@@ -1707,6 +2060,19 @@ function standingsTable(){
   return `<table class="standings">${order.map((p,k) => `<tr class="${p.total===top?'top':''}"><td>${k+1}. <span style="color:${p.color}">●</span> ${esc(p.name)}${p.jolly ? ' 🃏' : ''}</td><td>${euro(p.total)}</td></tr>`).join('')}</table>`;
 }
 
+/* Sulla TV la classifica è a barre che crescono dal totale di inizio manche */
+function standingsBars(){
+  const order = S.players.map((p,i)=>({...p,i})).filter(p => !S.tiebreak || S.final || S.tiebreak.includes(p.i)).sort((a,b) => b.total - a.total);
+  const max = Math.max(1, ...order.map(p => p.total));
+  const prev = S.prevTotals || [];
+  const top = order[0] ? order[0].total : 0;
+  return `<div class="bars">${order.map(p => {
+    const before = typeof prev[p.i] === 'number' ? prev[p.i] : p.total;
+    const w0 = Math.max(0, Math.min(100, before / max * 100)), w = Math.max(0, p.total / max * 100);
+    return `<div class="bar ${p.total === top && top > 0 ? 'top' : ''}" style="--pc:${p.color}"><span>${esc(p.name)}${p.jolly ? ' 🃏' : ''}</span><div class="track"><div class="fill" style="--w0:${w0}%;--w:${w}%"></div></div><span class="val">${euro(p.total)}</span></div>`;
+  }).join('')}</div>`;
+}
+const ranking = () => IS_REMOTE ? standingsTable() : standingsBars();
 function showEnd(){
   if (!S) return;
   const el = $('endContent');
@@ -1718,7 +2084,7 @@ function showEnd(){
       w.lampo ? `<b>${esc(w.name)}</b> vince la manche lampo e incassa <b>${euro(w.won)}</b>.` :
       `<b>${esc(w.name)}</b> ha risolto e incassa <b>${euro(w.won)}</b> (premio manche ${euro(S.cfg.winBonus)} incluso).`;
     el.innerHTML = `<h2>Manche ${S.manche} conclusa</h2><p style="margin:0 0 6px">${line}</p>
-      ${sol}${standingsTable()}
+      ${sol}${ranking()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Guarda il tabellone</button>
       <button class="btn green" data-act="${S.tiebreak || last ? 'finish' : 'nextManche'}">${S.tiebreak || last ? 'Classifica finale 🏆' : 'Prossima manche ▶'}</button></div>`;
   } else if (S.phase === 'gameOver'){
@@ -1729,7 +2095,7 @@ function showEnd(){
     el.innerHTML = `<div class="trophy">🏆</div>
       <h2 style="text-align:center">${tie ? 'Parità!' : 'Vince ' + esc(winners[0].name) + '!'}</h2>
       <p style="text-align:center;margin:0">${tie ? 'Pari merito tra ' + winners.map(w => '<b>'+esc(w.name)+'</b>').join(', ') + ' con ' + euro(top) + '.' : 'Con un montepremi di <b>' + euro(top) + '</b>.'}</p>
-      ${standingsTable()}
+      ${ranking()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       ${tie ? '<button class="btn" data-act="tiebreak">Manche di spareggio</button>' : ''}
       ${!tie && S.cfg.finalOn ? '<button class="btn" data-act="final">✉ Gioco finale delle 3 buste</button>' : ''}
@@ -1741,7 +2107,7 @@ function showEnd(){
       <h2 style="text-align:center">${f.won ? `${esc(p.name)} vince ${euro(f.won)}!` : 'Nessuna busta vinta'}</h2>
       <table class="standings">${rows}</table>
       <h2 style="margin-top:16px;font-size:20px">Classifica finale</h2>
-      ${standingsTable()}
+      ${ranking()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
   } else return;
@@ -1752,7 +2118,7 @@ function nextManche(){
   if (busy || S.phase !== 'mancheEnd' || (!S.tiebreak && S.manche >= S.cfg.manches)) return;
   snapshot(); S.manche++; S.phase = 'phrase'; S.category = ''; S.grid = null; S.used = []; S.extra = []; S.lastSeg = null;
   S.msg = 'Il conduttore inserisce la nuova frase.';
-  save(); buildBoard(true); render(); openPhrase();
+  save(); buildBoard(true); render(); autoPhraseOrModal();
 }
 function finishGame(){
   if (busy || S.phase !== 'mancheEnd') return;
@@ -1770,7 +2136,7 @@ function startTiebreak(){
   S.tiebreak = pool.filter(o => o.p.total === top).map(o => o.i);
   S.manche++; S.phase = 'phrase'; S.category = ''; S.grid = null; S.used = []; S.extra = [];
   S.msg = 'Spareggio! Il conduttore inserisce la frase.';
-  save(); buildBoard(true); render(); openPhrase();
+  save(); buildBoard(true); render(); autoPhraseOrModal();
 }
 
 /* ================= Azioni e telecomando ================= */
@@ -1779,7 +2145,7 @@ const ACTIONS = {
   vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
   right: solveRight, wrong: solveWrong, nextManche, finish: finishGame, tiebreak: startTiebreak,
   jollyYes, jollyNo, mysteryReveal, mysteryKeep, expressGo, expressNo,
-  buzz: i => buzz(i), lampoRight, lampoWrong, lampoEnd,
+  buzz: i => buzz(i), lampoRight, lampoWrong, lampoEnd, speedStart, speedWrong,
   final: startFinalSetup, finalNext, finalRight, finalStop,
   finalPhrases: a => applyFinalPhrases(a),
   undo, spin: spinDigital,
@@ -1798,7 +2164,7 @@ function act(name, arg){
 }
 
 async function letterClick(L){
-  if (IS_REMOTE && S && ['consonant','vowel','express'].includes(S.phase) && S.used.includes(L)){
+  if (IS_REMOTE && S && ['consonant','vowel','express','speedTurn'].includes(S.phase) && S.used.includes(L)){
     const txt = S.phase === 'express' ? `La ${L} è già stata chiamata: l'Express deraglia.` : `La ${L} è già stata chiamata. ${cur().name} perde il turno?`;
     if (!(await askConfirm('Lettera già chiamata', txt, 'Conferma'))) return;
     return act('letter', {L, confirmed: true});
@@ -1815,7 +2181,10 @@ function readSetup(){
     mysteryPrize: num($('mysteryPrize').value), expressValue: num($('expressValue').value),
     finalOn: $('finalOn').checked, finalSeconds: Math.max(10, num($('finalSeconds').value)),
     finalPrizes: $('finalPrizes').value.split(/[,;\s]+/).map(x => num(x.replace(/\./g,''))).filter(x => x > 0),
-    finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')};
+    finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,''),
+    speedSeconds: Math.max(3, num($('speedSeconds').value) || 8),
+    script: $('scriptText').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const k = l.indexOf('|'); return k >= 0 ? {cat: l.slice(0, k).trim(), txt: l.slice(k + 1).trim()} : {cat: '', txt: l}; }),
+    finalScript: (() => { const fl = $('finalScriptText').value.split('\n').map(l => l.trim()).filter(Boolean); return fl.length ? {theme: fl[0], phrases: fl.slice(1, 4)} : null; })()};
 }
 function applySetup(cfg){
   if (!cfg || !Array.isArray(cfg.names)) return;
@@ -1831,8 +2200,13 @@ function applySetup(cfg){
     mysteryPrize: n(cfg.mysteryPrize), expressValue: n(cfg.expressValue),
     finalOn: !!cfg.finalOn, finalSeconds: Math.min(300, Math.max(10, n(cfg.finalSeconds))),
     finalPrizes: prizes.length >= 3 ? prizes : DEFAULT_CFG.finalPrizes,
-    finalLetters: norm(String(cfg.finalLetters || '')).replace(/[^A-Z]/g,'')});
-  save(); buildBoard(true); render(); openPhrase();
+    finalLetters: norm(String(cfg.finalLetters || '')).replace(/[^A-Z]/g,''),
+    speedSeconds: Math.min(30, Math.max(3, n(cfg.speedSeconds) || 8)),
+    script: (Array.isArray(cfg.script) ? cfg.script : []).slice(0, 40).map(e => ({cat: String(e && e.cat || '').slice(0, 60), txt: String(e && e.txt || '').slice(0, 120)})).filter(e => validPhrase(e.txt)),
+    finalScript: cfg.finalScript && Array.isArray(cfg.finalScript.phrases) ? {theme: String(cfg.finalScript.theme || '').slice(0, 60), phrases: cfg.finalScript.phrases.slice(0, 3).map(x => String(x || '').slice(0, 120))} : null});
+  // collega i concorrenti iscritti dal telefono (stesso nome)
+  S.players.forEach(p => { const e = lobby.find(l => l.name.toLowerCase() === p.name.toLowerCase()); if (e) p.cid = e.cid; });
+  save(); buildBoard(true); render(); autoPhraseOrModal();
 }
 function applyPhrase(cat, txt){
   if (!S || S.phase !== 'phrase' || !validPhrase(txt)) return;
@@ -1842,6 +2216,93 @@ function applyPhrase(cat, txt){
 async function askNewGame(){
   if (S && !['gameOver','finalDone'].includes(S.phase) && !(await askConfirm('Nuova partita', 'La partita in corso andrà persa. Vuoi ricominciare?', 'Ricomincia'))) return;
   openSetup();
+}
+
+/* ---------- Control room: iscrizioni dei concorrenti dal telefono ---------- */
+const lobby = [];                 // sulla TV: {cid, name, online}
+let remoteLobby = [];             // sul telefono del conduttore: copia ricevuta dalla TV
+const lobbyList = () => IS_REMOTE ? remoteLobby : lobby;
+const phoneOnline = cid => !!cid && lobbyList().some(l => l.cid === cid && l.online);
+const playerUrl = code => location.origin + location.pathname + '?gioca=' + code;
+function lobbyUpsert(cid, name){
+  let e = lobby.find(l => l.cid === cid);
+  if (!e){ e = {cid, name, online: true}; lobby.push(e); Sound.ding(); } else { e.name = name; e.online = true; }
+  mergeLobbyIntoSetup(); render();
+}
+function lobbyOffline(cid){
+  const e = lobby.find(l => l.cid === cid); if (!e) return;
+  if (!S) lobby.splice(lobby.indexOf(e), 1); else e.online = false;
+  render();
+}
+let lobbyShown = new Set();
+function qrInto(id, url){
+  const el = $(id);
+  if (!url || el.dataset.url === url || typeof window.qrcode !== 'function') return;
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+  el.innerHTML = qr.createSvgTag({cellSize: 6, margin: 2, scalable: true}); el.dataset.url = url;
+}
+function renderLobby(){
+  if (IS_REMOTE || IS_PLAYER) return;
+  $('lobby').hidden = !!S;
+  if (S) return;
+  const code = Remote.code;
+  if (code){ qrInto('qrPlayers', playerUrl(code)); qrInto('qrHost', remoteUrl(code)); }
+  $('lobbyCode').textContent = code || '—';
+  const html = lobby.length ? lobby.map((l,i) => `<span class="name-chip ${l.online ? '' : 'off'} ${lobbyShown.has(l.cid) ? '' : 'in'}" style="--pc:${PLAYER_COLORS[i % PLAYER_COLORS.length]}">${esc(l.name)}</span>`).join('')
+    : '<span class="empty">Ancora nessuno: inquadrate il QR code dei concorrenti!</span>';
+  if ($('lobbyNames').dataset.html !== html){ $('lobbyNames').innerHTML = html; $('lobbyNames').dataset.html = html; }
+  lobby.forEach(l => lobbyShown.add(l.cid));
+  const ok = Remote.status === 'ready';
+  $('lobbyState').textContent = remoteConnected() ? '🎤 Il conduttore sta preparando le manche…' :
+    ok ? `In attesa del conduttore… (${lobby.length} iscritt${lobby.length === 1 ? 'o' : 'i'})` :
+    Remote.status === 'offline' || Remote.status === 'unavailable' ? 'Telefoni non disponibili: crea la partita da qui.' : 'Preparazione del collegamento…';
+  ['qrPlayers','qrHost'].forEach(id => $(id).parentElement.style.display = (ok || remoteConnected()) ? '' : 'none');
+  $('audioHint').hidden = !!(Sound.ctx && Sound.ctx.state === 'running');
+  $('lobbyLocal').hidden = remoteConnected();
+}
+
+/* ---------- Telefono del concorrente ---------- */
+const Player = {
+  cid: null, name: '', vibed: false,
+  init(){
+    this.cid = store.get('ruota-player-cid');
+    if (!this.cid){ this.cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); store.set('ruota-player-cid', this.cid); }
+    this.name = store.get('ruota-player-name') || '';
+    $('plName').value = this.name;
+    this.show(!!this.name);
+  },
+  show(main){ $('plJoin').hidden = main; $('plMain').hidden = !main; },
+  send(msg){ const c = Remote.conn; if (c && c.open){ try { c.send(msg); } catch(e){} } },
+  join(){
+    const n = $('plName').value.trim().replace(/\s+/g, ' ').slice(0, 24);
+    if (!n){ $('plErr').textContent = 'Scrivi il tuo nome.'; return; }
+    this.name = n; store.set('ruota-player-name', n); $('plErr').textContent = '';
+    this.send({type:'join', cid: this.cid, name: n});
+    this.show(true); onPlayerState(this.last || {type:'pstate', game:false, lobby:[]});
+  },
+  onOpen(){ if (this.name) this.send({type:'join', cid: this.cid, name: this.name}); },
+  buzz(){ this.send({type:'buzz'}); try { navigator.vibrate && navigator.vibrate(40); } catch(e){} }
+};
+function onPlayerState(ps){
+  if (!ps || ps.type !== 'pstate') return;
+  Player.last = ps;
+  const me = ps.game && ps.you >= 0 ? ps.players[ps.you] : null;
+  const ini = n => esc([...(n || '?')][0] || '?').toUpperCase();
+  $('plMe').style.setProperty('--pc', me ? me.color : '#8fa3d9');
+  $('plMe').innerHTML = me
+    ? `<div class="avatar" style="--pc:${me.color}">${ini(me.name)}</div><div><div style="font-weight:800">${esc(me.name)}${me.jolly ? ' <span class="jolly-badge">🃏 JOLLY</span>' : ''}</div><div class="big">${euro(me.round)}</div><div class="muted">Totale: <b>${euro(me.total)}</b></div></div>`
+    : `<div class="avatar" style="--pc:#8fa3d9">${ini(Player.name)}</div><div><div style="font-weight:800">${esc(Player.name)}</div><div class="muted">${ps.game ? 'Partita in corso: entrerai nella prossima.' : 'Sei iscritto! Aspetta che il conduttore inizi.'}</div></div>`;
+  $('plInfo').innerHTML = !ps.game ? '<div class="cat">Control room</div>Il conduttore sta preparando le manche…'
+    : `${ps.category ? `<div class="cat">${esc(ps.category)}</div>` : ''}<div>${esc(ps.msg || '')}</div>`;
+  const bz = $('plBuzz'), won = !!me && ps.buzzer === ps.you;
+  bz.disabled = !ps.canBuzz; bz.classList.toggle('win', won);
+  $('plBuzzTxt').textContent = won ? 'TOCCA A TE!' : ps.canBuzz ? 'PRENOTATI' : ps.out ? 'SEI FUORI DA QUESTA FRASE'
+    : ps.game && ps.buzzer >= 0 ? `PRENOTATO: ${ps.players[ps.buzzer].name}` : 'IL PULSANTE SI ACCENDE NELLA MANCHE LAMPO';
+  if (won && !Player.vibed){ Player.vibed = true; try { navigator.vibrate && navigator.vibrate([150, 60, 150]); } catch(e){} }
+  if (!won) Player.vibed = false;
+  $('plList').innerHTML = ps.game
+    ? ps.players.map(p => `<span class="name-chip" style="--pc:${p.color}">${esc(p.name)} · ${euro(p.total)}</span>`).join('')
+    : (ps.lobby || []).map(l => `<span class="name-chip ${l.online ? '' : 'off'}" style="--pc:${l.color}">${esc(l.name)}</span>`).join('');
 }
 
 /* ---------- Schermo sempre acceso (TV e telefono) ----------
@@ -1889,7 +2350,7 @@ const newCode = () => Array.from({length:5}, () => CODE_CHARS[Math.floor(Math.ra
 const remoteUrl = code => location.origin + location.pathname + '?telecomando=' + code;
 
 const Remote = {
-  peer: null, conns: new Set(), conn: null, status: 'off', code: null, lastSent: '', retry: null, idTries: 0,
+  peer: null, conns: new Set(), pconns: new Set(), conn: null, status: 'off', code: null, lastSent: '', retry: null, idTries: 0,
   available: () => typeof window.Peer === 'function',
 
   /* --- TV --- */
@@ -1901,9 +2362,16 @@ const Remote = {
     const peer = this.peer = new Peer(PEER_PREFIX + this.code, {debug: 0});
     peer.on('open', () => { this.idTries = 0; this.setStatus('ready'); });
     peer.on('connection', conn => {
-      conn.on('open', () => { this.conns.add(conn); onRemoteChange(); this.sendState(conn); });
-      conn.on('data', msg => this.handle(msg));
-      const drop = () => { if (this.conns.delete(conn)) onRemoteChange(); };
+      const role = conn.metadata && conn.metadata.role === 'player' ? 'player' : 'host';
+      conn.on('open', () => {
+        if (role === 'player'){ this.pconns.add(conn); this.sendPlayer(conn, true); }
+        else { this.conns.add(conn); onRemoteChange(); this.sendState(conn); }
+      });
+      conn.on('data', msg => role === 'player' ? this.handlePlayer(conn, msg) : this.handle(msg));
+      const drop = () => {
+        if (role === 'player'){ if (this.pconns.delete(conn) && conn.cid) lobbyOffline(conn.cid); }
+        else if (this.conns.delete(conn)) onRemoteChange();
+      };
       conn.on('close', drop); conn.on('error', drop);
     });
     peer.on('disconnected', () => setTimeout(() => { if (!peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500));
@@ -1925,18 +2393,56 @@ const Remote = {
     ACTIONS[msg.name](msg.arg);
     this.broadcast(true);
   },
-  payload(){ return {type:'state', state: S, busy, canUndo: history.length > 0, timer: timerShown}; },
+  /* i concorrenti possono solo iscriversi e prenotarsi: niente comandi di gioco */
+  handlePlayer(conn, msg){
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.type === 'join'){
+      const cid = String(msg.cid || '').replace(/[^a-z0-9]/gi, '').slice(0, 24);
+      const name = String(msg.name || '').trim().replace(/\s+/g, ' ').slice(0, 24);
+      if (!cid || !name) return;
+      conn.cid = cid;
+      if (S){ const i = S.players.findIndex(p => !p.cid && p.name.toLowerCase() === name.toLowerCase()); if (i >= 0){ S.players[i].cid = cid; save(); } }
+      lobbyUpsert(cid, name);
+    } else if (msg.type === 'buzz'){
+      if (!S || !conn.cid) return;
+      const i = S.players.findIndex(p => p.cid === conn.cid);
+      if (i >= 0){ Sound.ensure(); buzz(i); }
+    }
+    this.broadcast(true);
+  },
+  payload(){ return {type:'state', state: S, busy, canUndo: history.length > 0, timer: timerShown, lobby: lobby.map(l => ({cid: l.cid, name: l.name, online: l.online}))}; },
+  /* ai concorrenti arriva solo ciò che serve: mai la frase */
+  playerPayload(conn){
+    const base = {type:'pstate', lobby: lobby.map((l,k) => ({name: l.name, online: l.online, color: PLAYER_COLORS[k % PLAYER_COLORS.length]}))};
+    if (!S) return Object.assign(base, {game: false});
+    const you = conn.cid ? S.players.findIndex(p => p.cid === conn.cid) : -1;
+    const out = !!(S.lampo && you >= 0 && S.lampo.out.includes(you));
+    const txt = String(S.msg || '').replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+    return Object.assign(base, {game: true, you, phase: S.phase, current: S.current, category: S.category, msg: txt,
+      players: S.players.map(p => ({name: p.name, color: p.color, round: p.round, total: p.total, jolly: !!p.jolly})),
+      canBuzz: S.phase === 'lampo' && you >= 0 && isActive(you) && !out, out, buzzer: S.phase === 'lampoBuzz' ? S.current : -1});
+  },
   sendState(conn){ try { conn.send(this.payload()); } catch(e){} },
+  sendPlayer(conn, force){
+    const p = this.playerPayload(conn), str = JSON.stringify(p);
+    if (!force && str === conn.lastSent) return;
+    conn.lastSent = str;
+    try { if (conn.open) conn.send(p); } catch(e){}
+  },
   broadcast(force){
-    if (IS_REMOTE || !this.conns.size) return;
-    const p = this.payload(), str = JSON.stringify(p);
-    if (!force && str === this.lastSent) return;
-    this.lastSent = str;
-    this.conns.forEach(c => { try { if (c.open) c.send(p); } catch(e){} });
+    if (IS_REMOTE || IS_PLAYER) return;
+    if (this.conns.size){
+      const p = this.payload(), str = JSON.stringify(p);
+      if (force || str !== this.lastSent){
+        this.lastSent = str;
+        this.conns.forEach(c => { try { if (c.open) c.send(p); } catch(e){} });
+      }
+    }
+    this.pconns.forEach(c => this.sendPlayer(c, force));
   },
 
   /* --- Telefono --- */
-  startPhone(code){
+  startPhone(code, role = 'host'){
     this.code = code;
     if (!this.available()) { this.setStatus('unavailable'); return; }
     this.setStatus('connecting');
@@ -1950,10 +2456,10 @@ const Remote = {
         return;
       }
       if (!this.peer.open) return;
-      const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true});
+      const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true, metadata: {role}});
       const timeout = setTimeout(() => { if (!conn.open){ try { conn.close(); } catch(e){} this.later(go); } }, 9000);
-      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); });
-      conn.on('data', msg => onRemoteState(msg));
+      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); if (role === 'player') Player.onOpen(); });
+      conn.on('data', msg => role === 'player' ? onPlayerState(msg) : onRemoteState(msg));
       conn.on('close', () => { clearTimeout(timeout); if (this.conn === conn){ this.setStatus('lost'); this.later(go); } });
       conn.on('error', () => { this.setStatus('lost'); this.later(go); });
     };
@@ -1975,6 +2481,12 @@ function renderRemoteStatus(){
   const pill = $('remotePill');
   const tvText = {off:'', unavailable:'', connecting:'📱 …', offline:'📱 offline', ready: Remote.conns.size ? `📱 ${Remote.conns.size} collegat${Remote.conns.size === 1 ? 'o' : 'i'}` : '📱 Telecomando'};
   const phText = {off:'', unavailable:'Telecomando non disponibile', connecting:'Collegamento alla TV…', offline:'Rete non disponibile, riprovo…', notfound:`TV con codice ${Remote.code} non trovata, riprovo…`, lost:'Collegamento perso, riprovo…', ready:`✓ Collegato alla TV (${Remote.code})`};
+  if (IS_PLAYER){
+    const pp = $('plStatus');
+    pp.textContent = phText[Remote.status] || '';
+    pp.className = 'remote-pill ' + (Remote.status === 'ready' ? 'ok' : 'warn');
+    return;
+  }
   if (IS_REMOTE){
     pill.textContent = phText[Remote.status] || '';
     pill.className = 'remote-pill ' + (Remote.status === 'ready' ? 'ok' : 'warn');
@@ -1984,6 +2496,7 @@ function renderRemoteStatus(){
     $('remoteBtn').textContent = tvText[Remote.status] || '📱 Telecomando';
     $('remoteBtn').classList.toggle('on', Remote.conns.size > 0);
     renderRemoteModal();
+    renderLobby();
   }
 }
 function renderRemoteModal(){
@@ -2018,7 +2531,8 @@ let remoteCanUndo = false, remoteTimer = null, autoOpened = '';
 function onRemoteState(msg){
   if (!msg || msg.type !== 'state') return;
   S = msg.state; busy = !!msg.busy; remoteCanUndo = !!msg.canUndo; remoteTimer = msg.timer;
-  render();
+  remoteLobby = Array.isArray(msg.lobby) ? msg.lobby : [];
+  render(); mergeLobbyIntoSetup();
   const key = S ? `${S.phase}|${S.manche}|${S.final ? S.final.idx : ''}` : 'none';
   if (key === autoOpened) return;
   if (!S){ autoOpened = key; openSetup(); return; }
@@ -2051,6 +2565,8 @@ function renderSolution(){
 document.addEventListener('click', e => {
   const k = e.target.closest('[data-letter]'); if (k){ letterClick(k.dataset.letter); return; }
   const sg = e.target.closest('[data-seg]'); if (sg){ const v = sg.dataset.seg; act('seg', /^\d+$/.test(v) ? +v : v); return; }
+  const ea = e.target.closest('[data-eye-area]');
+  if (ea){ $(ea.dataset.eyeArea).classList.toggle('secret'); return; }
   const eye = e.target.closest('[data-eye]');
   if (eye){ const i = $(eye.dataset.eye); i.type = i.type === 'password' ? 'text' : 'password'; if (i.id === 'phraseInput') updatePreview(); return; }
   const rm = e.target.closest('[data-rm]');
@@ -2059,7 +2575,25 @@ document.addEventListener('click', e => {
   if (ac) act(ac.dataset.act, ac.dataset.arg !== undefined ? +ac.dataset.arg : undefined);
 });
 
-$('spinBtn').onclick = () => act('spin');
+/* Lancio della ruota: tocco = forza casuale, trascinamento = più veloce, più giri */
+let lastGesture = 0;
+function attachSpinGesture(el, guard){
+  let pts = [], down = false, moved = 0;
+  el.addEventListener('pointerdown', e => { if (guard && !guard()) return; down = true; moved = 0; pts = [[e.clientX, e.clientY, performance.now()]]; try { el.setPointerCapture(e.pointerId); } catch(_){} });
+  el.addEventListener('pointermove', e => { if (!down) return; const l = pts[pts.length - 1]; moved += Math.hypot(e.clientX - l[0], e.clientY - l[1]); pts.push([e.clientX, e.clientY, performance.now()]); if (pts.length > 14) pts.shift(); });
+  el.addEventListener('pointerup', () => {
+    if (!down) return; down = false; lastGesture = performance.now();
+    const now = performance.now(), recent = pts.filter(q => now - q[2] < 150);
+    let power;
+    if (moved > 14 && recent.length > 1){ const a = recent[0], b = recent[recent.length - 1]; power = Math.max(.15, Math.min(1, Math.hypot(b[0]-a[0], b[1]-a[1]) / Math.max(16, b[2]-a[2]) / 2.2)); }
+    if (el.id === 'spinBtn' && el.disabled) return;
+    act('spin', power === undefined ? {} : {power});
+  });
+  el.addEventListener('pointercancel', () => { down = false; });
+}
+attachSpinGesture($('spinBtn'));
+attachSpinGesture(document.querySelector('.wheel-box'), () => !IS_REMOTE && !remoteConnected() && mode === 'digital' && canSpinPhase() && !busy);
+$('spinBtn').onclick = () => { if (performance.now() - lastGesture < 600) return; act('spin'); };
 $('modeDigital').onclick = () => { mode = 'digital'; store.set('ruota-mode', mode); render(); };
 $('modeManual').onclick = () => { mode = 'manual'; store.set('ruota-mode', mode); render(); };
 $('undoBtn').onclick = () => act('undo');
@@ -2077,6 +2611,23 @@ $('joinBtn').onclick = () => {
   location.href = remoteUrl(c);
 };
 $('numManches').addEventListener('input', () => renderMancheTable(readMancheTable()));
+$('lobbyLocal').onclick = () => openSetup();
+$('joinPlayerBtn').onclick = () => {
+  const c = $('joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (c.length !== 5){ $('setupErr').textContent = 'Il codice della TV ha 5 caratteri.'; return; }
+  location.href = playerUrl(c);
+};
+$('scriptFill').onclick = () => {
+  const n = Math.max(1, Math.min(30, Math.round(+$('numManches').value || 1)));
+  $('scriptText').value = pickSamples(n).map(x => `${x[0]} | ${x[1]}`).join('\n');
+  if ($('finalOn').checked){ const f = pickSamples(3, true); $('finalScriptText').value = [f[0][0], ...f.map(x => x[1])].join('\n'); }
+  $('scriptErr').textContent = '';
+};
+$('plJoinBtn').onclick = () => Player.join();
+$('plName').addEventListener('keydown', e => { if (e.key === 'Enter') Player.join(); });
+$('plRename').onclick = () => Player.show(false);
+$('plBuzz').onclick = () => Player.buzz();
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { if (!IS_REMOTE && !IS_PLAYER){ Sound.ensure(); setTimeout(renderLobby, 150); } }, {passive: true}));
 $('presetTv').onclick = () => {
   $('numManches').value = TV_PRESET.length;
   renderMancheTable(TV_PRESET);
@@ -2093,13 +2644,16 @@ $('setupCancel').onclick = () => { closeModals(); if (!IS_REMOTE) openModalForPh
 $('setupStart').onclick = () => {
   const cfg = readSetup();
   if (cfg.names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
+  const bad = cfg.script.findIndex(e => !validPhrase(e.txt));
+  if (bad >= 0){ $('scriptBox').open = true; $('scriptErr').textContent = `Frasi della serata, riga ${bad + 1}: la frase manca o non entra nel tabellone.`; return; }
+  if (cfg.finalScript && (cfg.finalScript.phrases.length !== 3 || !cfg.finalScript.phrases.every(validPhrase))){ $('scriptBox').open = true; $('scriptErr').textContent = 'Gioco finale: servono il tema e 3 frasi valide, una per riga.'; return; }
   closeModals();
   act('setup', cfg);
 };
 
 $('phraseInput').addEventListener('input', updatePreview);
 $('randomPhrase').onclick = () => {
-  const [c, f] = SAMPLE[Math.floor(Math.random()*SAMPLE.length)];
+  const [[c, f]] = pickSamples(1);
   $('catInput').value = c; $('phraseInput').value = f; updatePreview();
 };
 $('phraseStart').onclick = () => {
@@ -2113,10 +2667,8 @@ $('phraseStart').onclick = () => {
 ['catInput','phraseInput'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('phraseStart').click(); }));
 
 $('finalRandom').onclick = () => {
-  const cats = [...new Set(SAMPLE.map(s => s[0]))].filter(c => SAMPLE.filter(s => s[0] === c).length >= 3);
-  const c = cats[Math.floor(Math.random() * cats.length)];
-  const picks = shuffle(SAMPLE.filter(s => s[0] === c)).slice(0, 3);
-  $('finalTheme').value = c; picks.forEach((s,k) => $('fp' + k).value = s[1]);
+  const picks = pickSamples(3, true);
+  $('finalTheme').value = picks[0][0]; picks.forEach((s,k) => $('fp' + k).value = s[1]);
   $('finalErr').textContent = '';
 };
 $('finalStart').onclick = () => {
@@ -2173,7 +2725,7 @@ setInterval(() => {
   }
 
   // Tempo per turno (manche a tempo)
-  const secs = (['turn','consonant','vowel','bonusPick','bonusSpin','express'].includes(S.phase) && spec().timer) || 0;
+  const secs = S.phase === 'speedSolve' ? S.cfg.speedSeconds : ((['turn','consonant','vowel','bonusPick','bonusSpin','express'].includes(S.phase) && spec().timer) || 0);
   if (!secs){ turnTimer.key = null; setTimerShown(null); return; }
   const key = actionCount + '|' + S.phase + '|' + S.current;
   if (key !== turnTimer.key){ turnTimer.key = key; turnTimer.left = secs * 1000; turnTimer.fired = false; }
@@ -2185,7 +2737,12 @@ setInterval(() => {
 /* ================= Avvio ================= */
 buildBulbs();
 KeepAwake.start();
-if (IS_REMOTE){
+if (IS_PLAYER){
+  document.body.classList.add('player');
+  $('playerApp').hidden = false;
+  Player.init(); renderRemoteStatus();
+  Remote.startPhone(PLAYER_CODE, 'player');
+} else if (IS_REMOTE){
   document.body.classList.add('remote');
   S = null; render(); renderRemoteStatus();
   Remote.startPhone(REMOTE_CODE);
