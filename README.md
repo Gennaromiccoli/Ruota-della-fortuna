@@ -20,6 +20,11 @@ La TV (o il PC collegato alla TV) mostra tabellone, ruota e punteggi; il telefon
 
 Il collegamento è diretto tra TV e telefono (WebRTC con PeerJS); il servizio pubblico gratuito di PeerJS serve solo a farli trovare. Serve internet su entrambi, meglio sullo stesso Wi-Fi. Se il telefono va in standby si ricollega da solo. Funziona dal sito GitHub Pages, non dall'anteprima su claude.ai.
 
+## Su Fire TV / Android TV
+- Usa un browser vero: **Silk** su Fire TV, oppure **Fully Kiosk Browser** (Fire TV e Android TV) con l'opzione "Keep Screen On" e l'indirizzo del tabellone come pagina iniziale.
+- Il tabellone chiede allo schermo di restare acceso (Wake Lock + video muto invisibile), ma alcune app con browser integrato (es. Downloader) ignorano la richiesta.
+- In più, sulla Fire TV imposta lo screensaver su "Mai".
+
 ## Regole predefinite (modificabili in "Regole avanzate")
 - **PASSA** (lo 0 della ruota): il turno passa al concorrente successivo.
 - **BANCAROTTA**: si perdono i soldi della manche **e** quelli conservati nelle manche precedenti.

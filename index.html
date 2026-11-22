@@ -1192,6 +1192,44 @@ async function askNewGame(){
   openSetup(true);
 }
 
+/* ---------- Schermo sempre acceso (TV e telefono) ----------
+   1) Wake Lock del browser, dove esiste;
+   2) in più un video muto e invisibile in loop: molti browser per TV (es. Silk su Fire TV)
+      tengono lo schermo acceso mentre un video è in riproduzione. */
+const KEEP_MP4 = 'data:video/mp4;base64,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ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0xIDh4OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MSBsb29rYWhlYWRfdGhyZWFkcz0xIHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVzPTAgd2VpZ2h0cD0wIGtleWludD0yNTAga2V5aW50X21pbj0yIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAC2WIhAU8mKAAP7+AARggBwEYIAcBGCAHARggBwAAAAZBmjgKeoABGCAHARggBwEYIAcBGCAHAAAABkGaVAKeoAEYIAcBGCAHARggBwEYIAcAAAAFQZpgEvUBGCAHARggBwEYIAcBGCAH';
+const KEEP_WEBM = 'data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQRChYECGFOAZwEAAAAAAAevEU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggGETbuMU6uEHFO7a1OsggeZ7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECfYAAAAAAAFlSua0CmrgEAAAAAAAA414EBc8WI7qF0uUkYOeycgQAitZyDdW5kiIEAhoVWX1ZQOIOBASPjg4QdzWUA4ImwgRC6gRCagQKuAQAAAAAAAFzXgQJzxYhlUDulMKYQNZyBACK1nIN1bmSIgQCGhkFfT1BVU1aqg2MuoFa7hATEtACDgQLhkZ+BAbWIQL9AAAAAAABiZIEQY6KTT3B1c0hlYWQBATgBQB8AAAAAABJUw2dA1nNzoGPAgGfImkWjh0VOQ09ERVJEh41MYXZmNjAuMTYuMTAwc3PWY8CLY8WI7qF0uUkYOexnyKFFo4dFTkNPREVSRIeUTGF2YzYwLjMxLjEwMiBsaWJ2cHhnyKFFo4hEVVJBVElPTkSHkzAwOjAwOjAyLjAwMDAwMDAwMABzc9djwItjxYhlUDulMKYQNWfIokWjh0VOQ09ERVJEh5VMYXZjNjAuMzEuMTAyIGxpYm9wdXNnyKFFo4hEVVJBVElPTkSHkzAwOjAwOjAyLjAwODAwMDAwMAAfQ7Z1RTPngQCji4IAAIAIC+Y7I6tgo6OBAACAEAIAnQEqEAAQAABHCIWFiIWEiAICAAwNYAD+/6tQgKOKggAVgAgIrLMOxqOKggApgAgIrLMOxqOKggA9gAgIrLMOxqOKggBRgAgIrLMOxqOKggBlgAgIrLMOxqOKggB5gAgIrLMOxqOKggCNgAgIrLMOxqOKggChgAgIrLMOxqOKggC1gAgIrLMOxqOKggDJgAgIrLMOxqOKggDdgAgIrLMOxqOKggDxgAgIrLMOxqOKggEFgAgIrLMOxqOKggEZgAgIrLMOxqOKggEtgAgIrLMOxqOKggFBgAgIrLMOxqOKggFVgAgIrLMOxqOKggFpgAgIrLMOxqOKggF9gAgIrLMOxqOKggGRgAgIrLMOxqOKggGlgAgIrLMOxqOKggG5gAgIrLMOxqOKggHNgAgIrLMOxqOKggHhgAgIrLMOxqOKggH1gAgIrLMOxqOVgQH0ALEBAAEQEAAYABhYL/QACAAAo4qCAgmACAissw7Go4qCAh2ACAissw7Go4qCAjGACAissw7Go4qCAkWACAissw7Go4qCAlmACAissw7Go4qCAm2ACAissw7Go4qCAoGACAissw7Go4qCApWACAissw7Go4qCAqmACAissw7Go4qCAr2ACAissw7Go4qCAtGACAissw7Go4qCAuWACAissw7Go4qCAvmACAissw7Go4qCAw2ACAissw7Go4qCAyGACAissw7Go4qCAzWACAissw7Go4qCA0mACAissw7Go4qCA12ACAissw7Go4qCA3GACAissw7Go4qCA4WACAissw7Go4qCA5mACAissw7Go4qCA62ACAissw7Go4qCA8GACAissw7Go4qCA9WACAissw7Go4qCA+mACAissw7Go5WBA+gAsQEAARAQABgAGFgv9AAIAACjioID/YAICKyzDsajioIEEYAICKyzDsajioIEJYAICKyzDsajioIEOYAICKyzDsajioIETYAICKyzDsajioIEYYAICKyzDsajioIEdYAICKyzDsajioIEiYAICKyzDsajioIEnYAICKyzDsajioIEsYAICKyzDsajioIExYAICKyzDsajioIE2YAICKyzDsajioIE7YAICKyzDsajioIFAYAICKyzDsajioIFFYAICKyzDsajioIFKYAICKyzDsajioIFPYAICKyzDsajioIFUYAICKyzDsajioIFZYAICKyzDsajioIFeYAICKyzDsajioIFjYAICKyzDsajioIFoYAICKyzDsajioIFtYAICKyzDsajioIFyYAICKyzDsajioIF3YAICKyzDsajlYEF3ACxAQABEBAAGAAYWC/0AAgAAKOKggXxgAgIrLMOxqOKggYFgAgIrLMOxqOKggYZgAgIrLMOxqOKggYtgAgIrLMOxqOKggZBgAgIrLMOxqOKggZVgAgIrLMOxqOKggZpgAgIrLMOxqOKggZ9gAgIrLMOxqOKggaRgAgIrLMOxqOKggalgAgIrLMOxqOKgga5gAgIrLMOxqOKggbNgAgIrLMOxqOKggbhgAgIrLMOxqOKggb1gAgIrLMOxqOKggcJgAgIrLMOxqOKggcdgAgIrLMOxqOKggcxgAgIrLMOxqOKggdFgAgIrLMOxqOKggdZgAgIrLMOxqOKggdtgAgIrLMOxqOKggeBgAgIrLMOxqOKggeVgAgIrLMOxqOKggepgAgIrLMOxqOKgge9gAgIrLMOxqCToYqCB9EACAissw7GdaKEAM3+YBxTu2uRu4+zgQC3iveBAfGCAmDwgRA=';
+const KeepAwake = {
+  lock: null, video: null,
+  async request(){
+    try {
+      if (!this.lock && navigator.wakeLock && document.visibilityState === 'visible'){
+        this.lock = await navigator.wakeLock.request('screen');
+        this.lock.addEventListener('release', () => { this.lock = null; });
+      }
+    } catch(e){ this.lock = null; }
+    this.playVideo();
+  },
+  playVideo(){
+    if (!this.video){
+      const v = document.createElement('video');
+      v.muted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+      v.style.cssText = 'position:fixed;right:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+      v.innerHTML = `<source src="${KEEP_MP4}" type="video/mp4"><source src="${KEEP_WEBM}" type="video/webm">`;
+      document.body.appendChild(v);
+      this.video = v;
+    }
+    if (this.video.paused){ const pr = this.video.play(); pr?.catch?.(() => {}); }
+  },
+  start(){
+    const again = () => this.request();
+    again();
+    ['click','keydown','touchend'].forEach(ev => document.addEventListener(ev, again, {passive: true}));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) again(); });
+    setInterval(again, 30000);
+  }
+};
+
 /* ---------- Collegamento TV ⇄ telefono (WebRTC tramite PeerJS) ---------- */
 const PEER_PREFIX = 'tabellone-ruota-v1-';
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -1199,7 +1237,7 @@ const newCode = () => Array.from({length:5}, () => CODE_CHARS[Math.floor(Math.ra
 const remoteUrl = code => location.origin + location.pathname + '?telecomando=' + code;
 
 const Remote = {
-  peer: null, conns: new Set(), conn: null, status: 'off', code: null, lastSent: '', retry: null, idTries: 0, wake: null,
+  peer: null, conns: new Set(), conn: null, status: 'off', code: null, lastSent: '', retry: null, idTries: 0,
   available: () => typeof window.Peer === 'function',
 
   /* --- TV --- */
@@ -1265,21 +1303,20 @@ const Remote = {
       if (!this.peer.open) return;
       const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true});
       const timeout = setTimeout(() => { if (!conn.open){ try { conn.close(); } catch(e){} this.later(go); } }, 9000);
-      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); this.keepAwake(); });
+      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); });
       conn.on('data', msg => onRemoteState(msg));
       conn.on('close', () => { clearTimeout(timeout); if (this.conn === conn){ this.setStatus('lost'); this.later(go); } });
       conn.on('error', () => { this.setStatus('lost'); this.later(go); });
     };
     this.reconnect = go;
     go();
-    document.addEventListener('visibilitychange', () => { if (!document.hidden){ go(); this.keepAwake(); } });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) go(); });
   },
   later(fn){ clearTimeout(this.retry); this.retry = setTimeout(fn, 2500); },
   send(name, arg){
     if (!this.conn || !this.conn.open){ this.setStatus('lost'); this.reconnect?.(); return; }
     try { this.conn.send({type:'act', name, arg}); } catch(e){ this.setStatus('lost'); }
   },
-  async keepAwake(){ try { if (!this.wake && navigator.wakeLock) { this.wake = await navigator.wakeLock.request('screen'); this.wake.addEventListener('release', () => this.wake = null); } } catch(e){} },
 
   setStatus(s){ this.status = s; renderRemoteStatus(); }
 };
@@ -1453,6 +1490,7 @@ setInterval(() => {
 
 /* ================= Avvio ================= */
 buildWheel();
+KeepAwake.start();
 if (IS_REMOTE){
   document.body.classList.add('remote');
   S = null; render(); renderRemoteStatus();
@@ -1467,7 +1505,7 @@ if (IS_REMOTE){
 }
 
 // API di test (solo per verifica automatica)
-window.__ruota = { layoutPhrase, get state(){ return S; }, remote: Remote };
+window.__ruota = { layoutPhrase, get state(){ return S; }, remote: Remote, keepAwake: KeepAwake };
 })();
 </script>
 </body>
