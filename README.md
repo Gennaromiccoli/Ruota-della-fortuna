@@ -25,16 +25,29 @@ Il collegamento è diretto tra TV e telefono (WebRTC con PeerJS); il servizio pu
 - Il tabellone chiede allo schermo di restare acceso (Wake Lock + video muto invisibile), ma alcune app con browser integrato (es. Downloader) ignorano la richiesta.
 - In più, sulla Fire TV imposta lo screensaver su "Mai".
 
-## Regole predefinite (modificabili in "Regole avanzate")
+## Regole predefinite (modificabili in "Nuova partita")
 - **PASSA** (lo 0 della ruota): il turno passa al concorrente successivo.
 - **BANCAROTTA**: si perdono i soldi della manche **e** quelli conservati nelle manche precedenti.
-- **BONUS**: il concorrente chiama una consonante e poi gira la ruota: la consonante vale il valore uscito e se ne chiama subito un'altra allo stesso valore. In quel giro BANCAROTTA, PASSA e BONUS non contano: si rigira. La seconda consonante segue le regole normali (se non c'è, il turno passa).
+- **BONUS**: si chiama una consonante, poi si gira: la consonante vale il valore uscito e se ne chiama subito un'altra allo stesso valore. In quel giro gli spicchi senza valore non contano: si rigira.
 - Chi risolve incassa i soldi della manche + **1000 €**; gli altri perdono i soldi della manche.
 - Lettera già chiamata, consonante/vocale assente o soluzione sbagliata → turno al successivo.
 - A fine partita vince chi ha il totale più alto; in caso di parità si può giocare una manche di spareggio.
 
-## Manche speciali e gioco finale (in "Nuova partita")
-- Per ogni manche: valori della ruota normali, doppi o tripli, e un eventuale tempo massimo per turno (allo scadere il turno passa).
-- **Gioco finale** (opzionale): il vincitore riceve le lettere regalate (default R S T L N E), sceglie 3 consonanti e 1 vocale e ha pochi secondi per risolvere. Premio configurabile.
+## Manche speciali (ispirate alla trasmissione attuale)
+Ogni manche si configura a parte; il pulsante **📺 Scaletta stile TV** prepara 6 manche già pronte.
+- **Manche lampo**: niente ruota, le lettere si accendono da sole; chi si prenota (tocca il suo nome) e indovina vince un premio fisso. Chi sbaglia resta fuori da quella frase.
+- **🃏 Jolly**: spicchio digitale; chi lo prende e chiama una consonante giusta conserva il Jolly e lo può usare una volta contro BANCAROTTA, PASSA o un errore.
+- **❓ Mistero**: dopo una consonante giusta si sceglie se scoprirlo: premio alto (10.000 € di default) oppure bancarotta.
+- **⚡ Express**: dopo una consonante giusta si può salire sull'Express: consonanti a valore fisso e vocali senza girare, finché si risolve; un errore fa perdere i soldi della manche.
+- Per ogni manche anche valori ×2/×3 e tempo massimo per turno.
+- Jolly, Mistero ed Express compaiono sulla ruota digitale; con la ruota manuale hanno i loro pulsanti.
+
+## Gioco finale delle 3 buste
+Il vincitore affronta tre frasi con un tema comune e un solo cronometro (60 secondi di default):
+1. **Busta 1**: lettere regalate (R S T L N E) + 3 consonanti e 1 vocale scelte dal concorrente.
+2. **Busta 2**: si vedono la prima e l'ultima lettera di ogni parola.
+3. **Busta 3**: le lettere compaiono da sole una alla volta.
+
+"Stop" passa alla busta successiva. Ogni frase risolta apre una busta verde con un premio nascosto (estratto tra quelli indicati, fino a 200.000 €); le altre diventano rosse e mostrano il premio perso.
 
 **↶ Annulla** (o Ctrl+Z) torna indietro di un'azione in caso di errore. La partita viene salvata nel browser e si riprende ricaricando la pagina.

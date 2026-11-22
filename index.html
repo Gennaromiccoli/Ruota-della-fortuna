@@ -8,19 +8,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
+/* Studio TV: blu notte con luci dorate; tabellone verde/bianco; ruota fedele a quella fisica */
 :root{
   --bg1:#030a2b; --bg2:#0a2a7a; --panel:#0b1d5c; --panel2:#102a7d;
   --gold:#ffd34d; --gold2:#f5a623; --text:#f4f7ff; --muted:#a9b8e8;
   --tile-empty1:#13896d; --tile-empty2:#0a5c49; --tile:#f8f8f2; --lit:#2f7bff;
-  --blue:#7cc6ee; --orange:#f39a2b; --green:#a8d36b; --pink:#f2b6d8; --white:#f4f4ee; --yellow:#f7df45; --black:#141414;
-  --danger:#e5484d; --ok:#2fbf71;
+  --danger:#e5484d; --ok:#2fbf71; --purple:#7b3fe4; --express:#0f9d58;
   --display:'Anton', Impact, 'Arial Black', sans-serif;
   --ui:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-html{background:#030a2b;color-scheme:dark}
+html{background:#030a2b}
 body{
+  position:relative;z-index:0;min-height:100vh;overflow-x:hidden;
   font-family:var(--ui); color:var(--text);
   background:
     radial-gradient(ellipse at 20% -10%, rgba(80,140,255,.45), transparent 55%),
@@ -29,68 +31,122 @@ body{
     linear-gradient(180deg,var(--bg2),var(--bg1));
   background-attachment:fixed;
 }
+body::before{content:"";position:fixed;inset:-25%;pointer-events:none;z-index:-1;
+  background:
+    conic-gradient(from 200deg at 25% 0%, transparent 0 40deg, rgba(120,170,255,.16) 48deg, transparent 60deg 360deg),
+    conic-gradient(from 140deg at 75% 0%, transparent 0 40deg, rgba(255,120,220,.12) 48deg, transparent 60deg 360deg);
+  animation:spotlights 14s ease-in-out infinite alternate}
+@keyframes spotlights{to{transform:translateX(4%) rotate(4deg)}}
 button{font-family:inherit;cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.38}
+[hidden]{display:none!important}
 
 /* ---------- header ---------- */
 header{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
-.logo{font-family:var(--display);font-size:clamp(22px,3vw,34px);letter-spacing:1px;
-  background:linear-gradient(180deg,#fff6c8,var(--gold) 45%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;
+.logo{font-family:var(--display);font-size:clamp(22px,3vw,36px);letter-spacing:1px;
+  background:linear-gradient(100deg,#fff6c8 0%,var(--gold) 30%,#fff 45%,var(--gold) 60%,var(--gold2) 100%);background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite;
   filter:drop-shadow(0 2px 0 #7a4b00) drop-shadow(0 0 12px rgba(255,200,60,.35))}
+@keyframes shimmer{from{background-position:100% 0}to{background-position:-150% 0}}
 .manche-badge{font-family:var(--display);font-size:18px;letter-spacing:1px;padding:4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,211,77,.5);color:var(--gold)}
 .spacer{flex:1}
 .hbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600}
 .hbtn:hover:not(:disabled){background:rgba(255,255,255,.16)}
+#remoteBtn.on{border-color:var(--ok);color:#b9ffd6}
+.remote-pill{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(229,72,77,.25);border:1px solid rgba(229,72,77,.6)}
+.remote-pill.ok{background:rgba(47,191,113,.2);border-color:rgba(47,191,113,.6)}
 
 /* ---------- players ---------- */
-#players{display:flex;gap:10px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:thin}
-.pcard{flex:1 0 150px;max-width:260px;position:relative;border-radius:14px;padding:10px 12px 10px 16px;
-  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:2px solid rgba(255,255,255,.12);overflow:hidden;transition:transform .25s, border-color .25s, box-shadow .25s}
-.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--pc)}
+#players{display:flex;gap:10px;padding:4px 16px 12px;overflow-x:auto;scrollbar-width:thin}
+.pcard{flex:1 0 170px;max-width:280px;position:relative;border-radius:16px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:0 10px;align-items:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border:2px solid rgba(255,255,255,.12);transition:transform .3s, border-color .3s, opacity .3s}
+.avatar{grid-row:span 3;width:48px;height:48px;border-radius:50%;background:var(--pc);color:#0b0b20;font-family:var(--display);font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,255,255,.25), 0 4px 10px rgba(0,0,0,.4)}
 .pcard .pname{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard .pround{font-family:var(--display);font-size:26px;letter-spacing:.5px;line-height:1.1;margin-top:2px}
+.pcard .pround{font-family:var(--display);font-size:28px;letter-spacing:.5px;line-height:1.1;font-variant-numeric:tabular-nums}
 .pcard .ptotal{font-size:13px;color:var(--muted)}
 .pcard .ptotal b{color:var(--text)}
-.pcard.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,211,77,.25),0 0 28px rgba(255,211,77,.35);transform:translateY(-2px)}
-.pcard.active .pname::after{content:"  ◀ di turno";color:var(--gold);font-size:12px;font-weight:600}
+.pcard.active{border-color:var(--gold);transform:translateY(-3px);animation:spot 1.4s ease-in-out infinite alternate}
+@keyframes spot{from{box-shadow:0 0 0 3px rgba(255,211,77,.2),0 0 18px rgba(255,211,77,.25)}to{box-shadow:0 0 0 3px rgba(255,211,77,.5),0 0 44px rgba(255,211,77,.6)}}
+.pcard.active .avatar{animation:bob 1.4s ease-in-out infinite alternate}
+@keyframes bob{to{transform:scale(1.08)}}
+.pcard .turn-tag{position:absolute;top:-10px;right:10px;font-size:11px;font-weight:800;letter-spacing:1px;background:var(--gold);color:#1a1200;padding:2px 8px;border-radius:999px;display:none}
+.pcard.active .turn-tag{display:block}
 .pcard.out{opacity:.35}
+.pcard.buzzable{cursor:pointer}
+.pcard.buzzable:hover{border-color:#8fc1ff}
+.jolly-badge{display:inline-block;margin-left:6px;font-size:12px;font-weight:800;padding:1px 7px;border-radius:999px;background:var(--purple);color:#fff;vertical-align:middle;box-shadow:0 0 10px rgba(123,63,228,.8)}
 
 /* ---------- stage ---------- */
-.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:16px;padding:0 16px 16px;align-items:start}
-@media (max-width:980px){.stage{grid-template-columns:minmax(0,1fr)}}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,30vw);gap:16px;padding:0 16px 16px;align-items:start}
+@media (max-width:700px), (orientation:portrait) and (max-width:1000px){.stage{grid-template-columns:minmax(0,1fr)}}
+main{min-width:0}
 
-.board-wrap{position:relative;border-radius:22px;padding:clamp(8px,1.6vw,18px);
-  background:linear-gradient(180deg,#0d1f63,#06113d);box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.08)}
-.board-wrap::before{content:"";position:absolute;inset:4px;border-radius:18px;border:5px dotted var(--gold);opacity:.85;pointer-events:none;animation:marquee 1.2s steps(2) infinite}
-@keyframes marquee{50%{border-color:#fff3b0;opacity:1}}
-#board{container-type:inline-size;display:grid;grid-template-columns:repeat(14,1fr);gap:clamp(2px,.5vw,6px);padding:clamp(6px,1.2vw,14px)}
+.board-wrap{position:relative;border-radius:22px;padding:clamp(14px,2vw,24px);
+  background:radial-gradient(ellipse at 50% 0%, #17307f, #06113d 70%);box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 40px rgba(0,0,0,.5)}
+.bulbs{position:absolute;inset:0;pointer-events:none}
+.bulb{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#ffe9a0;box-shadow:0 0 8px 2px rgba(255,210,80,.85);opacity:.25;animation:bulb 1.6s linear infinite}
+@keyframes bulb{0%,100%{opacity:.22}8%{opacity:1}22%{opacity:.5}}
+body.celebrate .bulb{animation-duration:.5s}
+#board{container-type:inline-size;display:grid;grid-template-columns:repeat(14,1fr);gap:clamp(2px,.5vw,6px);perspective:900px}
 .tile{aspect-ratio:3/4;border-radius:clamp(2px,.5cqw,6px);display:flex;align-items:center;justify-content:center;
   font-family:var(--display);font-size:clamp(14px,5.2cqw,64px);line-height:1;color:#0b0b0b;position:relative;user-select:none;transition:background .3s, box-shadow .3s}
 .tile.off{visibility:hidden}
 .tile.empty{background:linear-gradient(180deg,var(--tile-empty1),var(--tile-empty2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), inset 0 -3px 0 rgba(0,0,0,.25)}
-.tile.letter,.tile.punct{background:var(--tile);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.2)}
-.tile.letter span{opacity:0;transform:scale(.4);transition:opacity .25s,transform .25s}
-.tile.letter.shown span,.tile.punct span{opacity:1;transform:none}
-.tile.lit{background:var(--lit)!important;box-shadow:0 0 18px 4px rgba(80,150,255,.9), inset 0 0 0 2px #bfe0ff!important}
+.tile.letter,.tile.punct{background:linear-gradient(180deg,#ffffff,#e9e9e0);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.2)}
+.tile.letter span{opacity:0}
+.tile.letter.shown span,.tile.punct span{opacity:1}
+.tile.letter.shown span{display:inline-block;animation:flipIn .5s cubic-bezier(.2,1.3,.4,1)}
+.tile.letter.shown.instant span{animation:none}
+@keyframes flipIn{from{transform:rotateY(90deg) scale(.7);opacity:0}to{transform:none;opacity:1}}
+.tile.lit{background:radial-gradient(circle,#6fb0ff,var(--lit))!important;box-shadow:0 0 22px 6px rgba(80,150,255,.9), inset 0 0 0 2px #bfe0ff!important;animation:litPulse .35s ease-in-out infinite alternate}
+@keyframes litPulse{to{filter:brightness(1.35)}}
 .tile.lit span{opacity:0!important}
 
-.category{margin:12px auto 0;max-width:92%;text-align:center;font-family:var(--display);letter-spacing:2px;
-  font-size:clamp(18px,2.4vw,30px);padding:8px 22px;border-radius:999px;color:#1b1300;
-  background:linear-gradient(180deg,#fff2a8,var(--gold) 50%,var(--gold2));box-shadow:0 6px 18px rgba(0,0,0,.35);text-transform:uppercase;min-height:1.6em}
-.category small{font-family:var(--ui);font-weight:800;font-size:.5em;letter-spacing:1px;opacity:.6;margin-right:10px;vertical-align:middle}
+.category{position:relative;margin:14px auto 0;max-width:94%;text-align:center;font-family:var(--display);letter-spacing:2px;
+  font-size:clamp(20px,2.8vw,40px);padding:8px 28px;border-radius:999px;color:#1b1300;
+  background:linear-gradient(180deg,#fff2a8,var(--gold) 50%,var(--gold2));box-shadow:0 6px 18px rgba(0,0,0,.35), 0 0 30px rgba(255,200,60,.25);text-transform:uppercase;min-height:1.6em}
+.category small{font-family:var(--ui);font-weight:800;font-size:.42em;letter-spacing:2px;opacity:.6;margin-right:12px;vertical-align:middle}
+.category.pop{animation:catPop .8s cubic-bezier(.2,1.5,.4,1)}
+@keyframes catPop{from{transform:scale(.5) translateY(14px);opacity:0}}
+
+/* ---------- buste del gioco finale ---------- */
+#envelopes{display:flex;gap:14px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.env{position:relative;width:clamp(120px,24%,230px);aspect-ratio:1.55;border-radius:14px;overflow:hidden;
+  background:linear-gradient(160deg,#fbf3d6,#e2cf92);color:#3a2a00;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  box-shadow:0 10px 24px rgba(0,0,0,.45);font-family:var(--display);transition:transform .4s}
+.env::before{content:"";position:absolute;inset:0 0 45% 0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.02));clip-path:polygon(0 0,100% 0,50% 100%)}
+.env .n{font-size:clamp(18px,2.2vw,30px);letter-spacing:1px;position:relative}
+.env .t{font-family:var(--ui);font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.75;position:relative;text-align:center;padding:0 6px}
+.env .p{font-size:clamp(18px,2vw,28px);position:relative}
+.env .ic{position:absolute;top:6px;right:10px;font-size:22px}
+.env.active{transform:translateY(-6px) scale(1.04);outline:4px solid var(--gold);animation:envGlow .9s ease-in-out infinite alternate}
+@keyframes envGlow{to{box-shadow:0 0 36px rgba(255,211,77,.8)}}
+.env.won{background:linear-gradient(160deg,#6cf0a6,#1f9d5a);color:#fff;animation:envFlip .6s}
+.env.lost{background:linear-gradient(160deg,#ff9295,#c9302c);color:#fff;animation:envFlip .6s}
+.env.lost .p{text-decoration:line-through;opacity:.85}
+@keyframes envFlip{from{transform:rotateY(90deg)}}
 
 .panel{background:linear-gradient(180deg,rgba(16,42,125,.85),rgba(11,29,92,.85));border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
-#msg{font-size:clamp(16px,1.8vw,21px);font-weight:600;min-height:2.6em;line-height:1.35}
-#msg .big{margin-right:6px}
-#msg .big{font-family:var(--display);letter-spacing:1px;color:var(--gold)}
+.msgrow{display:flex;gap:14px;align-items:center}
+#msg{flex:1;min-width:0;font-size:clamp(16px,1.8vw,22px);font-weight:600;min-height:2.6em;line-height:1.35}
+#msg.msgIn{animation:msgIn .45s ease-out}
+@keyframes msgIn{from{transform:translateY(8px);opacity:0}}
+#msg .big{font-family:var(--display);letter-spacing:1px;color:var(--gold);margin-right:6px}
+#msg .red{color:#ff6b6f}
+.timer{flex:none;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:34px;color:var(--gold);border:4px solid var(--gold);background:rgba(0,0,0,.25);font-variant-numeric:tabular-nums;box-shadow:0 0 20px rgba(255,211,77,.3)}
+.timer.warn{color:#fff;border-color:var(--danger);background:rgba(229,72,77,.35);animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.1)}}
 #actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
 .btn{border:none;border-radius:12px;padding:12px 18px;font-weight:800;font-size:16px;color:#1a1200;
   background:linear-gradient(180deg,#fff2a8,var(--gold) 55%,var(--gold2));box-shadow:0 4px 0 #8a5a00,0 8px 16px rgba(0,0,0,.3);transition:transform .08s}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #8a5a00}
+.btn:focus-visible,.key:focus-visible,.seg-btn:focus-visible,.hbtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .btn.blue{color:#fff;background:linear-gradient(180deg,#5aa0ff,#2a62e0);box-shadow:0 4px 0 #173a8f,0 8px 16px rgba(0,0,0,.3)}
 .btn.green{color:#fff;background:linear-gradient(180deg,#4fdc8f,#1f9d5a);box-shadow:0 4px 0 #0f5c33,0 8px 16px rgba(0,0,0,.3)}
 .btn.red{color:#fff;background:linear-gradient(180deg,#ff6b6f,#c9302c);box-shadow:0 4px 0 #7a1714,0 8px 16px rgba(0,0,0,.3)}
+.btn.purple{color:#fff;background:linear-gradient(180deg,#a77bff,var(--purple));box-shadow:0 4px 0 #3f1d85,0 8px 16px rgba(0,0,0,.3)}
 .btn.ghost{color:var(--text);background:rgba(255,255,255,.08);box-shadow:none;border:1px solid rgba(255,255,255,.2);font-weight:600}
+.btn.buzz{color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.05));border:2px solid var(--pc);box-shadow:0 4px 0 rgba(0,0,0,.4)}
 
 #keyboard{margin-top:14px;display:grid;gap:6px}
 .krow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
@@ -100,39 +156,69 @@ header{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap
 .key.vowel{background:#ffe9a6}
 .key.used{background:#3a4677;color:#7f8bb8;box-shadow:none;text-decoration:line-through}
 .key.hot:not(:disabled){outline:3px solid var(--gold);outline-offset:1px}
+.key.picked{background:var(--gold);color:#1a1200;outline:3px solid #fff}
 
 /* ---------- wheel ---------- */
 .wheel-panel{display:flex;flex-direction:column;align-items:center;gap:12px}
 .mode-toggle{display:flex;background:rgba(0,0,0,.25);border-radius:999px;padding:4px;gap:4px}
-.mode-toggle button{border:none;background:transparent;color:var(--muted);padding:8px 16px;border-radius:999px;font-weight:800;font-size:14px}
+.mode-toggle button{border:none;background:transparent;color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:800;font-size:14px}
 .mode-toggle button.on{background:var(--gold);color:#1a1200}
-.wheel-box{position:relative;width:100%;max-width:380px;aspect-ratio:1}
+.wheel-box{position:relative;width:100%;max-width:420px;aspect-ratio:1;border-radius:50%;box-shadow:0 0 70px rgba(90,160,255,.35)}
 #wheelRot{position:absolute;inset:0;will-change:transform}
 #wheelRot svg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.5))}
-.pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;z-index:2;
-  border-left:16px solid transparent;border-right:16px solid transparent;border-top:34px solid #e5484d;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
-.pointer::after{content:"";position:absolute;left:-7px;top:-32px;width:14px;height:14px;border-radius:50%;background:var(--gold)}
+.wb{fill:#a8841e;animation:wb 1s steps(1) infinite}
+.wb.o{animation-delay:.5s}
+@keyframes wb{50%{fill:#fff3a8}}
+.pointer{position:absolute;left:50%;top:-8px;transform:translateX(-50%);transform-origin:50% 0;width:0;height:0;z-index:2;transition:transform .06s;
+  border-left:17px solid transparent;border-right:17px solid transparent;border-top:36px solid #e5484d;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
+.pointer.tick{transform:translateX(-50%) rotate(-16deg)}
+.pointer::after{content:"";position:absolute;left:-7px;top:-34px;width:14px;height:14px;border-radius:50%;background:var(--gold)}
+#wheelResult{font-family:var(--display);font-size:clamp(20px,2.4vw,32px);letter-spacing:1px;min-height:1.3em;text-align:center}
+#wheelResult.pop{animation:catPop .6s cubic-bezier(.2,1.5,.4,1)}
 #spinBtn{font-size:20px;padding:14px 30px;font-family:var(--display);letter-spacing:1.5px}
 #manualGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
-.seg-btn{border:none;border-radius:10px;padding:12px 4px;font-family:var(--display);font-size:20px;letter-spacing:.5px;color:#111;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.seg-btn{border:none;border-radius:10px;padding:12px 4px;font-family:var(--display);font-size:19px;letter-spacing:.5px;color:#111;box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .seg-btn.wide{grid-column:span 2;font-size:17px}
 .seg-btn:active:not(:disabled){transform:translateY(2px)}
 .hint{font-size:12.5px;color:var(--muted);text-align:center}
 
+/* ---------- effetti a tutto schermo (solo TV) ---------- */
+.splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:70;opacity:0;background:radial-gradient(circle, rgba(2,6,25,.6), rgba(2,6,25,.3))}
+.splash.show{animation:splashFade var(--dur,1.9s) ease forwards}
+@keyframes splashFade{0%{opacity:0}7%{opacity:1}82%{opacity:1}100%{opacity:0}}
+.splash-inner{text-align:center;padding:30px 60px;border-radius:40px;background:radial-gradient(ellipse at center, rgba(2,6,25,.78) 30%, rgba(2,6,25,0) 72%)}
+.splash.show .splash-inner{animation:splashPop var(--dur,1.9s) cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes splashPop{0%{transform:scale(.3) rotate(-5deg)}12%{transform:scale(1.08)}20%{transform:scale(1)}85%{transform:scale(1)}100%{transform:scale(1.2)}}
+.splash.flip .splash-big{animation:flipIn .6s cubic-bezier(.2,1.3,.4,1)}
+.splash-big{font-family:var(--display);font-size:clamp(54px,11vw,170px);letter-spacing:3px;line-height:1;color:var(--gold);text-shadow:0 6px 0 #7a4b00,0 0 40px rgba(255,200,60,.6)}
+.splash-sub{font-family:var(--display);font-size:clamp(20px,3vw,46px);letter-spacing:2px;margin-top:12px;color:#fff;text-shadow:0 3px 12px #000}
+.splash.k-bancarotta,.splash.k-mystery-lose,.splash.k-time,.splash.k-busta-lose{background:radial-gradient(circle, rgba(229,72,77,.35), transparent 65%)}
+.k-bancarotta .splash-big,.k-mystery-lose .splash-big,.k-time .splash-big,.k-busta-lose .splash-big{color:#fff;text-shadow:0 6px 0 #5a0000,0 0 60px rgba(255,40,40,.95)}
+.k-passa .splash-big,.k-miss .splash-big{color:#e8f0ff;text-shadow:0 6px 0 #1b2c66,0 0 40px rgba(140,180,255,.7)}
+.k-bonus .splash-big{background:linear-gradient(90deg,#7cc6ee,#f7df45,#f39a2b,#a8d36b);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 6px 0 #333)}
+.k-jolly .splash-big,.k-mistero .splash-big,.k-mystery-win .splash-big{color:#e7d7ff;text-shadow:0 6px 0 #3f1d85,0 0 60px rgba(160,100,255,.95)}
+.splash.k-jolly,.splash.k-mistero{background:radial-gradient(circle, rgba(123,63,228,.3), transparent 65%)}
+.k-express .splash-big,.k-busta-win .splash-big{color:#d6ffe6;text-shadow:0 6px 0 #0a5a32,0 0 60px rgba(40,220,120,.9)}
+.splash.k-express,.splash.k-busta-win{background:radial-gradient(circle, rgba(15,157,88,.3), transparent 65%)}
+.k-buzz .splash-big{color:#dff0ff;text-shadow:0 6px 0 #173a8f,0 0 60px rgba(90,160,255,.95)}
+.shake{animation:shake .55s}
+@keyframes shake{15%{transform:translateX(-14px)}30%{transform:translateX(12px)}45%{transform:translateX(-8px)}60%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
 /* ---------- modal ---------- */
 .modal-bg{position:fixed;inset:0;background:rgba(2,6,25,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal-bg.open{display:flex}
-.modal{width:min(620px,100%);max-height:calc(100vh - 32px);overflow:auto;background:linear-gradient(180deg,#14318f,#0b1d5c);border:2px solid rgba(255,211,77,.6);border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal{width:min(680px,100%);max-height:calc(100vh - 32px);overflow:auto;background:linear-gradient(180deg,#14318f,#0b1d5c);border:2px solid rgba(255,211,77,.6);border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .modal h2{font-family:var(--display);letter-spacing:1px;font-size:28px;margin:0 0 12px;color:var(--gold)}
 .modal label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px;color:var(--muted)}
 .modal input[type=text],.modal input[type=password],.modal input[type=number]{width:100%;padding:11px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:var(--text);font-size:17px;font-family:inherit}
-.modal input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.modal input:focus,.modal select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.modal select{padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#0d235f;color:var(--text);font-size:14px;font-family:inherit}
 .row{display:flex;gap:8px;align-items:center}
-.row > input{flex:1}
+.row > input{flex:1;min-width:0}
 .prow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .prow .dot{width:14px;height:14px;border-radius:50%;flex:none}
-.prow input{flex:1}
-.xbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--text);border-radius:8px;width:38px;height:40px;font-size:18px}
+.prow input{flex:1;min-width:0}
+.xbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--text);border-radius:8px;width:38px;height:40px;font-size:18px;flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 @media (max-width:520px){.grid2{grid-template-columns:1fr}}
 .check{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14px;color:var(--text)}
@@ -140,35 +226,38 @@ header{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap
 .mfoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
 details{margin-top:14px;background:rgba(0,0,0,.18);border-radius:12px;padding:8px 12px}
 summary{cursor:pointer;font-weight:800}
+.mrow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.mrow .ml{font-weight:800;min-width:76px}
+.chip{display:inline-flex!important;align-items:center;gap:5px;margin:0!important;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-size:13px!important;color:var(--text)!important;cursor:pointer}
+.chip:has(input:checked){background:rgba(255,211,77,.2);border-color:var(--gold)}
+.chip input{margin:0}
 #preview{display:grid;grid-template-columns:repeat(14,1fr);gap:2px;margin-top:10px;container-type:inline-size}
 #preview .tile{font-size:4.6cqw}
 .standings{width:100%;border-collapse:collapse;margin-top:8px}
 .standings td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.1);font-size:16px}
-.standings td:last-child{text-align:right;font-family:var(--display);font-size:20px;letter-spacing:.5px}
+.standings td:last-child{text-align:right;font-family:var(--display);font-size:20px;letter-spacing:.5px;white-space:nowrap}
 .standings tr.top td{color:var(--gold)}
+.standings small{color:var(--muted);font-size:12px}
 .trophy{font-size:56px;text-align:center}
-[hidden]{display:none!important}
-.msgrow{display:flex;gap:14px;align-items:center}
-.msgrow #msg{flex:1;min-width:0}
-.timer{flex:none;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:32px;color:var(--gold);border:4px solid var(--gold);background:rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
-.timer.warn{color:#fff;border-color:var(--danger);background:rgba(229,72,77,.35);animation:pulse .5s ease-in-out infinite alternate}
-@keyframes pulse{to{transform:scale(1.08)}}
-.mtable{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center;margin-top:10px}
-.mtable .mh{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.mtable .ml{font-weight:800}
-.modal select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#0d235f;color:var(--text);font-size:15px;font-family:inherit}
-.key.picked{background:var(--gold);color:#1a1200;outline:3px solid #fff}
-.mancheTag{font-family:var(--ui);font-weight:800;font-size:12px;letter-spacing:.5px;padding:3px 9px;border-radius:999px;background:var(--danger);color:#fff;margin-left:6px;vertical-align:middle}
-#remoteBtn.on{border-color:var(--ok);color:#b9ffd6}
-.remote-pill{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(229,72,77,.25);border:1px solid rgba(229,72,77,.6)}
-.remote-pill.ok{background:rgba(47,191,113,.2);border-color:rgba(47,191,113,.6)}
+.solution{font-family:var(--display);font-size:22px;letter-spacing:1px;text-align:center;background:rgba(0,0,0,.2);padding:10px;border-radius:12px;margin:6px 0 4px}
 .remote-invite{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:rgba(90,160,255,.15);border:1px solid rgba(90,160,255,.4);border-radius:14px;padding:12px;margin-bottom:6px}
 .qr{background:#fff;border-radius:16px;padding:10px;width:min(260px,70vw);margin:0 auto}
 .qr svg{display:block;width:100%;height:auto}
 .code-label{margin-top:12px;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .code-big{font-family:var(--display);font-size:44px;letter-spacing:8px;color:var(--gold)}
+
+/* ---------- TV con telefono collegato: solo spettacolo ---------- */
+body.tvmode #actions,body.tvmode .mode-toggle,body.tvmode #spinBtn,body.tvmode #manualGrid,body.tvmode #wheelHint,body.tvmode #undoBtn,body.tvmode #newBtn{display:none!important}
+body.tvmode .key{pointer-events:none;width:clamp(26px,2.6vw,38px);height:clamp(32px,3.2vw,44px);font-size:clamp(15px,1.6vw,20px)}
+body.tvmode #msg{font-size:clamp(20px,2.3vw,32px)}
+body.tvmode .pcard{cursor:default}
+body.tvmode #timer{position:fixed;right:28px;bottom:28px;width:clamp(96px,10vw,140px);height:clamp(96px,10vw,140px);font-size:clamp(44px,5vw,68px);border-width:6px;z-index:40;background:rgba(3,10,43,.85)}
+body.tvmode main{max-width:min(100%,118vh)}
+body.remote.nowheel .wheel-panel{display:none!important}
+
+/* ---------- telefono (telecomando) ---------- */
 .solution-box{display:none}
-body.remote .tv-only,body.remote .board-wrap,body.remote .wheel-box,body.remote #category,body.remote #fsBtn,body.remote #soundBtn,body.remote #remoteBtn{display:none!important}
+body.remote .tv-only,body.remote .board-wrap,body.remote .wheel-box,body.remote #category,body.remote #fsBtn,body.remote #soundBtn,body.remote #remoteBtn,body.remote .bulbs{display:none!important}
 body.remote .logo{font-size:18px}
 body.remote .stage{display:flex;flex-direction:column;gap:12px}
 body.remote .wheel-panel{order:-1}
@@ -177,16 +266,17 @@ body.remote .solution-box{display:block;margin:0 16px 10px;padding:12px 14px;bor
 .solution-box .sol-text{font-family:var(--display);font-size:22px;letter-spacing:2px;line-height:1.4;margin:4px 0;word-break:break-word}
 .solution-box .sol-text b{color:#fff;font-weight:400}
 .solution-box .sol-text i{color:#6f7fb3;font-style:normal}
-.solution-box .muted,.muted{color:var(--muted)}
-body.remote .pcard{flex-basis:120px;padding:8px 10px 8px 14px}
+.muted{color:var(--muted)}
+body.remote .pcard{flex-basis:130px;padding:8px 10px}
+body.remote .avatar{width:36px;height:36px;font-size:18px}
 body.remote .pcard .pround{font-size:20px}
 body.remote .key{width:44px;height:50px}
-@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
-.solution{font-family:var(--display);font-size:22px;letter-spacing:1px;text-align:center;background:rgba(0,0,0,.2);padding:10px;border-radius:12px;margin:6px 0 4px}
+body.remote #envelopes .env{width:30%}
 
 /* confetti */
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.splash.show{opacity:1}}
 </style>
 </head>
 <body>
@@ -208,10 +298,12 @@ body.remote .key{width:44px;height:50px}
 
 <div class="stage">
   <main>
-    <div class="board-wrap">
+    <div class="board-wrap" id="boardWrap">
+      <div class="bulbs" id="bulbs"></div>
       <div id="board"></div>
     </div>
     <div class="category" id="category"></div>
+    <div id="envelopes" hidden></div>
 
     <div class="panel" style="margin-top:14px">
       <div class="msgrow"><div id="msg" aria-live="polite"></div><div id="timer" class="timer" hidden title="Tempo rimasto"></div></div>
@@ -226,14 +318,17 @@ body.remote .key{width:44px;height:50px}
       <button id="modeManual">✋ Ruota manuale</button>
     </div>
     <div class="wheel-box">
-      <div class="pointer"></div>
+      <div class="pointer" id="pointer"></div>
       <div id="wheelRot"></div>
     </div>
+    <div id="wheelResult"></div>
     <button class="btn" id="spinBtn">GIRA LA RUOTA</button>
     <div id="manualGrid"></div>
     <div class="hint" id="wheelHint"></div>
   </aside>
 </div>
+
+<div class="splash" id="splash" aria-hidden="true"><div class="splash-inner"><div class="splash-big"></div><div class="splash-sub"></div></div></div>
 
 <!-- Setup -->
 <div class="modal-bg" id="setupModal">
@@ -253,44 +348,46 @@ body.remote .key{width:44px;height:50px}
     <label>Concorrenti</label>
     <div id="playerInputs"></div>
     <button class="btn ghost" id="addPlayer" type="button">+ Aggiungi concorrente</button>
-    <div>
-      <div>
+    <div class="row" style="margin-top:12px;align-items:flex-end;flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
         <label for="numManches">Numero di manche</label>
         <input type="number" id="numManches" min="1" max="30" value="3">
       </div>
+      <button class="btn blue" id="presetTv" type="button">📺 Scaletta stile TV</button>
     </div>
-    <details>
-      <summary>Regole avanzate</summary>
-      <div class="grid2">
-        <div>
-          <label for="vowelCost">Costo vocale (€)</label>
-          <input type="number" id="vowelCost" min="0" step="50" value="200">
-        </div>
-        <div>
-          <label for="winBonus">Premio a chi risolve la manche (€)</label>
-          <input type="number" id="winBonus" min="0" step="100" value="1000">
-        </div>
-      </div>
-      <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
-      <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi gira la ruota; la consonante vale il valore uscito e se ne chiama un'altra allo stesso valore. In quel giro BANCAROTTA, PASSA e BONUS non contano: si rigira.</p>
+    <details open>
+      <summary>Manche speciali</summary>
+      <p class="hint" style="text-align:left;margin:8px 0 0">
+        <b>Lampo</b>: niente ruota, le lettere si accendono da sole e vince chi si prenota e indovina.
+        <b>🃏 Jolly</b>: chi lo conquista lo usa una volta contro BANCAROTTA, PASSA o un errore.
+        <b>❓ Mistero</b>: dopo una consonante giusta si può scoprire un premio alto… o una bancarotta.
+        <b>⚡ Express</b>: consonanti a valore fisso senza girare, ma un errore fa perdere la manche.
+      </p>
+      <div id="mancheTable"></div>
     </details>
     <details>
-      <summary>Manche speciali e gioco finale</summary>
-      <div class="mtable" id="mancheTable"></div>
-      <label class="check"><input type="checkbox" id="finalOn"> Gioco finale per il vincitore</label>
+      <summary>Regole e premi</summary>
       <div class="grid2">
-        <div>
-          <label for="finalPrize">Premio gioco finale (€)</label>
-          <input type="number" id="finalPrize" min="0" step="500" value="5000">
-        </div>
-        <div>
-          <label for="finalSeconds">Secondi per risolvere</label>
-          <input type="number" id="finalSeconds" min="3" max="120" value="15">
-        </div>
+        <div><label for="vowelCost">Costo vocale (€)</label><input type="number" id="vowelCost" min="0" step="50" value="200"></div>
+        <div><label for="winBonus">Premio a chi risolve la manche (€)</label><input type="number" id="winBonus" min="0" step="100" value="1000"></div>
+        <div><label for="lampoPrize">Premio manche lampo (€)</label><input type="number" id="lampoPrize" min="0" step="100" value="1000"></div>
+        <div><label for="lampoSpeed">Lampo: secondi tra una lettera e l'altra</label><input type="number" id="lampoSpeed" min="1" max="10" step="0.5" value="2"></div>
+        <div><label for="mysteryPrize">Premio del Mistero (€)</label><input type="number" id="mysteryPrize" min="0" step="500" value="10000"></div>
+        <div><label for="expressValue">Valore consonante Express (€)</label><input type="number" id="expressValue" min="0" step="100" value="1000"></div>
       </div>
-      <label for="finalLetters">Lettere regalate nel gioco finale</label>
-      <input type="text" id="finalLetters" value="R S T L N E" autocomplete="off">
-      <p class="hint" style="text-align:left;margin:8px 0 0">Nel gioco finale il vincitore vede le lettere regalate, sceglie 3 consonanti e 1 vocale, poi ha il tempo indicato per risolvere.</p>
+      <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
+      <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi gira la ruota; la consonante vale il valore uscito e se ne chiama un'altra allo stesso valore. In quel giro BANCAROTTA, PASSA e gli altri spicchi speciali non contano: si rigira.</p>
+    </details>
+    <details>
+      <summary>Gioco finale delle 3 buste</summary>
+      <label class="check"><input type="checkbox" id="finalOn"> Gioco finale per il vincitore</label>
+      <p class="hint" style="text-align:left;margin:8px 0 0">Tre frasi con un tema comune e un solo cronometro. Busta 1: lettere regalate + 3 consonanti e 1 vocale. Busta 2: iniziali e finali di ogni parola. Busta 3: le lettere compaiono da sole. "Stop" passa alla busta dopo; ogni frase risolta vince il premio della sua busta.</p>
+      <div class="grid2">
+        <div><label for="finalSeconds">Secondi in tutto</label><input type="number" id="finalSeconds" min="10" max="300" value="60"></div>
+        <div><label for="finalLetters">Lettere regalate (busta 1)</label><input type="text" id="finalLetters" value="R S T L N E" autocomplete="off"></div>
+      </div>
+      <label for="finalPrizes">Premi possibili nelle buste (€), separati da virgola</label>
+      <input type="text" id="finalPrizes" value="5000, 10000, 20000, 50000, 100000, 200000" autocomplete="off">
     </details>
     <div class="err" id="setupErr"></div>
     <div class="mfoot">
@@ -310,13 +407,34 @@ body.remote .key{width:44px;height:50px}
     <label for="phraseInput">Frase</label>
     <div class="row">
       <input type="password" id="phraseInput" placeholder="es. Chi va piano va sano e va lontano" autocomplete="off" spellcheck="false">
-      <button class="xbtn" id="eyeBtn" type="button" title="Mostra / nascondi">👁</button>
+      <button class="xbtn" data-eye="phraseInput" type="button" title="Mostra / nascondi">👁</button>
     </div>
     <div id="preview"></div>
     <div class="err" id="phraseErr"></div>
     <div class="mfoot">
       <button class="btn ghost" id="randomPhrase" type="button">🎲 Frase a sorpresa</button>
       <button class="btn green" id="phraseStart" type="button">Svela il tabellone ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Final phrases -->
+<div class="modal-bg" id="finalModal">
+  <div class="modal">
+    <h2 id="finalTitle">Gioco finale</h2>
+    <p class="hint" style="text-align:left;margin:0">Tre frasi legate da un tema comune. Restano nascoste finché non premi 👁.</p>
+    <label for="finalTheme">Tema comune</label>
+    <input type="text" id="finalTheme" placeholder="es. Proverbi" autocomplete="off">
+    <label for="fp0">Busta 1 · 3 consonanti + 1 vocale</label>
+    <div class="row"><input type="password" id="fp0" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp0" type="button" title="Mostra / nascondi">👁</button></div>
+    <label for="fp1">Busta 2 · Inizio e fine parola</label>
+    <div class="row"><input type="password" id="fp1" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp1" type="button" title="Mostra / nascondi">👁</button></div>
+    <label for="fp2">Busta 3 · Lettere a sorpresa</label>
+    <div class="row"><input type="password" id="fp2" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp2" type="button" title="Mostra / nascondi">👁</button></div>
+    <div class="err" id="finalErr"></div>
+    <div class="mfoot">
+      <button class="btn ghost" id="finalRandom" type="button">🎲 Frasi a sorpresa</button>
+      <button class="btn green" id="finalStart" type="button">Prepara le buste ▶</button>
     </div>
   </div>
 </div>
@@ -354,14 +472,15 @@ body.remote .key{width:44px;height:50px}
   <div class="modal" id="endContent"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js" integrity="sha384-x0YgkOr/3UOZP2CRDxGW9e0Q+2Qjyr3uJrm4xU32Y7ZCNAo7Cc7bjhrZMi/dwczu" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js" integrity="sha384-e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA" crossorigin="anonymous"></script>
 <script>
 (() => {
 'use strict';
 
 /* ================= Dati ruota (dalla ruota fisica, senso orario dall'alto) ================= */
-const C = {blue:'#7cc6ee',orange:'#f39a2b',green:'#a8d36b',pink:'#f2b6d8',white:'#f4f4ee',yellow:'#f7df45',black:'#141414'};
+const C = {blue:'#7cc6ee',orange:'#f39a2b',green:'#a8d36b',pink:'#f2b6d8',white:'#f4f4ee',yellow:'#f7df45',black:'#141414',
+  jolly:'#7b3fe4', mistero:'#1d0b3a', express:'#0f9d58'};
 const SEGMENTS = [
   {t:'BANCAROTTA'},{v:100,c:'blue'},{v:200,c:'orange'},{v:100,c:'blue'},{t:'PASSA'},
   {v:400,c:'pink'},{v:200,c:'orange'},{v:300,c:'green'},{t:'PASSA'},{t:'BONUS'},
@@ -369,12 +488,28 @@ const SEGMENTS = [
   {v:400,c:'pink'},{v:350,c:'green'},{v:200,c:'orange'},{v:100,c:'blue'},{v:350,c:'green'},
   {v:200,c:'orange'},{v:100,c:'blue'},{v:200,c:'orange'},{v:300,c:'green'}
 ];
+// Spicchi speciali digitali: prendono il posto di questi spicchi quando sono attivi nella manche
+const SPECIAL_SLOTS = {JOLLY:3, MISTERO:13, EXPRESS:19};
+const SEG_KEYS = ['BONUS','PASSA','BANCAROTTA','JOLLY','MISTERO','EXPRESS'];
 const SEG_DEG = 360 / SEGMENTS.length;
 const VOWELS = 'AEIOU';
 const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const ROW_CAP = [12,14,14,12];
 const PLAYER_COLORS = ['#ff5d73','#4fc3ff','#7ee06f','#ffb547','#c38bff','#ff7ad9','#3ee0c5','#ffe066','#ff8a5c','#9fb4ff','#b8f06a','#f2f2f2'];
-const STORE_KEY = 'tabellone-ruota-v1';
+const STORE_KEY = 'tabellone-ruota-v2';
+const BUSTE = [
+  {key:'31',   name:'3 consonanti + 1 vocale'},
+  {key:'edge', name:'Inizio e fine parola'},
+  {key:'rand', name:'Lettere a sorpresa'}
+];
+const TV_PRESET = [
+  {type:'lampo', mult:1, timer:0, jolly:false, mistero:false, express:false},
+  {type:'normal', mult:1, timer:0, jolly:true, mistero:false, express:false},
+  {type:'normal', mult:1, timer:0, jolly:true, mistero:false, express:false},
+  {type:'lampo', mult:2, timer:0, jolly:false, mistero:false, express:false},
+  {type:'normal', mult:1, timer:0, jolly:false, mistero:true, express:true},
+  {type:'normal', mult:2, timer:0, jolly:false, mistero:true, express:true}
+];
 
 const SAMPLE = [
   ['Proverbio','Chi va piano va sano e va lontano'],
@@ -397,9 +532,13 @@ const SAMPLE = [
   ['In cucina','Spaghetti alla carbonara'],
   ['In cucina','Risotto alla milanese'],
   ['In cucina','Tiramisù al caffè'],
+  ['In cucina','Pizza margherita con basilico'],
+  ['In cucina','Lasagne al forno della nonna'],
   ['Luoghi famosi','La torre pendente di Pisa'],
   ['Luoghi famosi','Piazza San Marco a Venezia'],
   ['Luoghi famosi','Il Colosseo di Roma'],
+  ['Luoghi famosi','Il Duomo di Milano'],
+  ['Luoghi famosi','La reggia di Caserta'],
 ];
 
 /* ================= Utilità ================= */
@@ -407,8 +546,9 @@ const $ = id => document.getElementById(id);
 const norm = ch => ch.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 const isLetter = ch => /^[A-Z]$/.test(norm(ch));
 const isVowel = L => VOWELS.includes(L);
-const euro = n => n.toLocaleString('it-IT') + ' €';
+const euro = n => Math.round(n).toLocaleString('it-IT') + ' €';
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
 const store = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
@@ -449,13 +589,14 @@ function layoutPhrase(text){
   }
   return null;
 }
+function validPhrase(txt){ return !!(txt && txt.trim() && [...txt].some(isLetter) && layoutPhrase(txt)); }
 
 /* ================= Audio ================= */
 const Sound = {
   ctx:null, on: store.get('ruota-sound') !== 'off',
   ensure(){ if (!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if (this.ctx && this.ctx.state==='suspended') this.ctx.resume(); return this.ctx; },
   tone(freq, dur, type='sine', vol=.2, when=0){
-    if (!this.on) return; const ctx = this.ensure(); if (!ctx) return;
+    if (!this.on || IS_REMOTE) return; const ctx = this.ensure(); if (!ctx) return;
     const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(freq, t);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
@@ -463,9 +604,14 @@ const Sound = {
   },
   tick(){ this.tone(1500,.03,'square',.06); },
   ding(){ this.tone(1046,.5,'sine',.22); this.tone(1568,.4,'sine',.1); },
+  soft(){ this.tone(1800,.05,'square',.04); },
   buzz(){ this.tone(110,.55,'sawtooth',.18); this.tone(116,.55,'sawtooth',.12); },
   pass(){ this.tone(440,.18,'triangle',.18); this.tone(330,.3,'triangle',.18,.16); },
-  fanfare(){ [523,659,784,1046,784,1046].forEach((f,i)=>this.tone(f,.35,'triangle',.18,i*.13)); }
+  fanfare(){ [523,659,784,1046,784,1046].forEach((f,i)=>this.tone(f,.35,'triangle',.18,i*.13)); },
+  jolly(){ [660,880,1320].forEach((f,i)=>this.tone(f,.3,'square',.1,i*.09)); },
+  drum(){ for (let i = 0; i < 14; i++) this.tone(90 + i*4, .08, 'triangle', .14, i*.085); },
+  express(){ this.tone(392,.25,'sawtooth',.12); this.tone(523,.4,'sawtooth',.12,.22); },
+  whoosh(){ this.tone(300,.25,'sine',.08); this.tone(600,.2,'sine',.06,.08); }
 };
 
 /* ================= Stato ================= */
@@ -476,45 +622,54 @@ let busy = false;       // animazioni in corso
 let wheelRot = 0;
 let mode = store.get('ruota-mode') === 'manual' ? 'manual' : 'digital';
 
-const DEFAULT_CFG = {manches:3, vowelCost:200, winBonus:1000, keepOthers:false,
-  special:[], finalOn:false, finalPrize:5000, finalSeconds:15, finalLetters:'RSTLNE'};
+const DEFAULT_SPEC = {type:'normal', mult:1, timer:0, jolly:false, mistero:false, express:false};
+const DEFAULT_CFG = {manches:3, vowelCost:200, winBonus:1000, keepOthers:false, special:[],
+  lampoPrize:1000, lampoSpeed:2, mysteryPrize:10000, expressValue:1000,
+  finalOn:true, finalSeconds:60, finalPrizes:[5000,10000,20000,50000,100000,200000], finalLetters:'RSTLNE'};
 function withDefaults(cfg){
   const c = Object.assign({}, DEFAULT_CFG, cfg);
-  c.special = Array.from({length:c.manches}, (_,i) => Object.assign({mult:1, timer:0}, (cfg.special||[])[i]));
+  c.special = Array.from({length:c.manches}, (_,i) => Object.assign({}, DEFAULT_SPEC, (cfg.special||[])[i]));
   return c;
 }
-const spec = () => (!S.tiebreak && S.cfg.special[S.manche-1]) || {mult:1, timer:0};
+const spec = () => (S && !S.tiebreak && !S.final && S.cfg.special[S.manche-1]) || DEFAULT_SPEC;
 const mult = () => spec().mult || 1;
+const cost = () => S.cfg.vowelCost;
 
 function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
 function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); actionCount++; }
 const cur = () => S.players[S.current];
 const isActive = i => S.final ? i === S.final.player : (!S.tiebreak || S.tiebreak.includes(i));
-const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','finalPick','finalSolve'];
+const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','jollyAsk','mysteryAsk','expressAsk','express','lampoBuzz','finalIntro','finalPick','finalSolve'];
+const setFx = (kind, big, sub) => { S.fx = {id: Date.now() + Math.random(), kind, big: String(big), sub: sub ? String(sub) : ''}; };
+const nm = p => `<b>${esc(p.name)}</b>`;
 
 function newGame(cfg){
   S = {
     cfg: withDefaults(cfg),
-    players: cfg.names.map((n,i) => ({name:n, color:PLAYER_COLORS[i % PLAYER_COLORS.length], round:0, total:0})),
+    players: cfg.names.map((n,i) => ({name:n, color:PLAYER_COLORS[i % PLAYER_COLORS.length], round:0, total:0, jolly:false})),
     manche: 1, current: 0, phase: 'phrase',
-    category: '', phrase: '', grid: null, used: [], spin: null,
-    msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null, final: null
+    category: '', phrase: '', grid: null, used: [], extra: [], spin: null, bonusFirst: null,
+    express: false, pending: null, jollyTaken: false, mysteryDone: false, lampo: null, lastSeg: null,
+    msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null, final: null, fx: null
   };
   history = []; actionCount++;
+  for (const k in money) delete money[k];
 }
 
 function lettersInPhrase(){ return S.grid ? [...new Set(S.grid.filter(c => c && isLetter(c)).map(norm))] : []; }
 function remaining(kind){
   return lettersInPhrase().filter(L => !S.used.includes(L) && (kind === 'v' ? isVowel(L) : !isVowel(L)));
 }
-function allRevealed(){ return remaining('v').length === 0 && remaining('c').length === 0; }
+function allRevealed(){ return S.grid ? S.grid.every((c,i) => !c || !isLetter(c) || S.used.includes(norm(c)) || S.extra.includes(i)) : false; }
 const countOf = L => S.grid.filter(c => c && isLetter(c) && norm(c) === L).length;
+const tileShown = i => S.used.includes(norm(S.grid[i])) || S.extra.includes(i);
+const hiddenTiles = () => S.grid ? S.grid.map((c,i) => (c && isLetter(c) && !tileShown(i)) ? i : -1).filter(i => i >= 0) : [];
 
 function nextPlayer(){
   const n = S.players.length;
   let i = S.current;
   for (let k = 0; k < n; k++){ i = (i + 1) % n; if (isActive(i)) break; }
-  S.current = i; S.phase = 'turn'; S.spin = null; S.bonusFirst = null;
+  S.current = i; S.phase = 'turn'; S.spin = null; S.bonusFirst = null; S.express = false; S.pending = null;
 }
 
 /* Finestra di conferma interna (confirm() non funziona ovunque) */
@@ -529,69 +684,153 @@ function askConfirm(title, text, yes){
   });
 }
 
+function mancheLabel(sp){
+  const t = [];
+  if (sp.type === 'lampo') t.push('Manche lampo');
+  if (sp.mult > 1) t.push(`Valori ×${sp.mult}`);
+  if (sp.timer) t.push(`${sp.timer}" a turno`);
+  if (sp.jolly) t.push('Jolly');
+  if (sp.mistero) t.push('Mistero');
+  if (sp.express) t.push('Express');
+  return t.join(' · ');
+}
+
 function startManche(category, phrase){
   snapshot();
   S.category = category.trim();
   S.phrase = phrase.trim();
   S.grid = layoutPhrase(S.phrase);
-  S.used = [];
+  S.used = []; S.extra = [];
   S.players.forEach(p => p.round = 0);
+  S.spin = null; S.bonusFirst = null; S.express = false; S.pending = null; S.lastSeg = null;
+  S.jollyTaken = false; S.mysteryDone = false; S.lampo = null;
   const actives = S.players.map((_,i)=>i).filter(isActive);
   S.current = actives[(S.manche - 1) % actives.length];
-  S.phase = 'turn'; S.spin = null;
-  const sp = spec(), tags = [];
-  if (sp.mult > 1) tags.push(`valori ×${sp.mult}`);
-  if (sp.timer) tags.push(`${sp.timer} secondi per turno`);
-  S.msg = (tags.length ? `<span class="big">Manche speciale: ${tags.join(', ')}!</span> ` : '') + `Tocca a <b>${esc(cur().name)}</b>: gira la ruota!`;
-  buildBoard(); render();
+  const sp = spec(), label = mancheLabel(sp);
+  if (sp.type === 'lampo' && !S.tiebreak){
+    S.phase = 'lampo'; S.lampo = {out: [], done: false};
+    S.msg = `<span class="big">MANCHE LAMPO!</span> Le lettere si accendono da sole: chi conosce la frase si prenota. Vale ${euro(S.cfg.lampoPrize * mult())}.`;
+    setFx('lampo', 'MANCHE LAMPO', S.category || '');
+  } else {
+    S.phase = 'turn';
+    S.msg = (label ? `<span class="big">${esc(label)}</span> ` : '') + `Tocca a ${nm(cur())}: gira la ruota!`;
+    setFx('manche', S.tiebreak ? 'SPAREGGIO' : `MANCHE ${S.manche}`, [label, S.category].filter(Boolean).join(' · '));
+  }
+  Sound.whoosh();
+  buildBoard(true); save(); render();
 }
 
-/* ================= Azioni ================= */
+/* ================= Spicchi ================= */
+function activeSegments(){
+  const segs = SEGMENTS.map(s => ({...s}));
+  if (!S || S.final) return segs;
+  const sp = spec();
+  if (sp.jolly && !S.jollyTaken) segs[SPECIAL_SLOTS.JOLLY] = {t:'JOLLY'};
+  if (sp.mistero && !S.mysteryDone) segs[SPECIAL_SLOTS.MISTERO] = {t:'MISTERO'};
+  if (sp.express) segs[SPECIAL_SLOTS.EXPRESS] = {t:'EXPRESS'};
+  return segs;
+}
+function segBase(seg){
+  if (seg.v) return seg.v;
+  if (seg.t === 'JOLLY') return 500;
+  if (seg.t === 'MISTERO') return 1000;
+  if (seg.t === 'EXPRESS') return S.cfg.expressValue;
+  return null;
+}
+const segLabel = seg => seg.v ? euro(seg.v * mult()) : seg.t;
+
+/* ================= Azioni di gioco ================= */
 function applySegment(seg){
   const p = cur();
+  S.lastSeg = segLabel(seg);
   if (S.phase === 'bonusSpin'){
-    if (seg.t){
-      S.msg = `<span class="big">${seg.t}!</span> Con il BONUS non conta: ${esc(p.name)} rigira la ruota per dare un valore alla <b>${S.bonusFirst}</b>.`;
-      Sound.pass(); save(); render(); return;
+    const base = seg.v || null;
+    if (!base){
+      S.msg = `<span class="big">${seg.t}!</span> Con il BONUS non conta: ${nm(p)} rigira la ruota per dare un valore alla <b>${S.bonusFirst}</b>.`;
+      setFx('passa', seg.t, 'si rigira!'); Sound.pass(); save(); render(); return;
     }
-    return bonusValueSpin(seg.v * mult(), seg.v);
+    return bonusValueSpin(base * mult(), base);
   }
   if (seg.t === 'PASSA'){
-    nextPlayer();
-    S.msg = `<span class="big">PASSA!</span> ${esc(p.name)} cede il turno a <b>${esc(cur().name)}</b>.`;
+    setFx('passa', 'PASSA', p.name);
     Sound.pass();
-  } else if (seg.t === 'BANCAROTTA'){
-    const lost = p.round + p.total;
-    p.round = 0; p.total = 0;
-    nextPlayer();
-    S.msg = `<span class="big" style="color:#ff6b6f">BANCAROTTA!</span> ${esc(p.name)} perde ${euro(lost)}. Tocca a <b>${esc(cur().name)}</b>.`;
-    Sound.buzz();
-  } else if (seg.t === 'BONUS'){
-    S.spin = null; S.bonusFirst = null;
-    S.phase = 'bonusPick';
-    S.msg = `<span class="big">BONUS!</span> ${esc(p.name)}, chiama una consonante: varrà quanto esce al prossimo giro di ruota.`;
-    Sound.fanfare();
+    return failTurn('passa', `<span class="big">PASSA!</span>`);
+  }
+  if (seg.t === 'BANCAROTTA'){
+    setFx('bancarotta', 'BANCAROTTA', p.name);
+    Sound.buzz(); shake();
+    return failTurn('bancarotta', `<span class="big red">BANCAROTTA!</span>`);
+  }
+  if (seg.t === 'BONUS'){
+    S.spin = null; S.bonusFirst = null; S.phase = 'bonusPick';
+    S.msg = `<span class="big">BONUS!</span> ${nm(p)}, chiama una consonante: varrà quanto esce al prossimo giro di ruota.`;
+    setFx('bonus', 'BONUS', 'consonante + nuovo giro'); Sound.fanfare();
+    save(); render(); return;
+  }
+  const value = segBase(seg) * mult();
+  const kind = seg.t === 'JOLLY' ? 'jolly' : seg.t === 'MISTERO' ? 'mistero' : seg.t === 'EXPRESS' ? 'express' : 'normal';
+  S.spin = {value, kind}; S.phase = 'consonant';
+  if (kind === 'jolly'){
+    S.msg = `<span class="big">🃏 JOLLY</span> ${euro(value)} a consonante. Se ${nm(p)} chiama una consonante giusta, conquista il Jolly!`;
+    setFx('jolly', 'JOLLY', `${euro(value)} · consonante giusta = Jolly`); Sound.jolly();
+  } else if (kind === 'mistero'){
+    S.msg = `<span class="big">❓ MISTERO</span> ${euro(value)} a consonante. Con una consonante giusta ${nm(p)} potrà scoprire il Mistero.`;
+    setFx('mistero', 'MISTERO', `${euro(value)} a consonante`); Sound.drum();
+  } else if (kind === 'express'){
+    S.msg = `<span class="big">⚡ EXPRESS</span> ${euro(value)} a consonante. Con una consonante giusta ${nm(p)} potrà salire sull'Express.`;
+    setFx('express', 'EXPRESS', `${euro(value)} a consonante`); Sound.express();
   } else {
-    const value = seg.v * mult();
-    S.spin = {value, bonus: false};
-    S.phase = 'consonant';
-    S.msg = `<span class="big">${euro(value)}</span>${mult() > 1 ? ` (${seg.v} ×${mult()})` : ''} ${esc(p.name)}, chiama una consonante.`;
-    Sound.ding();
+    S.msg = `<span class="big">${euro(value)}</span>${mult() > 1 ? ` (${seg.v} ×${mult()})` : ''} ${nm(p)}, chiama una consonante.`;
+    setFx('value', euro(value), p.name); Sound.ding();
   }
   save(); render();
+}
+
+/* Un errore o uno spicchio negativo: se il concorrente ha il Jolly può annullarlo */
+function failTurn(kind, prefix){
+  const p = cur();
+  if (p.jolly){
+    S.pending = {kind, prefix}; S.phase = 'jollyAsk'; S.spin = null;
+    S.msg = `${prefix} ${nm(p)} ha il <b>JOLLY 🃏</b>: lo usa per salvarsi?`;
+    save(); render(); return;
+  }
+  applyPenalty(kind, prefix);
+}
+function applyPenalty(kind, prefix){
+  const p = cur();
+  let extra = '';
+  if (kind === 'bancarotta'){ const lost = p.round + p.total; p.round = 0; p.total = 0; extra = `${esc(p.name)} perde ${euro(lost)}.`; }
+  else if (kind === 'express'){ const lost = p.round; p.round = 0; extra = `Express deragliato: ${esc(p.name)} perde ${euro(lost)}.`; }
+  nextPlayer();
+  S.msg = `${prefix} ${extra} Tocca a ${nm(cur())}.`;
+  save(); render();
+}
+function jollyYes(){
+  if (busy || S.phase !== 'jollyAsk') return;
+  snapshot();
+  const p = cur();
+  p.jolly = false; S.pending = null; S.express = false; S.phase = 'turn'; S.spin = null;
+  S.msg = `🃏 ${nm(p)} gioca il <b>Jolly</b> e resta in gioco!`;
+  setFx('jolly', 'JOLLY USATO', p.name); Sound.jolly();
+  save(); render();
+}
+function jollyNo(){
+  if (busy || S.phase !== 'jollyAsk') return;
+  snapshot();
+  const pend = S.pending || {kind:'error', prefix:''};
+  applyPenalty(pend.kind, pend.prefix);
 }
 
 /* BONUS, passo 1: la consonante viene scelta ma resta coperta finché la ruota non dà un valore */
 function bonusPick(L){
   if (isVowel(L)) return;
   const p = cur();
-  if (S.used.includes(L)){ S.msg = `La <b>${L}</b> è già stata chiamata: ${esc(p.name)}, scegli un'altra consonante per il BONUS.`; Sound.buzz(); render(); return; }
+  if (S.used.includes(L)){ S.msg = `La <b>${L}</b> è già stata chiamata: ${nm(p)}, scegli un'altra consonante per il BONUS.`; Sound.buzz(); render(); return; }
   snapshot();
   S.bonusFirst = L; S.phase = 'bonusSpin';
-  S.msg = `${esc(p.name)} sceglie la <b>${L}</b>. Ora gira la ruota: la <b>${L}</b> varrà il valore che esce (BANCAROTTA, PASSA e BONUS non contano).`;
+  S.msg = `${nm(p)} sceglie la <b>${L}</b>. Ora gira la ruota: la <b>${L}</b> varrà il valore che esce (gli spicchi senza valore non contano).`;
   save(); render();
 }
-
 /* BONUS, passo 2: la ruota dà il valore, si scopre la prima consonante e se ne chiama un'altra allo stesso valore */
 function bonusValueSpin(value, base){
   const p = cur(), L = S.bonusFirst;
@@ -601,68 +840,90 @@ function bonusValueSpin(value, base){
   p.round += gain;
   let msg = `<span class="big">${euro(value)}</span>${value !== base ? ` (${base} ×${mult()})` : ''} ` +
     (count ? (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + ` <span class="big">+${euro(gain)}</span>` : `Nessuna <b>${L}</b>.`);
-  if (allRevealed()){ S.phase = 'turn'; S.spin = null; msg += ` Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`; }
-  else if (remaining('c').length){ S.phase = 'consonant'; S.spin = {value, bonus: false}; msg += ` Ora ${esc(p.name)} chiama un'altra consonante da ${euro(value)}.`; }
-  else { S.phase = 'turn'; S.spin = null; msg += ` Non restano consonanti: ${esc(p.name)} può comprare una vocale o risolvere.`; }
+  if (allRevealed()){ S.phase = 'turn'; S.spin = null; msg += ` Tutte le lettere sono scoperte! ${nm(p)}, dai la soluzione.`; }
+  else if (remaining('c').length){ S.phase = 'consonant'; S.spin = {value, kind:'normal'}; msg += ` Ora ${nm(p)} chiama un'altra consonante da ${euro(value)}.`; }
+  else { S.phase = 'turn'; S.spin = null; msg += ` Non restano consonanti: ${nm(p)} può comprare una vocale o risolvere.`; }
   S.msg = msg;
+  setFx(count ? 'value' : 'miss', euro(value), count ? `${count} × ${L}` : `Nessuna ${L}`);
   count ? Sound.ding() : Sound.buzz();
   const anim = animateReveal([L]);
   save(); render(); anim();
 }
 
+const foundText = (count, L) => count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`;
+
 async function chooseLetter(L, confirmed){
   if (busy || !S || (anyModalOpen() && !confirmed && !remoteConnected())) return;
-  if (S.phase === 'finalPick') return pickFinal(L);
-  if (S.phase === 'bonusPick') return bonusPick(L);
-  const vowelPhase = S.phase === 'vowel';
-  if (S.phase !== 'consonant' && !vowelPhase) return;
+  const ph = S.phase;
+  if (ph === 'finalPick') return pickFinal(L);
+  if (ph === 'bonusPick') return bonusPick(L);
+  if (ph === 'express') return expressLetter(L, confirmed);
+  const vowelPhase = ph === 'vowel';
+  if (ph !== 'consonant' && !vowelPhase) return;
   if (vowelPhase !== isVowel(L)) return;
   const p = cur();
   if (S.used.includes(L)){
     const ok = confirmed || await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${p.name} perde il turno?`, 'Sì, turno perso');
     if (!ok) return;
     snapshot();
-    if (vowelPhase) p.round -= S.cfg.vowelCost;
-    nextPlayer();
-    S.msg = `${L} era già stata chiamata! Turno a <b>${esc(cur().name)}</b>.`;
-    Sound.buzz(); save(); render(); return;
+    if (vowelPhase) p.round -= cost();
+    setFx('miss', L, 'già chiamata'); Sound.buzz();
+    return failTurn('error', `La <b>${L}</b> era già stata chiamata!`);
   }
   snapshot();
   S.used.push(L);
   const count = countOf(L);
-  if (vowelPhase) p.round -= S.cfg.vowelCost;
-  if (count > 0){
-    let gain = 0;
-    if (!vowelPhase){ gain = count * S.spin.value; p.round += gain; }
-    const found = (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '');
-    S.phase = 'turn'; S.spin = null; S.msg = `${found} ${esc(p.name)} continua.`;
-    if (allRevealed()){ S.phase = 'turn'; S.msg = `Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`; }
-    const anim = animateReveal([L]);
-    save(); render(); anim();
-  } else {
-    nextPlayer();
-    S.msg = `Nessuna <b>${L}</b>. Tocca a <b>${esc(cur().name)}</b>.`;
-    Sound.buzz(); save(); render();
+  if (vowelPhase) p.round -= cost();
+  if (!count){
+    setFx('miss', `NESSUNA ${L}`, p.name); Sound.buzz();
+    return failTurn('error', `Nessuna <b>${L}</b>.`);
   }
+  let gain = 0;
+  const kind = !vowelPhase && S.spin ? S.spin.kind : null;
+  if (!vowelPhase){ gain = count * S.spin.value; p.round += gain; }
+  const found = foundText(count, L) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '');
+  S.spin = null; S.phase = 'turn';
+  S.msg = `${found} ${nm(p)} continua.`;
+  setFx('found', `${count} × ${L}`, gain ? '+' + euro(gain) : p.name);
+  if (kind === 'jolly' && !p.jolly){
+    p.jolly = true; S.jollyTaken = true;
+    S.msg = `${found} ${nm(p)} conquista il <b>JOLLY 🃏</b>! Potrà usarlo una volta contro BANCAROTTA, PASSA o un errore.`;
+    setFx('jolly', 'JOLLY!', `${p.name} lo conserva`); Sound.jolly();
+  } else if (kind === 'mistero' && !S.mysteryDone && !allRevealed()){
+    S.phase = 'mysteryAsk';
+    S.msg = `${found} ${nm(p)}, vuoi scoprire il <b>MISTERO</b>? Può valere ${euro(S.cfg.mysteryPrize)}… o essere una BANCAROTTA.`;
+  } else if (kind === 'express' && !allRevealed()){
+    S.phase = 'expressAsk';
+    S.msg = `${found} ${nm(p)}, sali sull'<b>EXPRESS</b>? Consonanti a ${euro(S.cfg.expressValue * mult())} senza girare, ma un errore fa perdere tutta la manche.`;
+  }
+  if (allRevealed()){ S.phase = 'turn'; S.msg = `${found} Tutte le lettere sono scoperte! ${nm(p)}, dai la soluzione.`; }
+  const anim = animateReveal([L]);
+  save(); render(); anim();
 }
 
 function buyVowel(){
   if (busy || S.phase !== 'turn') return;
-  if (cur().round < S.cfg.vowelCost || !remaining('v').length) return;
+  if (cur().round < cost() || !remaining('v').length) return;
   S.phase = 'vowel';
-  S.msg = `${esc(cur().name)} compra una vocale (${euro(S.cfg.vowelCost)}). Quale?`;
+  S.msg = `${nm(cur())} compra una vocale (${euro(cost())}). Quale?`;
   render();
 }
 
-function solveAttempt(){ if (busy || S.phase !== 'turn') return; S.phase = 'solve'; S.msg = `<b>${esc(cur().name)}</b> prova a risolvere… La risposta è giusta?`; render(); }
-function cancelPhase(){ if (busy) return; if (S.phase === 'vowel' || S.phase === 'solve'){ S.phase = 'turn'; S.msg = `Tocca a <b>${esc(cur().name)}</b>.`; render(); } }
-
+function solveAttempt(){
+  if (busy || (S.phase !== 'turn' && S.phase !== 'express')) return;
+  S.phase = 'solve';
+  S.msg = `${nm(cur())} prova a risolvere… La risposta è giusta?`;
+  render();
+}
+function cancelPhase(){
+  if (busy) return;
+  if (S.phase === 'vowel' || S.phase === 'solve'){ S.phase = S.express ? 'express' : 'turn'; S.msg = `Tocca a ${nm(cur())}.`; render(); }
+}
 function solveWrong(){
   if (busy || S.phase !== 'solve') return;
   snapshot();
-  const p = cur(); nextPlayer();
-  S.msg = `Risposta sbagliata di ${esc(p.name)}. Tocca a <b>${esc(cur().name)}</b>.`;
-  Sound.buzz(); save(); render();
+  setFx('miss', 'SBAGLIATO', cur().name); Sound.buzz();
+  failTurn(S.express ? 'express' : 'error', 'Risposta sbagliata.');
 }
 
 function revealAllThen(next){
@@ -683,57 +944,226 @@ function solveRight(){
     else if (S.cfg.keepOthers) q.total += q.round;
     q.round = 0;
   });
-  S.lastWinner = {name: p.name, won};
+  S.lastWinner = {name: p.name, won, lampo: false};
+  S.express = false;
   S.phase = 'mancheEnd';
   S.msg = `<span class="big">${esc(p.name)} risolve!</span> +${euro(won)}`;
-  Sound.fanfare(); confetti();
+  setFx('solve', 'RISOLTO!', `${p.name} +${euro(won)}`);
+  Sound.fanfare(); celebrate();
   revealAllThen(showEnd);
 }
 
 function skipTurn(){
-  if (busy || !['turn','consonant','vowel','solve','bonusPick','bonusSpin'].includes(S.phase)) return;
+  if (busy || !['turn','consonant','vowel','solve','bonusPick','bonusSpin','express'].includes(S.phase)) return;
   snapshot(); const p = cur(); nextPlayer();
-  S.msg = `${esc(p.name)} passa. Tocca a <b>${esc(cur().name)}</b>.`;
+  S.msg = `${esc(p.name)} passa. Tocca a ${nm(cur())}.`;
   save(); render();
 }
 
 function timeUp(){
-  if (S.phase === 'finalSolve'){
-    S.msg = `<span class="big" style="color:#ff6b6f">TEMPO SCADUTO!</span> Il conduttore conferma se la risposta è arrivata in tempo.`;
-    Sound.buzz(); render(); return;
-  }
   snapshot(); const p = cur(); nextPlayer();
-  S.msg = `<span class="big" style="color:#ff6b6f">TEMPO SCADUTO!</span> ${esc(p.name)} perde il turno. Tocca a <b>${esc(cur().name)}</b>.`;
+  S.msg = `<span class="big red">TEMPO SCADUTO!</span> ${esc(p.name)} perde il turno. Tocca a ${nm(cur())}.`;
+  setFx('time', 'TEMPO SCADUTO', p.name);
   Sound.buzz(); save(); render();
 }
 
-/* ---------- Gioco finale ---------- */
-function finalGiven(){ return [...new Set([...norm(S.cfg.finalLetters || '')].filter(c => /[A-Z]/.test(c)))]; }
+/* ---------- Mistero ---------- */
+function mysteryKeep(){
+  if (busy || S.phase !== 'mysteryAsk') return;
+  snapshot();
+  S.phase = 'turn';
+  S.msg = `${nm(cur())} tiene i soldi: il Mistero resta sulla ruota. Si continua.`;
+  save(); render();
+}
+function mysteryReveal(){
+  if (busy || S.phase !== 'mysteryAsk') return;
+  snapshot();
+  const p = cur();
+  S.mysteryDone = true;
+  Sound.drum();
+  if (Math.random() < .5){
+    p.round += S.cfg.mysteryPrize;
+    S.phase = 'turn';
+    S.msg = `❓ Il Mistero nascondeva <span class="big">${euro(S.cfg.mysteryPrize)}</span>! ${nm(p)} continua.`;
+    setFx('mystery-win', euro(S.cfg.mysteryPrize), 'MISTERO SVELATO');
+    setTimeout(() => { Sound.fanfare(); celebrate(); }, 1300);
+    save(); render();
+  } else {
+    setFx('mystery-lose', 'BANCAROTTA', 'MISTERO SVELATO');
+    setTimeout(() => { Sound.buzz(); shake(); }, 1300);
+    failTurn('bancarotta', `❓ Il Mistero nascondeva una <span class="big red">BANCAROTTA!</span>`);
+  }
+}
 
+/* ---------- Express ---------- */
+function expressGo(){
+  if (busy || S.phase !== 'expressAsk') return;
+  snapshot();
+  S.express = true; S.phase = 'express';
+  const v = S.cfg.expressValue * mult();
+  S.msg = `<span class="big">⚡ EXPRESS!</span> ${nm(cur())} chiama consonanti a ${euro(v)} l'una e compra vocali senza girare. Un errore fa perdere la manche!`;
+  setFx('express', 'EXPRESS!', `${euro(v)} a consonante`); Sound.express();
+  save(); render();
+}
+function expressNo(){
+  if (busy || S.phase !== 'expressAsk') return;
+  snapshot();
+  S.phase = 'turn';
+  S.msg = `${nm(cur())} resta a terra e continua normalmente.`;
+  save(); render();
+}
+async function expressLetter(L, confirmed){
+  const p = cur(), v = isVowel(L);
+  if (v && p.round < cost()){ S.msg = `Per comprare una vocale servono ${euro(cost())}.`; render(); return; }
+  if (S.used.includes(L)){
+    const ok = confirmed || await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata: l'Express deraglia.`, 'Conferma');
+    if (!ok) return;
+    snapshot(); if (v) p.round -= cost();
+    setFx('bancarotta', 'DERAGLIATO', `${L} già chiamata`); Sound.buzz(); shake();
+    return failTurn('express', `La <b>${L}</b> era già stata chiamata!`);
+  }
+  snapshot();
+  S.used.push(L);
+  if (v) p.round -= cost();
+  const count = countOf(L);
+  if (!count){
+    setFx('bancarotta', 'DERAGLIATO', `Nessuna ${L}`); Sound.buzz(); shake();
+    return failTurn('express', `Nessuna <b>${L}</b>.`);
+  }
+  const gain = v ? 0 : count * S.cfg.expressValue * mult();
+  p.round += gain;
+  S.msg = `⚡ ${foundText(count, L)}${gain ? ` <span class="big">+${euro(gain)}</span>` : ''} L'Express di ${nm(p)} prosegue.`;
+  if (allRevealed()) S.msg = `⚡ Tutte le lettere sono scoperte! ${nm(p)}, risolvi.`;
+  setFx('found', `${count} × ${L}`, gain ? '+' + euro(gain) : 'Express');
+  const anim = animateReveal([L]);
+  save(); render(); anim();
+}
+
+/* ---------- Manche lampo ---------- */
+function lampoReveal(){
+  const hidden = hiddenTiles();
+  if (!hidden.length){
+    if (!S.lampo.done){ S.lampo.done = true; S.msg = 'Tutte le lettere sono accese: chi si prenota?'; save(); render(); }
+    return;
+  }
+  const i = hidden[Math.floor(Math.random() * hidden.length)];
+  S.extra.push(i);
+  lightTile(i);
+  save(); render();
+}
+function buzz(i){
+  i = +i;
+  if (busy || S.phase !== 'lampo' || !S.players[i] || !isActive(i) || S.lampo.out.includes(i)) return;
+  snapshot();
+  S.current = i; S.phase = 'lampoBuzz';
+  S.msg = `🔔 ${nm(cur())} si prenota! Qual è la frase?`;
+  setFx('buzz', cur().name, 'si prenota!'); Sound.ding();
+  save(); render();
+}
+function lampoRight(){
+  if (busy || S.phase !== 'lampoBuzz') return;
+  snapshot();
+  const p = cur(), won = S.cfg.lampoPrize * mult();
+  p.total += won;
+  S.lastWinner = {name: p.name, won, lampo: true};
+  S.phase = 'mancheEnd';
+  S.msg = `<span class="big">${esc(p.name)} indovina la frase lampo!</span> +${euro(won)}`;
+  setFx('solve', 'LAMPO!', `${p.name} +${euro(won)}`);
+  Sound.fanfare(); celebrate();
+  revealAllThen(showEnd);
+}
+function lampoWrong(){
+  if (busy || S.phase !== 'lampoBuzz') return;
+  snapshot();
+  const p = cur();
+  S.lampo.out.push(S.current);
+  const left = S.players.map((_,i)=>i).filter(i => isActive(i) && !S.lampo.out.includes(i));
+  setFx('miss', 'SBAGLIATO', `${p.name} è fuori`); Sound.buzz();
+  if (!left.length) return lampoNobody('Nessuno ha indovinato la frase lampo.');
+  S.phase = 'lampo';
+  S.msg = `Risposta sbagliata: ${esc(p.name)} resta fuori da questa frase. Le lettere continuano ad accendersi…`;
+  save(); render();
+}
+function lampoEnd(){ if (busy || S.phase !== 'lampo') return; snapshot(); lampoNobody('Il conduttore chiude la manche lampo: nessun vincitore.'); }
+function lampoNobody(text){
+  S.lastWinner = null; S.phase = 'mancheEnd'; S.msg = text;
+  revealAllThen(showEnd);
+}
+
+/* ---------- Gioco finale delle 3 buste ---------- */
+function finalGiven(){ return [...new Set([...norm(S.cfg.finalLetters || '')].filter(c => /[A-Z]/.test(c)))]; }
+function edgeTiles(grid){
+  const out = [];
+  for (let r = 0; r < 4; r++){
+    let run = [];
+    for (let c = 0; c <= 14; c++){
+      const i = r*14 + c, ch = c < 14 ? grid[i] : null;
+      if (ch) { run.push(i); continue; }
+      const letters = run.filter(j => isLetter(grid[j]));
+      if (letters.length){ out.push(letters[0]); if (letters.length > 1) out.push(letters[letters.length - 1]); }
+      run = [];
+    }
+  }
+  return out;
+}
 function startFinalSetup(){
   if (busy || S.phase !== 'gameOver' || !S.cfg.finalOn || S.final) return;
   const top = Math.max(...S.players.map(p => p.total));
   snapshot();
-  S.final = {player: S.players.findIndex(p => p.total === top), picks: [], won: null};
+  S.final = {player: S.players.findIndex(p => p.total === top), theme:'', phrases:[], prizes:[], idx:-1, results:[null,null,null], picks:[], timeLeft: S.cfg.finalSeconds * 1000, won: 0};
   S.current = S.final.player;
-  S.phase = 'finalPhrase'; S.category = ''; S.grid = null; S.used = [];
-  S.msg = `Gioco finale per <b>${esc(cur().name)}</b>! Il conduttore inserisce la frase.`;
-  save(); buildBoard(); render(); openPhrase();
+  S.phase = 'finalPhrase'; S.category = ''; S.grid = null; S.used = []; S.extra = []; S.phrase = '';
+  S.msg = `Gioco finale per ${nm(cur())}! Il conduttore prepara le tre buste.`;
+  setFx('final', 'GIOCO FINALE', cur().name);
+  Sound.fanfare();
+  save(); buildBoard(true); render(); openFinalPhrase();
 }
-
-function startFinal(category, phrase){
+function applyFinalPhrases(a){
+  if (!S || S.phase !== 'finalPhrase' || !a || !Array.isArray(a.phrases) || a.phrases.length !== 3) return;
+  const phrases = a.phrases.map(x => String(x || '').trim());
+  if (!phrases.every(validPhrase)) return;
+  closeModals();
   snapshot();
-  S.category = category.trim(); S.phrase = phrase.trim();
-  S.grid = layoutPhrase(S.phrase); S.used = [];
-  buildBoard();
-  const given = finalGiven();
-  S.used = given.slice();
-  S.phase = 'finalPick';
-  S.msg = `Lettere regalate: <b>${given.join(' ') || 'nessuna'}</b>. ${esc(cur().name)}, scegli <b>3 consonanti</b> e <b>1 vocale</b>.`;
-  const anim = animateReveal(given, true);
-  save(); render(); anim();
+  const f = S.final;
+  f.theme = String(a.theme || '').trim().slice(0, 60);
+  f.phrases = phrases;
+  const pool = (S.cfg.finalPrizes && S.cfg.finalPrizes.length >= 3 ? S.cfg.finalPrizes : DEFAULT_CFG.finalPrizes);
+  f.prizes = shuffle(pool).slice(0, 3);
+  f.idx = -1; f.results = [null,null,null]; f.timeLeft = S.cfg.finalSeconds * 1000;
+  S.phase = 'finalIntro'; S.category = f.theme; S.grid = null; S.phrase = '';
+  S.msg = `Tema: <b>${esc(f.theme || 'libero')}</b>. Tre buste, <b>${S.cfg.finalSeconds} secondi</b> in tutto. Ogni frase risolta apre una busta verde!`;
+  buildBoard(true); save(); render();
 }
-
+function finalNext(){
+  if (busy || S.phase !== 'finalIntro') return;
+  const k = S.final.results.findIndex(r => r === null);
+  if (k < 0) return finishFinal();
+  snapshot();
+  const f = S.final;
+  f.idx = k; f.picks = [];
+  S.phrase = f.phrases[k]; S.grid = layoutPhrase(S.phrase); S.used = []; S.extra = [];
+  S.category = f.theme;
+  buildBoard(true);
+  setFx('busta', `BUSTA ${k+1}`, BUSTE[k].name); Sound.whoosh();
+  let anim = null;
+  if (k === 0){
+    const given = finalGiven();
+    S.used = given.slice();
+    S.phase = 'finalPick';
+    S.msg = `Busta 1 · lettere regalate: <b>${given.join(' ') || 'nessuna'}</b>. ${nm(cur())}, scegli <b>3 consonanti</b> e <b>1 vocale</b>.`;
+    anim = animateReveal(given, true);
+  } else if (k === 1){
+    S.phase = 'finalSolve';
+    const tiles = edgeTiles(S.grid);
+    S.extra = tiles.slice();
+    S.msg = `Busta 2 · inizio e fine di ogni parola. Il tempo corre!`;
+    anim = animateTiles(tiles.map(tileEl).filter(Boolean), true);
+  } else {
+    S.phase = 'finalSolve';
+    S.msg = `Busta 3 · le lettere compaiono da sole. Il tempo corre!`;
+  }
+  save(); render(); if (anim) anim();
+}
 function pickFinal(L){
   const f = S.final;
   const cons = f.picks.filter(x => !isVowel(x)).length, vow = f.picks.length - cons;
@@ -748,62 +1178,117 @@ function pickFinal(L){
   }
   S.used.push(...f.picks);
   S.phase = 'finalSolve';
-  S.msg = `${esc(cur().name)}, hai <b>${S.cfg.finalSeconds} secondi</b> per risolvere!`;
+  S.msg = `${nm(cur())}, il tempo corre: risolvi la busta 1!`;
   const anim = animateReveal(f.picks);
   save(); render(); anim();
 }
-
-function finalResult(won){
+function finalRandomReveal(){
+  const hidden = hiddenTiles();
+  if (hidden.length <= 1) return;   // l'ultima lettera la deve trovare il concorrente
+  const i = hidden[Math.floor(Math.random() * hidden.length)];
+  S.extra.push(i); lightTile(i); save(); render();
+}
+function finalSettle(result){
+  const f = S.final, k = f.idx;
+  f.results[k] = result;
+  const done = f.results.every(r => r !== null) || f.timeLeft <= 0;
+  if (f.timeLeft <= 0) f.results = f.results.map(r => r === null ? false : r);
+  S.phase = done ? 'finalWrap' : 'finalIntro';
+  revealAllThen(done ? finishFinal : () => {});
+}
+function finalRight(){
   if (busy || S.phase !== 'finalSolve') return;
   snapshot();
-  const p = cur();
-  S.final.won = won;
-  if (won){ p.total += S.cfg.finalPrize; Sound.fanfare(); confetti(); S.msg = `<span class="big">${esc(p.name)} vince il gioco finale!</span> +${euro(S.cfg.finalPrize)}`; }
-  else { Sound.buzz(); S.msg = `Peccato, ${esc(p.name)}! Ecco la soluzione.`; }
+  const f = S.final;
+  S.msg = `🟩 Busta ${f.idx + 1} vinta: <span class="big">${euro(f.prizes[f.idx])}</span>!`;
+  setFx('busta-win', euro(f.prizes[f.idx]), `Busta ${f.idx + 1} vinta`);
+  Sound.fanfare(); celebrate();
+  finalSettle(true);
+}
+function finalStop(){
+  if (busy || S.phase !== 'finalSolve') return;
+  snapshot();
+  const f = S.final;
+  S.msg = `🟥 Stop sulla busta ${f.idx + 1}: dentro c'erano ${euro(f.prizes[f.idx])}.`;
+  setFx('busta-lose', 'STOP', `Busta ${f.idx + 1}: ${euro(f.prizes[f.idx])}`);
+  Sound.buzz();
+  finalSettle(false);
+}
+function finalTimeUp(){
+  if (S.phase !== 'finalSolve') return;
+  const f = S.final;
+  f.timeLeft = 0;
+  S.msg = `<span class="big red">TEMPO SCADUTO!</span>`;
+  setFx('time', 'TEMPO SCADUTO', '');
+  Sound.buzz();
+  finalSettle(false);
+}
+function finishFinal(){
+  const f = S.final, p = S.players[f.player];
+  f.results = f.results.map(r => r === null ? false : r);
+  f.won = f.prizes.reduce((s, v, k) => s + (f.results[k] ? v : 0), 0);
+  p.total += f.won;
   S.phase = 'finalDone';
-  revealAllThen(showEnd);
+  S.msg = f.won ? `<span class="big">${esc(p.name)} vince ${euro(f.won)} nel gioco finale!</span>` : `Nessuna busta vinta per ${nm(p)}.`;
+  if (f.won){ setFx('solve', euro(f.won), `${p.name} · gioco finale`); Sound.fanfare(); celebrate(); }
+  save(); render(); setTimeout(showEnd, 900);
 }
 
 function undo(){
   if (busy || !history.length) return;
   S = JSON.parse(history.pop()); actionCount++;
-  save(); buildBoard(); render();
+  save(); buildBoard(true); render();
   closeModals(); openModalForPhase();
 }
 
 /* ================= Ruota (SVG) ================= */
-function buildWheel(){
+let wheelSig = '';
+function segStyle(s){
+  if (s.t === 'BANCAROTTA') return {fill:C.black, color:'#fff', plain:true};
+  if (s.t === 'PASSA') return {fill:C.white, color:'#111'};
+  if (s.t === 'BONUS') return {fill:'url(#bonusG)', color:'#111'};
+  if (s.t === 'JOLLY') return {fill:C.jolly, color:'#fff', plain:true};
+  if (s.t === 'MISTERO') return {fill:'url(#mistG)', color:'#ffd34d', plain:true};
+  if (s.t === 'EXPRESS') return {fill:C.express, color:'#fff', plain:true};
+  return {fill:C[s.c], color:'#111'};
+}
+function buildWheel(segs){
   const R = 205, cx = 220, cy = 220, hub = 70;
   const pt = (a, r) => [cx + r * Math.sin(a * Math.PI/180), cy - r * Math.cos(a * Math.PI/180)];
   let defs = `<defs>
     <radialGradient id="hubG" cx="45%" cy="40%" r="65%"><stop offset="0" stop-color="#e9f3ff"/><stop offset=".45" stop-color="#5b8fe6"/><stop offset="1" stop-color="#1c3fa8"/></radialGradient>
-    <linearGradient id="bonusG" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7cc6ee"/><stop offset=".3" stop-color="#f7df45"/><stop offset=".6" stop-color="#f39a2b"/><stop offset="1" stop-color="#a8d36b"/></linearGradient>
+    <linearGradient id="bonusG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7cc6ee"/><stop offset=".3" stop-color="#f7df45"/><stop offset=".6" stop-color="#f39a2b"/><stop offset="1" stop-color="#a8d36b"/></linearGradient>
+    <radialGradient id="mistG" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5b2a9e"/><stop offset="1" stop-color="#1d0b3a"/></radialGradient>
   </defs>`;
-  let body = `<circle cx="${cx}" cy="${cy}" r="${R+10}" fill="#1a1a1a"/><circle cx="${cx}" cy="${cy}" r="${R+4}" fill="#2b2b2b"/>`;
-  SEGMENTS.forEach((s, i) => {
+  let body = `<circle cx="${cx}" cy="${cy}" r="${R+12}" fill="#1a1a1a"/><circle cx="${cx}" cy="${cy}" r="${R+3}" fill="#2b2b2b"/>`;
+  segs.forEach((s, i) => {
     const a0 = i*SEG_DEG - SEG_DEG/2, a1 = a0 + SEG_DEG;
     const [x0,y0] = pt(a0, R), [x1,y1] = pt(a1, R);
-    const fill = s.t === 'BANCAROTTA' ? C.black : s.t === 'PASSA' ? C.white : s.t === 'BONUS' ? 'url(#bonusG)' : C[s.c];
-    body += `<path d="M${cx},${cy} L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${fill}" stroke="#ffffff" stroke-width="1.2"/>`;
-    const label = s.t || String(s.v);
-    const color = s.t === 'BANCAROTTA' ? '#ffffff' : '#111111';
-    const chars = [...label];
+    const st = segStyle(s);
+    body += `<path d="M${cx},${cy} L${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} Z" fill="${st.fill}" stroke="#ffffff" stroke-width="1.2"/>`;
+    const chars = [...(s.t || String(s.v))];
     let rStart, step, size;
-    if (s.t === 'BANCAROTTA'){ rStart = 192; step = 12.4; size = 14; }
+    if (chars.length >= 9){ rStart = 192; step = 12.4; size = 14; }
+    else if (chars.length >= 6){ rStart = 190; step = 16.5; size = 17; }
     else if (s.t){ rStart = 186; step = 22; size = 22; }
     else { rStart = 180; step = 31; size = 32; }
     const a = i*SEG_DEG;
     chars.forEach((ch, k) => {
       const [x,y] = pt(a, rStart - k*step);
-      body += `<text x="${x}" y="${y}" transform="rotate(${a} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Anton, Impact, Arial Black, sans-serif" font-size="${size}" fill="${color}" ${s.t==='BANCAROTTA'?'':'stroke="#ffffff" stroke-width=".6" paint-order="stroke"'}>${ch}</text>`;
+      body += `<text x="${x}" y="${y}" transform="rotate(${a} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Anton, Impact, Arial Black, sans-serif" font-size="${size}" fill="${st.color}" ${st.plain ? '' : 'stroke="#ffffff" stroke-width=".6" paint-order="stroke"'}>${ch}</text>`;
     });
     if (!s.t){ const [x,y] = pt(a, rStart - chars.length*step + 4); body += `<text x="${x}" y="${y}" transform="rotate(${a} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="16" fill="#111">€</text>`; }
   });
-  SEGMENTS.forEach((s, i) => { const [x,y] = pt(i*SEG_DEG - SEG_DEG/2, R - 2); body += `<circle cx="${x}" cy="${y}" r="3.4" fill="#d9d9d9" stroke="#555" stroke-width="1"/>`; });
+  segs.forEach((s, i) => { const [x,y] = pt(i*SEG_DEG - SEG_DEG/2, R - 2); body += `<circle cx="${x}" cy="${y}" r="3.4" fill="#d9d9d9" stroke="#555" stroke-width="1"/>`; });
+  segs.forEach((s, i) => { const [x,y] = pt(i*SEG_DEG, R + 7.5); body += `<circle class="wb ${i % 2 ? 'o' : ''}" cx="${x}" cy="${y}" r="3.2"/>`; });
   body += `<circle cx="${cx}" cy="${cy}" r="${hub}" fill="url(#hubG)" stroke="#0b1d5c" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="7" fill="#cfd6e4" stroke="#666"/>`;
   $('wheelRot').innerHTML = `<svg viewBox="0 0 440 440" aria-label="Ruota">${defs}${body}</svg>`;
   $('wheelRot').style.transform = `rotate(${wheelRot}deg)`;
+}
+function ensureWheel(){
+  const segs = activeSegments();
+  const sig = segs.map(s => s.t || s.v).join(',');
+  if (sig !== wheelSig){ wheelSig = sig; buildWheel(segs); }
 }
 
 function rotateWheelTo(index, turns, ms){
@@ -812,7 +1297,7 @@ function rotateWheelTo(index, turns, ms){
     const target = -index*SEG_DEG + jitter;
     let delta = ((target - wheelRot) % 360 + 360) % 360;
     const newRot = wheelRot + turns*360 + delta;
-    const el = $('wheelRot');
+    const el = $('wheelRot'), ptr = $('pointer');
     el.style.transition = `transform ${ms}ms cubic-bezier(.1,.62,.12,1)`;
     el.style.transform = `rotate(${newRot}deg)`;
     let lastSeg = null, done = false;
@@ -823,7 +1308,7 @@ function rotateWheelTo(index, turns, ms){
         const [a,b] = m.slice(7,-1).split(',').map(parseFloat);
         const ang = Math.atan2(b, a) * 180/Math.PI;
         const seg = Math.floor(((ang + SEG_DEG/2) % 360 + 360) % 360 / SEG_DEG);
-        if (lastSeg !== null && seg !== lastSeg) Sound.tick();
+        if (lastSeg !== null && seg !== lastSeg){ Sound.tick(); ptr.classList.add('tick'); setTimeout(() => ptr.classList.remove('tick'), 60); }
         lastSeg = seg;
       }
       requestAnimationFrame(watch);
@@ -838,125 +1323,244 @@ async function spinDigital(){
   if (busy || !S || !canSpinPhase() || !remaining('c').length) return;
   Sound.ensure();
   busy = true; render();
-  const index = Math.floor(Math.random() * SEGMENTS.length);
+  const segs = activeSegments();
+  const index = Math.floor(Math.random() * segs.length);
   const turns = 4 + Math.floor(Math.random()*3);
   await rotateWheelTo(index, turns, 4800 + Math.random()*1200);
   busy = false;
   snapshot();
-  applySegment(SEGMENTS[index]);
+  applySegment(segs[index]);
 }
-
 function chooseManual(key){
   if (busy || !S || !canSpinPhase()) return;
   Sound.ensure();
   const isMoney = typeof key === 'number';
-  if ((isMoney || key === 'BONUS') && !remaining('c').length) return;
-  const idxs = SEGMENTS.map((s,i)=>i).filter(i => isMoney ? SEGMENTS[i].v === key : SEGMENTS[i].t === key);
+  if (!isMoney && !SEG_KEYS.includes(key)) return;
+  if (key !== 'PASSA' && key !== 'BANCAROTTA' && !remaining('c').length) return;
+  const segs = activeSegments();
+  const idxs = segs.map((s,i)=>i).filter(i => isMoney ? segs[i].v === key : segs[i].t === key);
+  if (!idxs.length) return;
   const index = idxs[Math.floor(Math.random()*idxs.length)];
   rotateWheelTo(index, 1, 900);
   snapshot();
-  applySegment(SEGMENTS[index]);
+  applySegment(segs[index]);
 }
 
 /* ================= Tabellone ================= */
-function buildBoard(){
+function buildBulbs(){
+  const b = $('bulbs'); let h = ''; const pos = [];
+  const NX = 26, NY = 8;
+  for (let i = 0; i < NX; i++) pos.push([`${(i+.5)/NX*100}%`, '7px']);
+  for (let j = 0; j < NY; j++) pos.push(['calc(100% - 7px)', `${(j+.5)/NY*100}%`]);
+  for (let i = NX - 1; i >= 0; i--) pos.push([`${(i+.5)/NX*100}%`, 'calc(100% - 7px)']);
+  for (let j = NY - 1; j >= 0; j--) pos.push(['7px', `${(j+.5)/NY*100}%`]);
+  pos.forEach(([l,t], k) => { h += `<span class="bulb" style="left:${l};top:${t};animation-delay:${(k/pos.length*1.6).toFixed(3)}s"></span>`; });
+  b.innerHTML = h;
+}
+function buildBoard(instant){
   const b = $('board'); b.innerHTML = '';
   for (let r = 0; r < 4; r++) for (let c = 0; c < 14; c++){
+    const i = r*14 + c;
     const d = document.createElement('div');
-    d.className = 'tile';
+    d.className = 'tile'; d.dataset.i = i;
     if ((r === 0 || r === 3) && (c === 0 || c === 13)){ d.classList.add('off'); b.appendChild(d); continue; }
-    const ch = S && S.grid ? S.grid[r*14 + c] : null;
+    const ch = S && S.grid ? S.grid[i] : null;
     if (!ch) d.classList.add('empty');
-    else if (isLetter(ch)){ d.classList.add('letter'); d.dataset.n = norm(ch); d.innerHTML = `<span>${esc(ch)}</span>`; }
+    else if (isLetter(ch)){ d.classList.add('letter'); if (instant) d.classList.add('instant'); d.dataset.n = norm(ch); d.innerHTML = `<span>${esc(ch)}</span>`; }
     else { d.classList.add('punct'); d.innerHTML = `<span>${esc(ch)}</span>`; }
     b.appendChild(d);
   }
   updateBoard();
 }
+const tileEl = i => document.querySelector(`#board .tile[data-i="${i}"]`);
 function updateBoard(){
-  if (!S) return;
+  if (!S || !S.grid) return;
   document.querySelectorAll('#board .tile.letter').forEach(t => {
     if (t.classList.contains('pending')) return;
-    t.classList.toggle('shown', S.used.includes(t.dataset.n));
+    const sh = tileShown(+t.dataset.i);
+    if (sh && !t.classList.contains('shown')) t.classList.add('instant');
+    t.classList.toggle('shown', sh);
   });
 }
-/* Prepara (sincrono) e restituisce la funzione che avvia l'animazione di rivelazione */
-function animateReveal(letters, fast){
-  const tiles = [...document.querySelectorAll('#board .tile.letter')].filter(t => letters.includes(t.dataset.n) && !t.classList.contains('shown'));
-  tiles.forEach(t => t.classList.add('pending'));
-  busy = tiles.length > 0;
+/* Animazione "stile TV": le caselle si accendono di blu una dopo l'altra, poi girano */
+function animateTiles(tiles, fast){
+  tiles = tiles.filter(t => !t.classList.contains('shown'));
+  tiles.forEach(t => { t.classList.add('pending'); t.classList.remove('instant'); });
+  busy = busy || tiles.length > 0;
   return () => new Promise(resolve => {
     if (!tiles.length){ resolve(); return; }
     const litGap = fast ? 70 : 480, showGap = fast ? 60 : 260;
     tiles.forEach((t, i) => setTimeout(() => { t.classList.add('lit'); if (!fast || i % 3 === 0) Sound.ding(); }, i*litGap));
     const afterLit = tiles.length*litGap + (fast ? 400 : 650);
-    tiles.forEach((t, i) => setTimeout(() => { t.classList.remove('lit','pending'); t.classList.add('shown'); Sound.tone(1800,.04,'square',.05); }, afterLit + i*showGap));
+    tiles.forEach((t, i) => setTimeout(() => { t.classList.remove('lit','pending'); t.classList.add('shown'); Sound.soft(); }, afterLit + i*showGap));
     setTimeout(() => { busy = false; render(); resolve(); }, afterLit + tiles.length*showGap + 120);
   });
 }
+function animateReveal(letters, fast){
+  return animateTiles([...document.querySelectorAll('#board .tile.letter')].filter(t => letters.includes(t.dataset.n)), fast);
+}
+/* Rivelazione leggera di una casella (manche lampo, busta 3): non blocca il gioco */
+function lightTile(i){
+  const t = tileEl(i); if (!t || t.classList.contains('shown')) return;
+  t.classList.add('pending','lit'); t.classList.remove('instant'); Sound.soft();
+  setTimeout(() => { t.classList.remove('lit','pending'); t.classList.add('shown'); }, 420);
+}
+
+/* ================= Effetti TV ================= */
+let fxSeen = 0, booted = false, splashT = null, flipT = null;
+function playSplash(fx){
+  if (IS_REMOTE) return;
+  const el = $('splash'), big = el.querySelector('.splash-big'), sub = el.querySelector('.splash-sub');
+  const mystery = fx.kind.startsWith('mystery');
+  const dur = mystery ? 3300 : ['manche','lampo','final','busta'].includes(fx.kind) ? 2600 : 1900;
+  clearTimeout(splashT); clearTimeout(flipT);
+  el.className = 'splash k-' + (mystery ? 'mistero' : fx.kind);
+  el.style.setProperty('--dur', dur + 'ms');
+  if (mystery){
+    big.textContent = '?'; sub.textContent = 'MISTERO…';
+    flipT = setTimeout(() => { el.className = 'splash show flip k-' + fx.kind; big.textContent = fx.big; sub.textContent = fx.sub; }, 1300);
+  } else { big.textContent = fx.big; sub.textContent = fx.sub || ''; }
+  void el.offsetWidth; el.classList.add('show');
+  splashT = setTimeout(() => el.classList.remove('show'), dur);
+}
+function shake(){ if (IS_REMOTE) return; const st = document.querySelector('.stage'); st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake'); setTimeout(() => st.classList.remove('shake'), 600); }
+function celebrate(){
+  if (IS_REMOTE) return;
+  document.body.classList.add('celebrate'); setTimeout(() => document.body.classList.remove('celebrate'), 4000);
+  const cols = ['#ffd34d','#ff5d73','#4fc3ff','#7ee06f','#c38bff','#fff'];
+  for (let i = 0; i < 110; i++){
+    const d = document.createElement('div'); d.className = 'confetti';
+    d.style.left = Math.random()*100 + 'vw'; d.style.background = cols[i % cols.length];
+    d.style.animationDuration = (2.2 + Math.random()*2.4) + 's'; d.style.animationDelay = Math.random()*.7 + 's';
+    d.style.borderRadius = Math.random() < .4 ? '50%' : '2px';
+    document.body.appendChild(d); setTimeout(() => d.remove(), 5600);
+  }
+}
+
+/* Soldi che "scorrono" quando cambiano */
+const money = {};
+function moneyNow(m){ if (!m.start) return m.to; const t = Math.min(1, (performance.now() - m.start) / 750); return Math.round(m.from + (m.to - m.from) * (1 - Math.pow(1 - t, 3))); }
+function setMoney(i, v){
+  const m = money[i];
+  if (!m){ money[i] = {from:v, to:v, start:0}; return; }
+  if (m.to === v) return;
+  money[i] = {from: moneyNow(m), to: v, start: performance.now()};
+  requestAnimationFrame(tickMoney);
+}
+function tickMoney(){
+  let again = false;
+  for (const i in money){
+    const m = money[i], el = document.querySelector(`[data-pr="${i}"]`);
+    if (el) el.textContent = euro(moneyNow(m));
+    if (m.start && performance.now() - m.start < 750) again = true; else m.start = 0;
+  }
+  if (again) requestAnimationFrame(tickMoney);
+}
 
 /* ================= Render ================= */
+let lastCat = null, lastMsg = null, lastSegShown = null;
 function render(){
-  // header
   $('undoBtn').disabled = busy || !(IS_REMOTE ? remoteCanUndo : history.length);
-  renderSolution();
   $('soundBtn').textContent = Sound.on ? '🔊' : '🔇';
+  document.body.classList.toggle('tvmode', remoteConnected());
+  document.body.classList.toggle('nowheel', !!S && (!!S.final || ['lampo','lampoBuzz'].includes(S.phase)));
+  renderSolution();
+  ensureWheel();
   if (!S){
-    $('mancheBadge').textContent = '—'; $('players').innerHTML='';
+    $('mancheBadge').textContent = '—'; $('players').innerHTML = ''; $('category').innerHTML = '&nbsp;'; $('envelopes').hidden = true;
     $('msg').innerHTML = remoteConnected() ? '📱 Il conduttore sta creando la partita dal telefono…' : IS_REMOTE ? 'Crea la partita: si aprirà sulla TV.' : 'Crea una nuova partita per iniziare.';
     $('actions').innerHTML = IS_REMOTE ? '<button class="btn" data-act="newGame">Nuova partita</button>' : '';
+    $('wheelResult').textContent = '';
     renderKeyboard(); renderWheelControls(); Remote.broadcast(); return;
   }
-  const sp = spec(), extra = (sp.mult > 1 ? ` · VALORI ×${sp.mult}` : '') + (sp.timer ? ` · ⏱ ${sp.timer}s` : '');
-  $('mancheBadge').textContent = S.final ? 'GIOCO FINALE' : S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` : `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${extra}`;
+  if (!IS_REMOTE && S.fx && S.fx.id > fxSeen){ fxSeen = S.fx.id; if (booted) playSplash(S.fx); }
 
-  // players
-  $('players').innerHTML = S.players.map((p,i) => `
-    <div class="pcard ${i===S.current && PLAY_PHASES.includes(S.phase) ? 'active':''} ${isActive(i)?'':'out'}" style="--pc:${p.color}">
-      <div class="pname">${esc(p.name)}</div>
-      <div class="pround">${euro(p.round)}</div>
-      <div class="ptotal">Totale: <b>${euro(p.total)}</b></div>
-    </div>`).join('');
-  const act = document.querySelector('.pcard.active'); if (act) act.scrollIntoView({block:'nearest',inline:'nearest'});
+  const sp = spec(), label = mancheLabel(sp);
+  $('mancheBadge').textContent = S.final ? 'GIOCO FINALE' : S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` :
+    `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${label ? ' · ' + label.toUpperCase() : ''}`;
 
-  // category
-  $('category').innerHTML = S.category ? `<small>TITOLO</small>${esc(S.category)}` : '&nbsp;';
+  renderPlayers();
 
-  // message
-  $('msg').innerHTML = S.msg || '';
+  const catHtml = S.category ? `<small>${S.final ? 'TEMA' : 'TITOLO'}</small>${esc(S.category)}` : '&nbsp;';
+  const cat = $('category');
+  if (catHtml !== lastCat){ cat.innerHTML = catHtml; lastCat = catHtml; cat.classList.remove('pop'); void cat.offsetWidth; if (S.category) cat.classList.add('pop'); }
 
-  // actions
-  const a = [];
-  const ph = S.phase, p = cur();
-  if (ph === 'turn'){
-    const canVowel = p.round >= S.cfg.vowelCost && remaining('v').length > 0;
-    a.push(`<button class="btn blue" data-act="vowel" ${busy||!canVowel?'disabled':''}>Compra vocale (${euro(S.cfg.vowelCost)})</button>`);
-    a.push(`<button class="btn green" data-act="solve" ${busy?'disabled':''}>Risolvi</button>`);
-    a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
-  } else if (ph === 'consonant' || ph === 'bonusPick' || ph === 'bonusSpin'){
-    a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
-  } else if (ph === 'vowel'){
-    a.push(`<button class="btn ghost" data-act="cancel">Annulla acquisto</button>`);
-  } else if (ph === 'solve'){
-    a.push(`<button class="btn green" data-act="right">✓ Soluzione esatta</button>`);
-    a.push(`<button class="btn red" data-act="wrong">✗ Sbagliata</button>`);
-    a.push(`<button class="btn ghost" data-act="cancel">Indietro</button>`);
-  } else if (ph === 'finalSolve'){
-    a.push(`<button class="btn green" data-act="finalRight" ${busy?'disabled':''}>✓ Soluzione esatta</button>`);
-    a.push(`<button class="btn red" data-act="finalWrong" ${busy?'disabled':''}>✗ Sbagliata / tempo scaduto</button>`);
-  } else if (ph === 'mancheEnd' || ph === 'gameOver' || ph === 'finalDone'){
-    a.push(`<button class="btn" data-act="showEnd" ${busy?'disabled':''}>${ph==='mancheEnd'?'Continua ▶':'Classifica finale'}</button>`);
-  } else if (ph === 'phrase' || ph === 'finalPhrase'){
-    if (remoteConnected()) $('msg').innerHTML = '📱 Il conduttore sta inserendo la frase dal telefono…';
-    else a.push(`<button class="btn" data-act="openPhrase">Inserisci la frase</button>`);
+  renderEnvelopes();
+
+  let msg = S.msg || '';
+  if ((S.phase === 'phrase' || S.phase === 'finalPhrase') && remoteConnected()) msg = '📱 Il conduttore sta preparando la frase sul telefono…';
+  if (S.phase === 'turn' && !busy && S.grid && !remaining('c').length && remaining('v').length && !/scoperte/.test(msg))
+    msg += ` <span class="muted">(Restano solo vocali: compra una vocale o risolvi.)</span>`;
+  if (msg !== lastMsg){ $('msg').innerHTML = msg; lastMsg = msg; const m = $('msg'); m.classList.remove('msgIn'); void m.offsetWidth; m.classList.add('msgIn'); }
+
+  const wr = $('wheelResult');
+  const segTxt = S.lastSeg ? `↓ ${S.lastSeg}` : '';
+  if (segTxt !== lastSegShown){ wr.textContent = segTxt; lastSegShown = segTxt; wr.classList.remove('pop'); void wr.offsetWidth; if (segTxt) wr.classList.add('pop'); }
+
+  renderActions(); renderKeyboard(); renderWheelControls(); updateBoard();
+  Remote.broadcast();
+}
+
+function renderPlayers(){
+  const lampo = S.phase === 'lampo';
+  const showTurn = PLAY_PHASES.includes(S.phase) && S.phase !== 'finalIntro';
+  $('players').innerHTML = S.players.map((p,i) => {
+    const out = !isActive(i) || (S.lampo && ['lampo','lampoBuzz'].includes(S.phase) && S.lampo.out.includes(i));
+    const buzzable = lampo && !out && !remoteConnected();
+    const shown = money[i] ? moneyNow(money[i]) : p.round;
+    return `<div class="pcard ${i === S.current && showTurn ? 'active' : ''} ${out ? 'out' : ''} ${buzzable ? 'buzzable' : ''}" style="--pc:${p.color}" ${buzzable ? `data-act="buzz" data-arg="${i}" role="button" tabindex="0"` : ''}>
+      <span class="turn-tag">TOCCA A TE</span>
+      <div class="avatar">${esc([...p.name][0] || '?').toUpperCase()}</div>
+      <div class="pname">${esc(p.name)}${p.jolly ? '<span class="jolly-badge">🃏 JOLLY</span>' : ''}</div>
+      <div class="pround" data-pr="${i}">${euro(shown)}</div>
+      <div class="ptotal">Totale: <b>${euro(p.total)}</b>${lampo && !out ? ' · 🔔' : ''}</div>
+    </div>`;
+  }).join('');
+  S.players.forEach((p,i) => setMoney(i, p.round));
+  const act = document.querySelector('.pcard.active'); if (act && IS_REMOTE) act.scrollIntoView({block:'nearest', inline:'nearest'});
+}
+
+function renderEnvelopes(){
+  const el = $('envelopes');
+  if (!S.final || !S.final.prizes.length){ el.hidden = true; return; }
+  const f = S.final;
+  el.hidden = false;
+  el.innerHTML = BUSTE.map((b,k) => {
+    const r = f.results[k];
+    const active = f.idx === k && ['finalPick','finalSolve'].includes(S.phase);
+    const cls = r === true ? 'won' : r === false ? 'lost' : active ? 'active' : '';
+    return `<div class="env ${cls}"><div class="n">BUSTA ${k+1}</div><div class="t">${b.name}</div>${r === null ? '' : `<div class="p">${euro(f.prizes[k])}</div>`}${r === true ? '<div class="ic">✓</div>' : r === false ? '<div class="ic">✗</div>' : ''}</div>`;
+  }).join('');
+}
+
+function renderActions(){
+  const a = [], ph = S.phase, p = cur();
+  const btn = (act, label, cls = '', dis = false, arg) =>
+    `<button class="btn ${cls}" data-act="${act}" ${arg !== undefined ? `data-arg="${arg}"` : ''} ${busy || dis ? 'disabled' : ''}>${label}</button>`;
+  switch (ph){
+    case 'turn':
+      a.push(btn('vowel', `Compra vocale (${euro(cost())})`, 'blue', p.round < cost() || !remaining('v').length),
+             btn('solve', 'Risolvi', 'green'), btn('skip', 'Passa turno', 'ghost')); break;
+    case 'consonant': case 'bonusPick': case 'bonusSpin':
+      a.push(btn('skip', 'Passa turno', 'ghost')); break;
+    case 'vowel': a.push(btn('cancel', 'Annulla acquisto', 'ghost')); break;
+    case 'solve': a.push(btn('right', '✓ Soluzione esatta', 'green'), btn('wrong', '✗ Sbagliata', 'red'), btn('cancel', 'Indietro', 'ghost')); break;
+    case 'jollyAsk': a.push(btn('jollyYes', '🃏 Usa il Jolly', 'purple'), btn('jollyNo', 'Non usarlo', 'ghost')); break;
+    case 'mysteryAsk': a.push(btn('mysteryReveal', '❓ Scopri il Mistero', 'purple'), btn('mysteryKeep', 'Tieni i soldi', 'ghost')); break;
+    case 'expressAsk': a.push(btn('expressGo', '⚡ Sali sull\'Express', 'green'), btn('expressNo', 'Continua normale', 'ghost')); break;
+    case 'express': a.push(btn('solve', 'Risolvi', 'green')); break;
+    case 'lampo':
+      S.players.forEach((q,i) => { if (isActive(i) && !S.lampo.out.includes(i)) a.push(`<button class="btn buzz" style="--pc:${q.color}" data-act="buzz" data-arg="${i}" ${busy ? 'disabled' : ''}>🔔 ${esc(q.name)}</button>`); });
+      a.push(btn('lampoEnd', 'Nessuno indovina', 'ghost')); break;
+    case 'lampoBuzz': a.push(btn('lampoRight', '✓ Esatta', 'green'), btn('lampoWrong', '✗ Sbagliata', 'red')); break;
+    case 'mancheEnd': case 'gameOver': case 'finalDone':
+      a.push(btn('showEnd', ph === 'mancheEnd' ? 'Continua ▶' : 'Classifica finale')); break;
+    case 'phrase': if (!remoteConnected()) a.push(btn('openPhrase', 'Inserisci la frase')); break;
+    case 'finalPhrase': if (!remoteConnected()) a.push(btn('openFinalPhrase', 'Prepara le buste')); break;
+    case 'finalIntro': { const k = S.final.results.findIndex(r => r === null); a.push(btn('finalNext', k < 0 ? 'Risultato finale' : `✉ Apri la busta ${k+1}`, 'green')); break; }
+    case 'finalSolve': a.push(btn('finalRight', '✓ Esatta', 'green'), btn('finalStop', '✋ STOP · passa', 'red')); break;
   }
   $('actions').innerHTML = a.join('');
-
-  if (ph === 'turn' && !busy && !remaining('c').length && remaining('v').length && !/Tutte/.test(S.msg))
-    $('msg').innerHTML += ` <span style="color:var(--muted)">(Restano solo vocali: compra una vocale o risolvi.)</span>`;
-
-  renderKeyboard(); renderWheelControls(); updateBoard();
-  Remote.broadcast();
 }
 
 function renderKeyboard(){
@@ -964,18 +1568,24 @@ function renderKeyboard(){
   const mk = L => {
     const used = S && S.used.includes(L);
     const v = isVowel(L);
-    let enabled = !busy && (((ph === 'consonant' || ph === 'bonusPick') && !v) || (ph === 'vowel' && v));
-    const picked = (ph === 'finalPick' && S.final.picks.includes(L)) || (ph === 'bonusSpin' && S.bonusFirst === L);
-    if (ph === 'finalPick' && !busy){
-      const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
-      enabled = !used && !picked && (v ? nc === 3 && nv === 0 : nc < 3);
+    let enabled = false;
+    if (S && !busy){
+      if (ph === 'consonant' || ph === 'bonusPick') enabled = !v;
+      else if (ph === 'vowel') enabled = v;
+      else if (ph === 'express') enabled = !v || cur().round >= cost();
+      else if (ph === 'finalPick'){
+        const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
+        enabled = !used && !S.final.picks.includes(L) && (v ? nc === 3 && nv === 0 : nc < 3);
+      }
     }
+    const picked = S && ((ph === 'finalPick' && S.final.picks.includes(L)) || (ph === 'bonusSpin' && S.bonusFirst === L));
     return `<button class="key ${v?'vowel':''} ${used?'used':''} ${picked?'picked':''} ${enabled && !used ? 'hot':''}" data-letter="${L}" ${enabled?'':'disabled'}>${L}</button>`;
   };
   const cons = [...ALPHA].filter(L => !isVowel(L));
+  const tv = remoteConnected();
   $('keyboard').innerHTML =
-    `<div class="krow"><div class="klabel">Vocali</div>${[...VOWELS].map(mk).join('')}</div>` +
-    `<div class="krow"><div class="klabel">Consonanti</div>${cons.map(mk).join('')}</div>`;
+    `<div class="krow"><div class="klabel">${tv ? 'Lettere chiamate · vocali' : 'Vocali'}</div>${[...VOWELS].map(mk).join('')}</div>` +
+    `<div class="krow"><div class="klabel">${tv ? 'Consonanti' : 'Consonanti'}</div>${cons.map(mk).join('')}</div>`;
 }
 
 function renderWheelControls(){
@@ -983,19 +1593,25 @@ function renderWheelControls(){
   $('modeManual').classList.toggle('on', mode === 'manual');
   const canSpin = canSpinPhase() && !busy;
   const noCons = S && S.grid && !remaining('c').length;
-  $('spinBtn').style.display = mode === 'digital' ? '' : 'none';
-  $('manualGrid').style.display = mode === 'manual' ? '' : 'none';
+  $('spinBtn').hidden = mode !== 'digital';
+  $('manualGrid').hidden = mode !== 'manual';
   $('spinBtn').disabled = !canSpin || noCons;
   const vals = [100,150,200,250,300,350,400];
   const col = {100:C.blue,150:C.yellow,200:C.orange,250:C.orange,300:C.green,350:C.green,400:C.pink};
-  $('manualGrid').innerHTML =
-    vals.map(v => `<button class="seg-btn" data-seg="${v}" style="background:${col[v]}" ${!canSpin||noCons?'disabled':''}>${v}</button>`).join('') +
-    `<button class="seg-btn" data-seg="BONUS" style="background:linear-gradient(135deg,${C.blue},${C.yellow},${C.orange},${C.green})" ${!canSpin||noCons?'disabled':''}>BONUS</button>` +
-    `<button class="seg-btn wide" data-seg="PASSA" style="background:${C.white}" ${!canSpin?'disabled':''}>PASSA</button>` +
-    `<button class="seg-btn wide" data-seg="BANCAROTTA" style="background:${C.black};color:#fff" ${!canSpin?'disabled':''}>BANCAROTTA</button>`;
-  $('wheelHint').textContent = mode === 'digital'
+  const segs = activeSegments(), has = t => segs.some(s => s.t === t);
+  const dis = need => (!canSpin || (need && noCons)) ? 'disabled' : '';
+  let h = vals.map(v => `<button class="seg-btn" data-seg="${v}" style="background:${col[v]}" ${dis(true)}>${v}</button>`).join('') +
+    `<button class="seg-btn" data-seg="BONUS" style="background:linear-gradient(135deg,${C.blue},${C.yellow},${C.orange},${C.green})" ${dis(true)}>BONUS</button>`;
+  if (has('JOLLY')) h += `<button class="seg-btn" data-seg="JOLLY" style="background:${C.jolly};color:#fff" ${dis(true)}>JOLLY</button>`;
+  if (has('MISTERO')) h += `<button class="seg-btn" data-seg="MISTERO" style="background:#3b1a6e;color:#ffd34d" ${dis(true)}>MISTERO</button>`;
+  if (has('EXPRESS')) h += `<button class="seg-btn" data-seg="EXPRESS" style="background:${C.express};color:#fff" ${dis(true)}>EXPRESS</button>`;
+  h += `<button class="seg-btn wide" data-seg="PASSA" style="background:${C.white}" ${dis(false)}>PASSA</button>` +
+       `<button class="seg-btn wide" data-seg="BANCAROTTA" style="background:${C.black};color:#fff" ${dis(false)}>BANCAROTTA</button>`;
+  $('manualGrid').innerHTML = h;
+  const lampo = S && ['lampo','lampoBuzz'].includes(S.phase);
+  $('wheelHint').textContent = lampo ? 'Manche lampo: la ruota non si usa.' : mode === 'digital'
     ? 'Premi “Gira la ruota” per uno spin digitale.'
-    : 'Gira la ruota vera e tocca lo spicchio uscito.';
+    : 'Gira la ruota vera e tocca lo spicchio uscito. Jolly, Mistero ed Express compaiono qui quando sono attivi.';
 }
 
 /* ================= Modali ================= */
@@ -1003,12 +1619,13 @@ function closeModals(){ document.querySelectorAll('.modal-bg').forEach(m => m.cl
 function anyModalOpen(){ return !!document.querySelector('.modal-bg.open'); }
 function openModalForPhase(){
   if (!S){ openSetup(); return; }
-  if (S.phase === 'phrase' || S.phase === 'finalPhrase') openPhrase();
+  if (S.phase === 'phrase') openPhrase();
+  if (S.phase === 'finalPhrase') openFinalPhrase();
 }
 
 function playerRow(name, i){
   return `<div class="prow"><span class="dot" style="background:${PLAYER_COLORS[i % PLAYER_COLORS.length]}"></span>
-    <input type="text" value="${esc(name)}" placeholder="Nome concorrente" maxlength="24">
+    <input type="text" value="${esc(name)}" placeholder="Nome concorrente" maxlength="24" aria-label="Nome concorrente ${i+1}">
     <button class="xbtn" type="button" data-rm title="Rimuovi">✕</button></div>`;
 }
 function openSetup(){
@@ -1017,26 +1634,35 @@ function openSetup(){
   $('playerInputs').innerHTML = names.map(playerRow).join('');
   const c = S ? S.cfg : withDefaults({manches:3});
   $('numManches').value = c.manches; $('vowelCost').value = c.vowelCost; $('winBonus').value = c.winBonus; $('keepOthers').checked = c.keepOthers;
-  $('finalOn').checked = c.finalOn; $('finalPrize').value = c.finalPrize; $('finalSeconds').value = c.finalSeconds; $('finalLetters').value = [...c.finalLetters].join(' ').replace(/\s+/g,' ');
+  $('lampoPrize').value = c.lampoPrize; $('lampoSpeed').value = c.lampoSpeed; $('mysteryPrize').value = c.mysteryPrize; $('expressValue').value = c.expressValue;
+  $('finalOn').checked = c.finalOn; $('finalSeconds').value = c.finalSeconds; $('finalLetters').value = [...c.finalLetters].join(' ');
+  $('finalPrizes').value = c.finalPrizes.join(', ');
   renderMancheTable(c.special);
   $('setupCancel').style.display = S ? '' : 'none';
   $('setupErr').textContent = '';
   closeModals(); $('setupModal').classList.add('open');
 }
 function readMancheTable(){
-  return [...$('mancheTable').querySelectorAll('[data-m]')].map(row => ({mult: +row.querySelector('.selMult').value, timer: +row.querySelector('.selTimer').value}));
+  return [...$('mancheTable').querySelectorAll('.mrow')].map(row => ({
+    type: row.querySelector('.selType').value, mult: +row.querySelector('.selMult').value, timer: +row.querySelector('.selTimer').value,
+    jolly: row.querySelector('.cJolly').checked, mistero: row.querySelector('.cMist').checked, express: row.querySelector('.cExp').checked
+  }));
 }
 function renderMancheTable(special){
   const n = Math.max(1, Math.min(30, Math.round(+$('numManches').value || 1)));
-  const opt = (v, cur, label) => `<option value="${v}" ${+cur === v ? 'selected' : ''}>${label}</option>`;
-  let h = '<div class="mh">Manche</div><div class="mh">Valori ruota</div><div class="mh">Tempo per turno</div>';
+  const opt = (v, curV, label) => `<option value="${v}" ${String(curV) === String(v) ? 'selected' : ''}>${label}</option>`;
+  let h = '';
   for (let i = 0; i < n; i++){
-    const sp = special[i] || {mult:1, timer:0};
-    h += `<div class="ml">${i+1}</div>
-      <div data-m="${i}" style="display:contents">
-        <select class="selMult" aria-label="Valori manche ${i+1}">${opt(1,sp.mult,'Normali')}${opt(2,sp.mult,'Doppi ×2')}${opt(3,sp.mult,'Tripli ×3')}</select>
-        <select class="selTimer" aria-label="Tempo manche ${i+1}">${opt(0,sp.timer,'Nessun limite')}${[10,15,20,30,45].map(t => opt(t,sp.timer,t+' secondi')).join('')}</select>
-      </div>`;
+    const sp = Object.assign({}, DEFAULT_SPEC, special[i]);
+    h += `<div class="mrow" data-m="${i}">
+      <span class="ml">Manche ${i+1}</span>
+      <select class="selType" aria-label="Tipo manche ${i+1}">${opt('normal',sp.type,'Normale')}${opt('lampo',sp.type,'⚡ Lampo')}</select>
+      <select class="selMult" aria-label="Valori manche ${i+1}">${opt(1,sp.mult,'Valori ×1')}${opt(2,sp.mult,'Valori ×2')}${opt(3,sp.mult,'Valori ×3')}</select>
+      <select class="selTimer" aria-label="Tempo manche ${i+1}">${opt(0,sp.timer,'Senza tempo')}${[10,15,20,30,45].map(t => opt(t,sp.timer,t+'" a turno')).join('')}</select>
+      <label class="chip"><input type="checkbox" class="cJolly" ${sp.jolly?'checked':''}> 🃏 Jolly</label>
+      <label class="chip"><input type="checkbox" class="cMist" ${sp.mistero?'checked':''}> ❓ Mistero</label>
+      <label class="chip"><input type="checkbox" class="cExp" ${sp.express?'checked':''}> ⚡ Express</label>
+    </div>`;
   }
   $('mancheTable').innerHTML = h;
 }
@@ -1044,11 +1670,21 @@ function recolorPlayerRows(){ [...$('playerInputs').children].forEach((r,i) => r
 
 function openPhrase(){
   if (remoteConnected()){ closeModals(); render(); return; }   // la frase si scrive sul telefono, mai sulla TV
-  $('phraseTitle').textContent = S.final ? `Gioco finale · ${S.players[S.final.player].name}` : S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}`;
+  const sp = spec();
+  $('phraseTitle').textContent = S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}${sp.type === 'lampo' ? ' · Lampo' : ''}`;
   $('catInput').value = ''; $('phraseInput').value = ''; $('phraseInput').type = 'password';
   $('phraseErr').textContent = ''; $('preview').innerHTML = '';
   closeModals(); $('phraseModal').classList.add('open');
   setTimeout(() => $('catInput').focus(), 50);
+}
+function openFinalPhrase(){
+  if (remoteConnected()){ closeModals(); render(); return; }
+  $('finalTitle').textContent = `Gioco finale · ${S.players[S.final.player].name}`;
+  ['finalTheme','fp0','fp1','fp2'].forEach(id => $(id).value = '');
+  ['fp0','fp1','fp2'].forEach(id => $(id).type = 'password');
+  $('finalErr').textContent = '';
+  closeModals(); $('finalModal').classList.add('open');
+  setTimeout(() => $('finalTheme').focus(), 50);
 }
 function updatePreview(){
   const txt = $('phraseInput').value;
@@ -1068,16 +1704,20 @@ function updatePreview(){
 function standingsTable(){
   const order = S.players.map((p,i)=>({...p,i})).filter(p => !S.tiebreak || S.final || S.tiebreak.includes(p.i)).sort((a,b) => b.total - a.total);
   const top = order[0] ? order[0].total : 0;
-  return `<table class="standings">${order.map((p,k) => `<tr class="${p.total===top?'top':''}"><td>${k+1}. <span style="color:${p.color}">●</span> ${esc(p.name)}</td><td>${euro(p.total)}</td></tr>`).join('')}</table>`;
+  return `<table class="standings">${order.map((p,k) => `<tr class="${p.total===top?'top':''}"><td>${k+1}. <span style="color:${p.color}">●</span> ${esc(p.name)}${p.jolly ? ' 🃏' : ''}</td><td>${euro(p.total)}</td></tr>`).join('')}</table>`;
 }
 
 function showEnd(){
+  if (!S) return;
   const el = $('endContent');
-  const sol = `<div class="solution">${esc(S.phrase.toUpperCase())}</div>`;
+  const sol = `<div class="solution">${esc((S.phrase || '').toUpperCase())}</div>`;
   if (S.phase === 'mancheEnd'){
     const last = !S.tiebreak && S.manche >= S.cfg.manches;
-    el.innerHTML = `<h2>Manche ${S.manche} conclusa</h2>
-      <p style="margin:0 0 6px"><b>${esc(S.lastWinner.name)}</b> ha risolto e incassa <b>${euro(S.lastWinner.won)}</b> (premio manche ${euro(S.cfg.winBonus)} incluso).</p>
+    const w = S.lastWinner;
+    const line = !w ? 'Nessuno ha risolto questa manche.' :
+      w.lampo ? `<b>${esc(w.name)}</b> vince la manche lampo e incassa <b>${euro(w.won)}</b>.` :
+      `<b>${esc(w.name)}</b> ha risolto e incassa <b>${euro(w.won)}</b> (premio manche ${euro(S.cfg.winBonus)} incluso).`;
+    el.innerHTML = `<h2>Manche ${S.manche} conclusa</h2><p style="margin:0 0 6px">${line}</p>
       ${sol}${standingsTable()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Guarda il tabellone</button>
       <button class="btn green" data-act="${S.tiebreak || last ? 'finish' : 'nextManche'}">${S.tiebreak || last ? 'Classifica finale 🏆' : 'Prossima manche ▶'}</button></div>`;
@@ -1092,25 +1732,35 @@ function showEnd(){
       ${standingsTable()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       ${tie ? '<button class="btn" data-act="tiebreak">Manche di spareggio</button>' : ''}
-      ${!tie && S.cfg.finalOn ? '<button class="btn" data-act="final">Gioco finale ▶</button>' : ''}
+      ${!tie && S.cfg.finalOn ? '<button class="btn" data-act="final">✉ Gioco finale delle 3 buste</button>' : ''}
       <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
   } else if (S.phase === 'finalDone'){
-    const p = S.players[S.final.player];
-    el.innerHTML = `<div class="trophy">${S.final.won ? '🏆' : '⏱'}</div>
-      <h2 style="text-align:center">${S.final.won ? esc(p.name) + ' vince il gioco finale!' : 'Gioco finale non riuscito'}</h2>
-      <p style="text-align:center;margin:0">${S.final.won ? 'Premio di <b>' + euro(S.cfg.finalPrize) + '</b> aggiunto al totale.' : 'Peccato! ' + esc(p.name) + ' resta comunque il vincitore della partita.'}</p>
-      ${sol}${standingsTable()}
+    const f = S.final, p = S.players[f.player];
+    const rows = BUSTE.map((b,k) => `<tr class="${f.results[k] ? 'top' : ''}"><td>${f.results[k] ? '🟩' : '🟥'} Busta ${k+1} · ${b.name}<br><small>${esc((f.phrases[k] || '').toUpperCase())}</small></td><td>${euro(f.prizes[k])}</td></tr>`).join('');
+    el.innerHTML = `<div class="trophy">${f.won ? '🏆' : '✉'}</div>
+      <h2 style="text-align:center">${f.won ? `${esc(p.name)} vince ${euro(f.won)}!` : 'Nessuna busta vinta'}</h2>
+      <table class="standings">${rows}</table>
+      <h2 style="margin-top:16px;font-size:20px">Classifica finale</h2>
+      ${standingsTable()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
   } else return;
   closeModals(); $('endModal').classList.add('open');
 }
 
-function nextManche(){ if (busy || S.phase !== 'mancheEnd' || (!S.tiebreak && S.manche >= S.cfg.manches)) return; snapshot(); S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[]; S.msg = 'Il conduttore inserisce la nuova frase.'; save(); buildBoard(); render(); openPhrase(); }
+function nextManche(){
+  if (busy || S.phase !== 'mancheEnd' || (!S.tiebreak && S.manche >= S.cfg.manches)) return;
+  snapshot(); S.manche++; S.phase = 'phrase'; S.category = ''; S.grid = null; S.used = []; S.extra = []; S.lastSeg = null;
+  S.msg = 'Il conduttore inserisce la nuova frase.';
+  save(); buildBoard(true); render(); openPhrase();
+}
 function finishGame(){
   if (busy || S.phase !== 'mancheEnd') return;
   snapshot(); S.phase = 'gameOver'; S.msg = 'Partita terminata!';
-  save(); render(); confetti(); Sound.fanfare(); showEnd();
+  const top = Math.max(...S.players.map(p => p.total));
+  const w = S.players.filter(p => p.total === top);
+  setFx('solve', w.length > 1 ? 'PARITÀ!' : w[0].name.toUpperCase(), w.length > 1 ? 'si va allo spareggio?' : `vince con ${euro(top)}`);
+  save(); render(); celebrate(); Sound.fanfare(); showEnd();
 }
 function startTiebreak(){
   if (busy || S.phase !== 'gameOver') return;
@@ -1118,20 +1768,9 @@ function startTiebreak(){
   const pool = S.players.map((p,i)=>({p,i})).filter(o => isActive(o.i));
   const top = Math.max(...pool.map(o => o.p.total));
   S.tiebreak = pool.filter(o => o.p.total === top).map(o => o.i);
-  S.manche++; S.phase = 'phrase'; S.category=''; S.grid=null; S.used=[];
+  S.manche++; S.phase = 'phrase'; S.category = ''; S.grid = null; S.used = []; S.extra = [];
   S.msg = 'Spareggio! Il conduttore inserisce la frase.';
-  save(); buildBoard(); render(); openPhrase();
-}
-
-function confetti(){
-  const cols = ['#ffd34d','#ff5d73','#4fc3ff','#7ee06f','#c38bff','#fff'];
-  for (let i = 0; i < 90; i++){
-    const d = document.createElement('div'); d.className = 'confetti';
-    d.style.left = Math.random()*100 + 'vw'; d.style.background = cols[i % cols.length];
-    d.style.animationDuration = (2.2 + Math.random()*2.2) + 's'; d.style.animationDelay = Math.random()*.6 + 's';
-    d.style.borderRadius = Math.random() < .4 ? '50%' : '2px';
-    document.body.appendChild(d); setTimeout(() => d.remove(), 5200);
-  }
+  save(); buildBoard(true); render(); openPhrase();
 }
 
 /* ================= Azioni e telecomando ================= */
@@ -1139,15 +1778,18 @@ function confetti(){
 const ACTIONS = {
   vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
   right: solveRight, wrong: solveWrong, nextManche, finish: finishGame, tiebreak: startTiebreak,
-  final: startFinalSetup, finalRight: () => finalResult(true), finalWrong: () => finalResult(false),
+  jollyYes, jollyNo, mysteryReveal, mysteryKeep, expressGo, expressNo,
+  buzz: i => buzz(i), lampoRight, lampoWrong, lampoEnd,
+  final: startFinalSetup, finalNext, finalRight, finalStop,
+  finalPhrases: a => applyFinalPhrases(a),
   undo, spin: spinDigital,
-  seg: k => chooseManual(typeof k === 'number' || k === 'BONUS' || k === 'PASSA' || k === 'BANCAROTTA' ? k : null),
+  seg: k => chooseManual(typeof k === 'number' || SEG_KEYS.includes(k) ? k : null),
   letter: a => a && /^[A-Z]$/.test(a.L) && chooseLetter(a.L, !!a.confirmed),
   setup: cfg => applySetup(cfg),
   phrase: a => a && applyPhrase(String(a.cat || ''), String(a.txt || ''))
 };
 // Azioni che riguardano solo lo schermo di chi le preme
-const LOCAL = { showEnd, openPhrase, closeEnd: closeModals, newGame: () => askNewGame() };
+const LOCAL = { showEnd, openPhrase, openFinalPhrase, closeEnd: closeModals, newGame: () => askNewGame() };
 
 function act(name, arg){
   if (LOCAL[name]) return LOCAL[name](arg);
@@ -1156,8 +1798,9 @@ function act(name, arg){
 }
 
 async function letterClick(L){
-  if (IS_REMOTE && S && (S.phase === 'consonant' || S.phase === 'vowel') && S.used.includes(L)){
-    if (!(await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${cur().name} perde il turno?`, 'Sì, turno perso'))) return;
+  if (IS_REMOTE && S && ['consonant','vowel','express'].includes(S.phase) && S.used.includes(L)){
+    const txt = S.phase === 'express' ? `La ${L} è già stata chiamata: l'Express deraglia.` : `La ${L} è già stata chiamata. ${cur().name} perde il turno?`;
+    if (!(await askConfirm('Lettera già chiamata', txt, 'Conferma'))) return;
     return act('letter', {L, confirmed: true});
   }
   act('letter', {L});
@@ -1167,29 +1810,38 @@ function readSetup(){
   const names = [...$('playerInputs').querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean);
   const num = v => Math.max(0, Math.round(+v || 0));
   return {names, manches: Math.max(1, num($('numManches').value)), vowelCost: num($('vowelCost').value), winBonus: num($('winBonus').value),
-    keepOthers: $('keepOthers').checked, special: readMancheTable(), finalOn: $('finalOn').checked, finalPrize: num($('finalPrize').value),
-    finalSeconds: Math.max(3, num($('finalSeconds').value)), finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')};
+    keepOthers: $('keepOthers').checked, special: readMancheTable(),
+    lampoPrize: num($('lampoPrize').value), lampoSpeed: Math.max(1, +$('lampoSpeed').value || 2),
+    mysteryPrize: num($('mysteryPrize').value), expressValue: num($('expressValue').value),
+    finalOn: $('finalOn').checked, finalSeconds: Math.max(10, num($('finalSeconds').value)),
+    finalPrizes: $('finalPrizes').value.split(/[,;\s]+/).map(x => num(x.replace(/\./g,''))).filter(x => x > 0),
+    finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')};
 }
 function applySetup(cfg){
   if (!cfg || !Array.isArray(cfg.names)) return;
   const names = cfg.names.map(n => String(n).trim().slice(0, 24)).filter(Boolean).slice(0, 20);
   if (!names.length) return;
   const n = v => Math.max(0, Math.round(+v || 0));
+  const prizes = (Array.isArray(cfg.finalPrizes) ? cfg.finalPrizes : []).map(n).filter(x => x > 0).slice(0, 20);
   newGame({names, manches: Math.min(30, Math.max(1, n(cfg.manches))), vowelCost: n(cfg.vowelCost), winBonus: n(cfg.winBonus), keepOthers: !!cfg.keepOthers,
-    special: (Array.isArray(cfg.special) ? cfg.special : []).map(s => ({mult: [1,2,3].includes(+s.mult) ? +s.mult : 1, timer: Math.min(120, n(s.timer))})),
-    finalOn: !!cfg.finalOn, finalPrize: n(cfg.finalPrize), finalSeconds: Math.min(120, Math.max(3, n(cfg.finalSeconds))),
+    special: (Array.isArray(cfg.special) ? cfg.special : []).map(s => ({
+      type: s && s.type === 'lampo' ? 'lampo' : 'normal', mult: [1,2,3].includes(+(s && s.mult)) ? +s.mult : 1, timer: Math.min(120, n(s && s.timer)),
+      jolly: !!(s && s.jolly), mistero: !!(s && s.mistero), express: !!(s && s.express)})),
+    lampoPrize: n(cfg.lampoPrize), lampoSpeed: Math.min(10, Math.max(1, +cfg.lampoSpeed || 2)),
+    mysteryPrize: n(cfg.mysteryPrize), expressValue: n(cfg.expressValue),
+    finalOn: !!cfg.finalOn, finalSeconds: Math.min(300, Math.max(10, n(cfg.finalSeconds))),
+    finalPrizes: prizes.length >= 3 ? prizes : DEFAULT_CFG.finalPrizes,
     finalLetters: norm(String(cfg.finalLetters || '')).replace(/[^A-Z]/g,'')});
-  save(); buildBoard(); render(); openPhrase();
+  save(); buildBoard(true); render(); openPhrase();
 }
 function applyPhrase(cat, txt){
-  if (!S || !layoutPhrase(txt) || ![...txt].some(isLetter)) return;
+  if (!S || S.phase !== 'phrase' || !validPhrase(txt)) return;
   closeModals();
-  if (S.phase === 'finalPhrase') startFinal(cat, txt);
-  else if (S.phase === 'phrase') startManche(cat, txt);
+  startManche(cat, txt);
 }
 async function askNewGame(){
   if (S && !['gameOver','finalDone'].includes(S.phase) && !(await askConfirm('Nuova partita', 'La partita in corso andrà persa. Vuoi ricominciare?', 'Ricomincia'))) return;
-  openSetup(true);
+  openSetup();
 }
 
 /* ---------- Schermo sempre acceso (TV e telefono) ----------
@@ -1249,12 +1901,12 @@ const Remote = {
     const peer = this.peer = new Peer(PEER_PREFIX + this.code, {debug: 0});
     peer.on('open', () => { this.idTries = 0; this.setStatus('ready'); });
     peer.on('connection', conn => {
-      conn.on('open', () => { this.conns.add(conn); onRemoteChange(); this.sendState(conn, true); });
+      conn.on('open', () => { this.conns.add(conn); onRemoteChange(); this.sendState(conn); });
       conn.on('data', msg => this.handle(msg));
       const drop = () => { if (this.conns.delete(conn)) onRemoteChange(); };
       conn.on('close', drop); conn.on('error', drop);
     });
-    peer.on('disconnected', () => { if (!peer.destroyed) setTimeout(() => peer.reconnect(), 1500); });
+    peer.on('disconnected', () => setTimeout(() => { if (!peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500));
     peer.on('error', e => {
       if (e.type === 'unavailable-id'){
         // codice ancora occupato (es. pagina appena ricaricata): riprova, poi cambia codice
@@ -1274,10 +1926,7 @@ const Remote = {
     this.broadcast(true);
   },
   payload(){ return {type:'state', state: S, busy, canUndo: history.length > 0, timer: timerShown}; },
-  sendState(conn, force){
-    const p = this.payload();
-    try { conn.send(p); } catch(e){}
-  },
+  sendState(conn){ try { conn.send(this.payload()); } catch(e){} },
   broadcast(force){
     if (IS_REMOTE || !this.conns.size) return;
     const p = this.payload(), str = JSON.stringify(p);
@@ -1296,7 +1945,7 @@ const Remote = {
       if (!this.peer || this.peer.destroyed){
         this.peer = new Peer({debug: 0});
         this.peer.on('open', go);
-        this.peer.on('disconnected', () => { if (!this.peer.destroyed) this.peer.reconnect(); });
+        const pp = this.peer; pp.on('disconnected', () => setTimeout(() => { if (!pp.destroyed && pp.disconnected) pp.reconnect(); }, 1000));
         this.peer.on('error', e => { this.setStatus(e.type === 'peer-unavailable' ? 'notfound' : 'offline'); this.later(go); });
         return;
       }
@@ -1317,7 +1966,6 @@ const Remote = {
     if (!this.conn || !this.conn.open){ this.setStatus('lost'); this.reconnect?.(); return; }
     try { this.conn.send({type:'act', name, arg}); } catch(e){ this.setStatus('lost'); }
   },
-
   setStatus(s){ this.status = s; renderRemoteStatus(); }
 };
 
@@ -1338,7 +1986,6 @@ function renderRemoteStatus(){
     renderRemoteModal();
   }
 }
-
 function renderRemoteModal(){
   if (IS_REMOTE) return;
   const ok = Remote.status === 'ready';
@@ -1356,53 +2003,60 @@ function renderRemoteModal(){
     $('remoteQr').dataset.url = url;
   }
 }
-
 /* La TV cambia comportamento quando un telefono si collega o si scollega */
 function onRemoteChange(){
   renderRemoteStatus();
   if (remoteConnected()){
-    ['setupModal','phraseModal','confirmModal'].forEach(id => $(id).classList.remove('open'));
+    ['setupModal','phraseModal','finalModal','confirmModal'].forEach(id => $(id).classList.remove('open'));
     if ($('remoteModal').classList.contains('open')) setTimeout(() => $('remoteModal').classList.remove('open'), 1200);
   } else if (!anyModalOpen()) openModalForPhase();
   render();
 }
 
 /* Telefono: arriva lo stato dalla TV */
-let remoteBusy = false, remoteCanUndo = false, remoteTimer = null, autoOpened = '';
+let remoteCanUndo = false, remoteTimer = null, autoOpened = '';
 function onRemoteState(msg){
   if (!msg || msg.type !== 'state') return;
   S = msg.state; busy = !!msg.busy; remoteCanUndo = !!msg.canUndo; remoteTimer = msg.timer;
   render();
-  const key = S ? `${S.phase}|${S.manche}|${S.final ? 'f' : ''}` : 'none';
+  const key = S ? `${S.phase}|${S.manche}|${S.final ? S.final.idx : ''}` : 'none';
   if (key === autoOpened) return;
   if (!S){ autoOpened = key; openSetup(); return; }
-  if (S.phase === 'phrase' || S.phase === 'finalPhrase'){ autoOpened = key; openPhrase(); return; }
+  if (S.phase === 'phrase'){ autoOpened = key; openPhrase(); return; }
+  if (S.phase === 'finalPhrase'){ autoOpened = key; openFinalPhrase(); return; }
   if (['mancheEnd','gameOver','finalDone'].includes(S.phase) && !busy){ autoOpened = key; showEnd(); return; }
-  if (PLAY_PHASES.includes(S.phase)){
+  if (PLAY_PHASES.includes(S.phase) || S.phase === 'lampo'){
     autoOpened = key;
-    ['setupModal','phraseModal','endModal'].forEach(id => $(id).classList.remove('open'));
+    ['setupModal','phraseModal','finalModal','endModal'].forEach(id => $(id).classList.remove('open'));
   }
 }
-
 /* Telefono: soluzione sempre visibile al conduttore */
 function renderSolution(){
   if (!IS_REMOTE) return;
   const box = $('solutionBox');
-  if (!S || !S.phrase || !S.grid){ box.innerHTML = '<span class="muted">La soluzione apparirà qui quando inserisci la frase.</span>'; return; }
+  if (!S || !S.phrase || !S.grid){
+    box.innerHTML = S && S.final && S.final.phrases.length
+      ? `<div class="sol-cat">Buste</div>${S.final.phrases.map((x,k) => `<div class="muted">${k+1}. ${esc(x.toUpperCase())}</div>`).join('')}`
+      : '<span class="muted">La soluzione apparirà qui quando inserisci la frase.</span>';
+    return;
+  }
   const chars = [...S.phrase.toUpperCase()].map(ch => {
-    if (!isLetter(ch)) return ch === ' ' ? '<span class="sp"> </span>' : `<b>${esc(ch)}</b>`;
+    if (!isLetter(ch)) return ch === ' ' ? ' ' : `<b>${esc(ch)}</b>`;
     return S.used.includes(norm(ch)) ? `<b>${esc(ch)}</b>` : `<i>${esc(ch)}</i>`;
   }).join('');
-  box.innerHTML = `<div class="sol-cat">${esc(S.category || 'Senza titolo')}</div><div class="sol-text">${chars}</div><div class="muted" style="font-size:12px">In chiaro le lettere già scoperte, in grigio quelle ancora coperte.</div>`;
+  box.innerHTML = `<div class="sol-cat">${esc(S.category || 'Senza titolo')}${S.final ? ` · busta ${S.final.idx + 1}` : ''}</div><div class="sol-text">${chars}</div><div class="muted" style="font-size:12px">In chiaro le lettere già chiamate, in grigio le altre.</div>`;
 }
 
 /* ================= Eventi ================= */
 document.addEventListener('click', e => {
   const k = e.target.closest('[data-letter]'); if (k){ letterClick(k.dataset.letter); return; }
   const sg = e.target.closest('[data-seg]'); if (sg){ const v = sg.dataset.seg; act('seg', /^\d+$/.test(v) ? +v : v); return; }
+  const eye = e.target.closest('[data-eye]');
+  if (eye){ const i = $(eye.dataset.eye); i.type = i.type === 'password' ? 'text' : 'password'; if (i.id === 'phraseInput') updatePreview(); return; }
   const rm = e.target.closest('[data-rm]');
   if (rm){ if ($('playerInputs').children.length > 1){ rm.parentElement.remove(); recolorPlayerRows(); } return; }
-  const ac = e.target.closest('[data-act]'); if (ac) act(ac.dataset.act);
+  const ac = e.target.closest('[data-act]');
+  if (ac) act(ac.dataset.act, ac.dataset.arg !== undefined ? +ac.dataset.arg : undefined);
 });
 
 $('spinBtn').onclick = () => act('spin');
@@ -1423,6 +2077,12 @@ $('joinBtn').onclick = () => {
   location.href = remoteUrl(c);
 };
 $('numManches').addEventListener('input', () => renderMancheTable(readMancheTable()));
+$('presetTv').onclick = () => {
+  $('numManches').value = TV_PRESET.length;
+  renderMancheTable(TV_PRESET);
+  $('finalOn').checked = true;
+  $('setupErr').textContent = '';
+};
 
 $('addPlayer').onclick = () => {
   const n = $('playerInputs').children.length;
@@ -1437,7 +2097,6 @@ $('setupStart').onclick = () => {
   act('setup', cfg);
 };
 
-$('eyeBtn').onclick = () => { const i = $('phraseInput'); i.type = i.type === 'password' ? 'text' : 'password'; updatePreview(); };
 $('phraseInput').addEventListener('input', updatePreview);
 $('randomPhrase').onclick = () => {
   const [c, f] = SAMPLE[Math.floor(Math.random()*SAMPLE.length)];
@@ -1453,43 +2112,78 @@ $('phraseStart').onclick = () => {
 };
 ['catInput','phraseInput'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('phraseStart').click(); }));
 
+$('finalRandom').onclick = () => {
+  const cats = [...new Set(SAMPLE.map(s => s[0]))].filter(c => SAMPLE.filter(s => s[0] === c).length >= 3);
+  const c = cats[Math.floor(Math.random() * cats.length)];
+  const picks = shuffle(SAMPLE.filter(s => s[0] === c)).slice(0, 3);
+  $('finalTheme').value = c; picks.forEach((s,k) => $('fp' + k).value = s[1]);
+  $('finalErr').textContent = '';
+};
+$('finalStart').onclick = () => {
+  const phrases = [0,1,2].map(k => $('fp' + k).value.trim());
+  const bad = phrases.findIndex(x => !validPhrase(x));
+  if (bad >= 0){ $('finalErr').textContent = `La frase della busta ${bad + 1} manca o non entra nel tabellone.`; return; }
+  closeModals();
+  act('finalPhrases', {theme: $('finalTheme').value, phrases});
+};
+
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !anyModalOpen()){ e.preventDefault(); act('undo'); return; }
   if (anyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
+  if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.classList.contains('pcard')){ e.preventDefault(); document.activeElement.click(); return; }
   const L = e.key.length === 1 ? norm(e.key) : '';
   if (/^[A-Z]$/.test(L)) letterClick(L);
 });
 
-/* ================= Timer (solo sulla TV) ================= */
-let timerShown = null;
-const timer = {key:null, left:0, last:0, fired:false};
-function timerSecs(){
-  if (!S) return 0;
-  if (S.phase === 'finalSolve') return S.cfg.finalSeconds;
-  if (S.final || !['turn','consonant','vowel','bonusPick','bonusSpin'].includes(S.phase)) return 0;
-  return spec().timer || 0;
-}
+/* ================= Cronometri e rivelazioni automatiche (solo sulla TV) ================= */
+let timerShown = null, lampoAcc = 0, randAcc = 0, lastTick = performance.now();
+const turnTimer = {key:null, left:0, fired:false};
 function showTimer(v){
   const el = $('timer');
   if (v === null || v === undefined){ el.hidden = true; return; }
   el.hidden = false; el.textContent = v; el.classList.toggle('warn', v <= 5);
 }
+function setTimerShown(v){
+  if (v === timerShown) return;
+  timerShown = v; showTimer(v);
+  if (S && S.final && S.phase === 'finalSolve') save();
+  Remote.broadcast();
+}
 setInterval(() => {
+  const now = performance.now(), dt = Math.min(1000, now - lastTick); lastTick = now;
   if (IS_REMOTE){ showTimer(remoteTimer); return; }
-  const secs = timerSecs(), now = performance.now();
-  if (!secs){ timer.key = null; if (timerShown !== null){ timerShown = null; showTimer(null); Remote.broadcast(); } return; }
+  if (!S){ setTimerShown(null); return; }
+  const paused = busy || (anyModalOpen() && !remoteConnected()) || document.hidden;
+
+  // Manche lampo: una lettera alla volta
+  if (S.phase === 'lampo'){
+    if (!paused){ lampoAcc += dt; if (lampoAcc >= S.cfg.lampoSpeed * 1000){ lampoAcc = 0; lampoReveal(); } }
+  } else lampoAcc = 0;
+
+  // Gioco finale: un solo cronometro per le tre buste
+  if (S.final && ['finalIntro','finalPick','finalSolve','finalWrap'].includes(S.phase)){
+    if (S.phase === 'finalSolve' && !paused){
+      S.final.timeLeft = Math.max(0, S.final.timeLeft - dt);
+      if (S.final.idx === 2){ randAcc += dt; if (randAcc >= 2200){ randAcc = 0; finalRandomReveal(); } }
+    }
+    setTimerShown(Math.ceil(S.final.timeLeft / 1000));
+    if (S.phase === 'finalSolve' && S.final.timeLeft <= 0) finalTimeUp();
+    return;
+  }
+
+  // Tempo per turno (manche a tempo)
+  const secs = (['turn','consonant','vowel','bonusPick','bonusSpin','express'].includes(S.phase) && spec().timer) || 0;
+  if (!secs){ turnTimer.key = null; setTimerShown(null); return; }
   const key = actionCount + '|' + S.phase + '|' + S.current;
-  if (key !== timer.key){ timer.key = key; timer.left = secs * 1000; timer.last = now; timer.fired = false; }
-  if (!busy && !anyModalOpen() && !document.hidden) timer.left -= now - timer.last;
-  timer.last = now;
-  const shown = Math.max(0, Math.ceil(timer.left / 1000));
-  if (shown !== timerShown){ timerShown = shown; showTimer(shown); Remote.broadcast(); }
-  if (timer.left <= 0 && !timer.fired){ timer.fired = true; timeUp(); }
+  if (key !== turnTimer.key){ turnTimer.key = key; turnTimer.left = secs * 1000; turnTimer.fired = false; }
+  if (!paused) turnTimer.left -= dt;
+  setTimerShown(Math.max(0, Math.ceil(turnTimer.left / 1000)));
+  if (turnTimer.left <= 0 && !turnTimer.fired){ turnTimer.fired = true; timeUp(); }
 }, 200);
 
 /* ================= Avvio ================= */
-buildWheel();
+buildBulbs();
 KeepAwake.start();
 if (IS_REMOTE){
   document.body.classList.add('remote');
@@ -1498,11 +2192,12 @@ if (IS_REMOTE){
 } else {
   try { const raw = store.get(STORE_KEY); if (raw) S = JSON.parse(raw); } catch(e){ S = null; }
   if (S && (!S.players || !S.cfg)) S = null;
-  if (S){ S.cfg = withDefaults(S.cfg); if (S.final === undefined) S.final = null; }
-  buildBoard(); render();
+  if (S){ S.cfg = withDefaults(S.cfg); S.extra = S.extra || []; fxSeen = S.fx ? S.fx.id : 0; }
+  buildBoard(true); render();
   if (S && ['mancheEnd','gameOver','finalDone'].includes(S.phase)) showEnd(); else openModalForPhase();
   Remote.startTV();
 }
+booted = true;
 
 // API di test (solo per verifica automatica)
 window.__ruota = { layoutPhrase, get state(){ return S; }, remote: Remote, keepAwake: KeepAwake };
