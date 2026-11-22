@@ -217,14 +217,10 @@ summary{cursor:pointer;font-weight:800}
     <label>Concorrenti</label>
     <div id="playerInputs"></div>
     <button class="btn ghost" id="addPlayer" type="button">+ Aggiungi concorrente</button>
-    <div class="grid2">
+    <div>
       <div>
         <label for="numManches">Numero di manche</label>
         <input type="number" id="numManches" min="1" max="30" value="3">
-      </div>
-      <div>
-        <label for="bonusValue">Valore consonante BONUS (€)</label>
-        <input type="number" id="bonusValue" min="0" step="50" value="0">
       </div>
     </div>
     <details>
@@ -240,7 +236,7 @@ summary{cursor:pointer;font-weight:800}
         </div>
       </div>
       <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
-      <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi rigira la ruota e ne chiama un'altra. In quel giro BANCAROTTA e PASSA non contano: si rigira.</p>
+      <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi gira la ruota; la consonante vale il valore uscito e se ne chiama un'altra allo stesso valore. In quel giro BANCAROTTA, PASSA e BONUS non contano: si rigira.</p>
     </details>
     <details>
       <summary>Manche speciali e gioco finale</summary>
@@ -423,7 +419,7 @@ let busy = false;       // animazioni in corso
 let wheelRot = 0;
 let mode = store.get('ruota-mode') === 'manual' ? 'manual' : 'digital';
 
-const DEFAULT_CFG = {manches:3, bonusValue:0, vowelCost:200, winBonus:1000, keepOthers:false,
+const DEFAULT_CFG = {manches:3, vowelCost:200, winBonus:1000, keepOthers:false,
   special:[], finalOn:false, finalPrize:5000, finalSeconds:15, finalLetters:'RSTLNE'};
 function withDefaults(cfg){
   const c = Object.assign({}, DEFAULT_CFG, cfg);
@@ -437,7 +433,7 @@ function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
 function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); actionCount++; }
 const cur = () => S.players[S.current];
 const isActive = i => S.final ? i === S.final.player : (!S.tiebreak || S.tiebreak.includes(i));
-const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusSpin','finalPick','finalSolve'];
+const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','finalPick','finalSolve'];
 
 function newGame(cfg){
   S = {
@@ -461,7 +457,7 @@ function nextPlayer(){
   const n = S.players.length;
   let i = S.current;
   for (let k = 0; k < n; k++){ i = (i + 1) % n; if (isActive(i)) break; }
-  S.current = i; S.phase = 'turn'; S.spin = null;
+  S.current = i; S.phase = 'turn'; S.spin = null; S.bonusFirst = null;
 }
 
 /* Finestra di conferma interna (confirm() non funziona ovunque) */
@@ -496,10 +492,12 @@ function startManche(category, phrase){
 /* ================= Azioni ================= */
 function applySegment(seg){
   const p = cur();
-  const protectedSpin = S.phase === 'bonusSpin';
-  if (protectedSpin && (seg.t === 'PASSA' || seg.t === 'BANCAROTTA')){
-    S.msg = `<span class="big">${seg.t}!</span> Ma con il BONUS non conta: ${esc(p.name)} rigira la ruota.`;
-    Sound.pass(); save(); render(); return;
+  if (S.phase === 'bonusSpin'){
+    if (seg.t){
+      S.msg = `<span class="big">${seg.t}!</span> Con il BONUS non conta: ${esc(p.name)} rigira la ruota per dare un valore alla <b>${S.bonusFirst}</b>.`;
+      Sound.pass(); save(); render(); return;
+    }
+    return bonusValueSpin(seg.v * mult(), seg.v);
   }
   if (seg.t === 'PASSA'){
     nextPlayer();
@@ -512,9 +510,9 @@ function applySegment(seg){
     S.msg = `<span class="big" style="color:#ff6b6f">BANCAROTTA!</span> ${esc(p.name)} perde ${euro(lost)}. Tocca a <b>${esc(cur().name)}</b>.`;
     Sound.buzz();
   } else if (seg.t === 'BONUS'){
-    S.spin = {value: S.cfg.bonusValue * mult(), bonus: true};
-    S.phase = 'consonant';
-    S.msg = `<span class="big">BONUS!</span> ${esc(p.name)}, chiama una consonante. Poi rigiri la ruota e ne chiami un'altra (BANCAROTTA e PASSA non contano).`;
+    S.spin = null; S.bonusFirst = null;
+    S.phase = 'bonusPick';
+    S.msg = `<span class="big">BONUS!</span> ${esc(p.name)}, chiama una consonante: varrà quanto esce al prossimo giro di ruota.`;
     Sound.fanfare();
   } else {
     const value = seg.v * mult();
@@ -526,26 +524,44 @@ function applySegment(seg){
   save(); render();
 }
 
-/* Dopo la consonante del BONUS si rigira (se restano consonanti) */
-function afterBonusLetter(prefix){
+/* BONUS, passo 1: la consonante viene scelta ma resta coperta finché la ruota non dà un valore */
+function bonusPick(L){
+  if (isVowel(L)) return;
   const p = cur();
-  if (remaining('c').length){ S.phase = 'bonusSpin'; S.spin = null; S.msg = `${prefix} Ora ${esc(p.name)} rigira la ruota grazie al BONUS.`; }
-  else { S.phase = 'turn'; S.spin = null; S.msg = `${prefix} Non restano consonanti: ${esc(p.name)} può comprare una vocale o risolvere.`; }
+  if (S.used.includes(L)){ S.msg = `La <b>${L}</b> è già stata chiamata: ${esc(p.name)}, scegli un'altra consonante per il BONUS.`; Sound.buzz(); render(); return; }
+  snapshot();
+  S.bonusFirst = L; S.phase = 'bonusSpin';
+  S.msg = `${esc(p.name)} sceglie la <b>${L}</b>. Ora gira la ruota: la <b>${L}</b> varrà il valore che esce (BANCAROTTA, PASSA e BONUS non contano).`;
+  save(); render();
+}
+
+/* BONUS, passo 2: la ruota dà il valore, si scopre la prima consonante e se ne chiama un'altra allo stesso valore */
+function bonusValueSpin(value, base){
+  const p = cur(), L = S.bonusFirst;
+  S.bonusFirst = null;
+  S.used.push(L);
+  const count = countOf(L), gain = count * value;
+  p.round += gain;
+  let msg = `<span class="big">${euro(value)}</span>${value !== base ? ` (${base} ×${mult()})` : ''} ` +
+    (count ? (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + ` <span class="big">+${euro(gain)}</span>` : `Nessuna <b>${L}</b>.`);
+  if (allRevealed()){ S.phase = 'turn'; S.spin = null; msg += ` Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`; }
+  else if (remaining('c').length){ S.phase = 'consonant'; S.spin = {value, bonus: false}; msg += ` Ora ${esc(p.name)} chiama un'altra consonante da ${euro(value)}.`; }
+  else { S.phase = 'turn'; S.spin = null; msg += ` Non restano consonanti: ${esc(p.name)} può comprare una vocale o risolvere.`; }
+  S.msg = msg;
+  count ? Sound.ding() : Sound.buzz();
+  const anim = animateReveal([L]);
+  save(); render(); anim();
 }
 
 async function chooseLetter(L){
   if (busy || !S || anyModalOpen()) return;
   if (S.phase === 'finalPick') return pickFinal(L);
+  if (S.phase === 'bonusPick') return bonusPick(L);
   const vowelPhase = S.phase === 'vowel';
   if (S.phase !== 'consonant' && !vowelPhase) return;
   if (vowelPhase !== isVowel(L)) return;
   const p = cur();
-  const bonus = !vowelPhase && S.spin && S.spin.bonus;
   if (S.used.includes(L)){
-    if (bonus){
-      snapshot(); afterBonusLetter(`La <b>${L}</b> era già stata chiamata.`);
-      Sound.buzz(); save(); render(); return;
-    }
     const ok = await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${p.name} perde il turno?`, 'Sì, turno perso');
     if (!ok) return;
     snapshot();
@@ -562,14 +578,10 @@ async function chooseLetter(L){
     let gain = 0;
     if (!vowelPhase){ gain = count * S.spin.value; p.round += gain; }
     const found = (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '');
-    if (bonus) afterBonusLetter(found);
-    else { S.phase = 'turn'; S.spin = null; S.msg = `${found} ${esc(p.name)} continua.`; }
+    S.phase = 'turn'; S.spin = null; S.msg = `${found} ${esc(p.name)} continua.`;
     if (allRevealed()){ S.phase = 'turn'; S.msg = `Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`; }
     const anim = animateReveal([L]);
     save(); render(); anim();
-  } else if (bonus){
-    afterBonusLetter(`Nessuna <b>${L}</b>.`);
-    Sound.buzz(); save(); render();
   } else {
     nextPlayer();
     S.msg = `Nessuna <b>${L}</b>. Tocca a <b>${esc(cur().name)}</b>.`;
@@ -620,7 +632,7 @@ function solveRight(){
 }
 
 function skipTurn(){
-  if (busy || !['turn','consonant','vowel','solve','bonusSpin'].includes(S.phase)) return;
+  if (busy || !['turn','consonant','vowel','solve','bonusPick','bonusSpin'].includes(S.phase)) return;
   snapshot(); const p = cur(); nextPlayer();
   S.msg = `${esc(p.name)} passa. Tocca a <b>${esc(cur().name)}</b>.`;
   save(); render();
@@ -854,7 +866,7 @@ function render(){
     a.push(`<button class="btn blue" data-act="vowel" ${busy||!canVowel?'disabled':''}>Compra vocale (${euro(S.cfg.vowelCost)})</button>`);
     a.push(`<button class="btn green" data-act="solve" ${busy?'disabled':''}>Risolvi</button>`);
     a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
-  } else if (ph === 'consonant' || ph === 'bonusSpin'){
+  } else if (ph === 'consonant' || ph === 'bonusPick' || ph === 'bonusSpin'){
     a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
   } else if (ph === 'vowel'){
     a.push(`<button class="btn ghost" data-act="cancel">Annulla acquisto</button>`);
@@ -883,8 +895,8 @@ function renderKeyboard(){
   const mk = L => {
     const used = S && S.used.includes(L);
     const v = isVowel(L);
-    let enabled = !busy && ((ph === 'consonant' && !v) || (ph === 'vowel' && v));
-    const picked = ph === 'finalPick' && S.final.picks.includes(L);
+    let enabled = !busy && (((ph === 'consonant' || ph === 'bonusPick') && !v) || (ph === 'vowel' && v));
+    const picked = (ph === 'finalPick' && S.final.picks.includes(L)) || (ph === 'bonusSpin' && S.bonusFirst === L);
     if (ph === 'finalPick' && !busy){
       const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
       enabled = !used && !picked && (v ? nc === 3 && nv === 0 : nc < 3);
@@ -934,7 +946,7 @@ function openSetup(){
   const names = S ? S.players.map(p => p.name) : ['Giocatore 1','Giocatore 2','Giocatore 3'];
   $('playerInputs').innerHTML = names.map(playerRow).join('');
   const c = S ? S.cfg : withDefaults({manches:3});
-  $('numManches').value = c.manches; $('bonusValue').value = c.bonusValue; $('vowelCost').value = c.vowelCost; $('winBonus').value = c.winBonus; $('keepOthers').checked = c.keepOthers;
+  $('numManches').value = c.manches; $('vowelCost').value = c.vowelCost; $('winBonus').value = c.winBonus; $('keepOthers').checked = c.keepOthers;
   $('finalOn').checked = c.finalOn; $('finalPrize').value = c.finalPrize; $('finalSeconds').value = c.finalSeconds; $('finalLetters').value = [...c.finalLetters].join(' ').replace(/\s+/g,' ');
   renderMancheTable(c.special);
   $('setupCancel').style.display = S ? '' : 'none';
@@ -1090,7 +1102,7 @@ $('setupStart').onclick = () => {
   const num = v => Math.max(0, Math.round(+v || 0));
   if (names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
   const manches = Math.max(1, num($('numManches').value));
-  newGame({names, manches, bonusValue:num($('bonusValue').value), vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked,
+  newGame({names, manches, vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked,
     special: readMancheTable(), finalOn: $('finalOn').checked, finalPrize: num($('finalPrize').value),
     finalSeconds: Math.max(3, num($('finalSeconds').value)), finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')});
   save(); buildBoard(); render(); openPhrase();
@@ -1133,7 +1145,7 @@ const timer = {key:null, left:0, last:0, fired:false};
 function timerSecs(){
   if (!S) return 0;
   if (S.phase === 'finalSolve') return S.cfg.finalSeconds;
-  if (S.final || !['turn','consonant','vowel','bonusSpin'].includes(S.phase)) return 0;
+  if (S.final || !['turn','consonant','vowel','bonusPick','bonusSpin'].includes(S.phase)) return 0;
   return spec().timer || 0;
 }
 setInterval(() => {
