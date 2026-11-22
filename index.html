@@ -19,7 +19,7 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-html{background:#030a2b}
+html{background:#030a2b;color-scheme:dark}
 body{
   font-family:var(--ui); color:var(--text);
   background:
@@ -147,6 +147,19 @@ summary{cursor:pointer;font-weight:800}
 .standings td:last-child{text-align:right;font-family:var(--display);font-size:20px;letter-spacing:.5px}
 .standings tr.top td{color:var(--gold)}
 .trophy{font-size:56px;text-align:center}
+[hidden]{display:none!important}
+.msgrow{display:flex;gap:14px;align-items:center}
+.msgrow #msg{flex:1;min-width:0}
+.timer{flex:none;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:32px;color:var(--gold);border:4px solid var(--gold);background:rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.timer.warn{color:#fff;border-color:var(--danger);background:rgba(229,72,77,.35);animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+.mtable{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center;margin-top:10px}
+.mtable .mh{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.mtable .ml{font-weight:800}
+.modal select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#0d235f;color:var(--text);font-size:15px;font-family:inherit}
+.key.picked{background:var(--gold);color:#1a1200;outline:3px solid #fff}
+.mancheTag{font-family:var(--ui);font-weight:800;font-size:12px;letter-spacing:.5px;padding:3px 9px;border-radius:999px;background:var(--danger);color:#fff;margin-left:6px;vertical-align:middle}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .solution{font-family:var(--display);font-size:22px;letter-spacing:1px;text-align:center;background:rgba(0,0,0,.2);padding:10px;border-radius:12px;margin:6px 0 4px}
 
 /* confetti */
@@ -176,7 +189,7 @@ summary{cursor:pointer;font-weight:800}
     <div class="category" id="category"></div>
 
     <div class="panel" style="margin-top:14px">
-      <div id="msg" aria-live="polite"></div>
+      <div class="msgrow"><div id="msg" aria-live="polite"></div><div id="timer" class="timer" hidden title="Tempo rimasto"></div></div>
       <div id="actions"></div>
       <div id="keyboard"></div>
     </div>
@@ -210,8 +223,8 @@ summary{cursor:pointer;font-weight:800}
         <input type="number" id="numManches" min="1" max="30" value="3">
       </div>
       <div>
-        <label for="bonusValue">Valore spicchio BONUS (€)</label>
-        <input type="number" id="bonusValue" min="0" step="50" value="500">
+        <label for="bonusValue">Valore consonante BONUS (€)</label>
+        <input type="number" id="bonusValue" min="0" step="50" value="0">
       </div>
     </div>
     <details>
@@ -227,6 +240,25 @@ summary{cursor:pointer;font-weight:800}
         </div>
       </div>
       <label class="check"><input type="checkbox" id="keepOthers"> Chi non risolve conserva comunque i soldi della manche (di solito si perdono)</label>
+      <p class="hint" style="text-align:left;margin:10px 0 0">BONUS: il concorrente chiama una consonante, poi rigira la ruota e ne chiama un'altra. In quel giro BANCAROTTA e PASSA non contano: si rigira.</p>
+    </details>
+    <details>
+      <summary>Manche speciali e gioco finale</summary>
+      <div class="mtable" id="mancheTable"></div>
+      <label class="check"><input type="checkbox" id="finalOn"> Gioco finale per il vincitore</label>
+      <div class="grid2">
+        <div>
+          <label for="finalPrize">Premio gioco finale (€)</label>
+          <input type="number" id="finalPrize" min="0" step="500" value="5000">
+        </div>
+        <div>
+          <label for="finalSeconds">Secondi per risolvere</label>
+          <input type="number" id="finalSeconds" min="3" max="120" value="15">
+        </div>
+      </div>
+      <label for="finalLetters">Lettere regalate nel gioco finale</label>
+      <input type="text" id="finalLetters" value="R S T L N E" autocomplete="off">
+      <p class="hint" style="text-align:left;margin:8px 0 0">Nel gioco finale il vincitore vede le lettere regalate, sceglie 3 consonanti e 1 vocale, poi ha il tempo indicato per risolvere.</p>
     </details>
     <div class="err" id="setupErr"></div>
     <div class="mfoot">
@@ -253,6 +285,18 @@ summary{cursor:pointer;font-weight:800}
     <div class="mfoot">
       <button class="btn ghost" id="randomPhrase" type="button">🎲 Frase a sorpresa</button>
       <button class="btn green" id="phraseStart" type="button">Svela il tabellone ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Conferma -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal" style="width:min(460px,100%)">
+    <h2 id="confirmTitle">Sei sicuro?</h2>
+    <p id="confirmText" style="margin:0;font-size:16px;line-height:1.4"></p>
+    <div class="mfoot">
+      <button class="btn ghost" id="confirmNo" type="button">Annulla</button>
+      <button class="btn red" id="confirmYes" type="button">Conferma</button>
     </div>
   </div>
 </div>
@@ -374,24 +418,36 @@ const Sound = {
 /* ================= Stato ================= */
 let S = null;           // stato di gioco (serializzabile)
 let history = [];       // per "Annulla"
+let actionCount = 0;    // cambia a ogni azione (serve al timer)
 let busy = false;       // animazioni in corso
 let wheelRot = 0;
 let mode = store.get('ruota-mode') === 'manual' ? 'manual' : 'digital';
 
+const DEFAULT_CFG = {manches:3, bonusValue:0, vowelCost:200, winBonus:1000, keepOthers:false,
+  special:[], finalOn:false, finalPrize:5000, finalSeconds:15, finalLetters:'RSTLNE'};
+function withDefaults(cfg){
+  const c = Object.assign({}, DEFAULT_CFG, cfg);
+  c.special = Array.from({length:c.manches}, (_,i) => Object.assign({mult:1, timer:0}, (cfg.special||[])[i]));
+  return c;
+}
+const spec = () => (!S.tiebreak && S.cfg.special[S.manche-1]) || {mult:1, timer:0};
+const mult = () => spec().mult || 1;
+
 function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
-function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); }
+function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); actionCount++; }
 const cur = () => S.players[S.current];
-const isActive = i => !S.tiebreak || S.tiebreak.includes(i);
+const isActive = i => S.final ? i === S.final.player : (!S.tiebreak || S.tiebreak.includes(i));
+const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusSpin','finalPick','finalSolve'];
 
 function newGame(cfg){
   S = {
-    cfg,
+    cfg: withDefaults(cfg),
     players: cfg.names.map((n,i) => ({name:n, color:PLAYER_COLORS[i % PLAYER_COLORS.length], round:0, total:0})),
     manche: 1, current: 0, phase: 'phrase',
     category: '', phrase: '', grid: null, used: [], spin: null,
-    msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null
+    msg: 'Il conduttore inserisce la prima frase.', tiebreak: null, lastWinner: null, final: null
   };
-  history = [];
+  history = []; actionCount++;
 }
 
 function lettersInPhrase(){ return S.grid ? [...new Set(S.grid.filter(c => c && isLetter(c)).map(norm))] : []; }
@@ -399,12 +455,25 @@ function remaining(kind){
   return lettersInPhrase().filter(L => !S.used.includes(L) && (kind === 'v' ? isVowel(L) : !isVowel(L)));
 }
 function allRevealed(){ return remaining('v').length === 0 && remaining('c').length === 0; }
+const countOf = L => S.grid.filter(c => c && isLetter(c) && norm(c) === L).length;
 
 function nextPlayer(){
   const n = S.players.length;
   let i = S.current;
   for (let k = 0; k < n; k++){ i = (i + 1) % n; if (isActive(i)) break; }
   S.current = i; S.phase = 'turn'; S.spin = null;
+}
+
+/* Finestra di conferma interna (confirm() non funziona ovunque) */
+function askConfirm(title, text, yes){
+  return new Promise(resolve => {
+    $('confirmTitle').textContent = title; $('confirmText').textContent = text;
+    $('confirmYes').textContent = yes || 'Conferma';
+    const m = $('confirmModal'); m.classList.add('open');
+    const done = v => { m.classList.remove('open'); $('confirmYes').onclick = $('confirmNo').onclick = null; resolve(v); };
+    $('confirmYes').onclick = () => done(true);
+    $('confirmNo').onclick = () => done(false);
+  });
 }
 
 function startManche(category, phrase){
@@ -417,13 +486,21 @@ function startManche(category, phrase){
   const actives = S.players.map((_,i)=>i).filter(isActive);
   S.current = actives[(S.manche - 1) % actives.length];
   S.phase = 'turn'; S.spin = null;
-  S.msg = `Tocca a <b>${esc(cur().name)}</b>: gira la ruota!`;
+  const sp = spec(), tags = [];
+  if (sp.mult > 1) tags.push(`valori ×${sp.mult}`);
+  if (sp.timer) tags.push(`${sp.timer} secondi per turno`);
+  S.msg = (tags.length ? `<span class="big">Manche speciale: ${tags.join(', ')}!</span> ` : '') + `Tocca a <b>${esc(cur().name)}</b>: gira la ruota!`;
   buildBoard(); render();
 }
 
 /* ================= Azioni ================= */
 function applySegment(seg){
   const p = cur();
+  const protectedSpin = S.phase === 'bonusSpin';
+  if (protectedSpin && (seg.t === 'PASSA' || seg.t === 'BANCAROTTA')){
+    S.msg = `<span class="big">${seg.t}!</span> Ma con il BONUS non conta: ${esc(p.name)} rigira la ruota.`;
+    Sound.pass(); save(); render(); return;
+  }
   if (seg.t === 'PASSA'){
     nextPlayer();
     S.msg = `<span class="big">PASSA!</span> ${esc(p.name)} cede il turno a <b>${esc(cur().name)}</b>.`;
@@ -434,24 +511,43 @@ function applySegment(seg){
     nextPlayer();
     S.msg = `<span class="big" style="color:#ff6b6f">BANCAROTTA!</span> ${esc(p.name)} perde ${euro(lost)}. Tocca a <b>${esc(cur().name)}</b>.`;
     Sound.buzz();
-  } else {
-    const value = seg.t === 'BONUS' ? S.cfg.bonusValue : seg.v;
-    S.spin = {value, label: seg.t === 'BONUS' ? 'BONUS' : euro(value)};
+  } else if (seg.t === 'BONUS'){
+    S.spin = {value: S.cfg.bonusValue * mult(), bonus: true};
     S.phase = 'consonant';
-    S.msg = `<span class="big">${seg.t === 'BONUS' ? 'BONUS · ' + euro(value) : euro(value)}</span> ${esc(p.name)}, chiama una consonante.`;
+    S.msg = `<span class="big">BONUS!</span> ${esc(p.name)}, chiama una consonante. Poi rigiri la ruota e ne chiami un'altra (BANCAROTTA e PASSA non contano).`;
+    Sound.fanfare();
+  } else {
+    const value = seg.v * mult();
+    S.spin = {value, bonus: false};
+    S.phase = 'consonant';
+    S.msg = `<span class="big">${euro(value)}</span>${mult() > 1 ? ` (${seg.v} ×${mult()})` : ''} ${esc(p.name)}, chiama una consonante.`;
     Sound.ding();
   }
   save(); render();
 }
 
-function chooseLetter(L){
-  if (busy || !S) return;
+/* Dopo la consonante del BONUS si rigira (se restano consonanti) */
+function afterBonusLetter(prefix){
+  const p = cur();
+  if (remaining('c').length){ S.phase = 'bonusSpin'; S.spin = null; S.msg = `${prefix} Ora ${esc(p.name)} rigira la ruota grazie al BONUS.`; }
+  else { S.phase = 'turn'; S.spin = null; S.msg = `${prefix} Non restano consonanti: ${esc(p.name)} può comprare una vocale o risolvere.`; }
+}
+
+async function chooseLetter(L){
+  if (busy || !S || anyModalOpen()) return;
+  if (S.phase === 'finalPick') return pickFinal(L);
   const vowelPhase = S.phase === 'vowel';
   if (S.phase !== 'consonant' && !vowelPhase) return;
   if (vowelPhase !== isVowel(L)) return;
   const p = cur();
+  const bonus = !vowelPhase && S.spin && S.spin.bonus;
   if (S.used.includes(L)){
-    if (!confirm(`La lettera ${L} è già stata chiamata.\nTurno perso per ${p.name}?`)) return;
+    if (bonus){
+      snapshot(); afterBonusLetter(`La <b>${L}</b> era già stata chiamata.`);
+      Sound.buzz(); save(); render(); return;
+    }
+    const ok = await askConfirm('Lettera già chiamata', `La ${L} è già stata chiamata. ${p.name} perde il turno?`, 'Sì, turno perso');
+    if (!ok) return;
     snapshot();
     if (vowelPhase) p.round -= S.cfg.vowelCost;
     nextPlayer();
@@ -460,16 +556,20 @@ function chooseLetter(L){
   }
   snapshot();
   S.used.push(L);
-  const count = S.grid.filter(c => c && isLetter(c) && norm(c) === L).length;
+  const count = countOf(L);
   if (vowelPhase) p.round -= S.cfg.vowelCost;
   if (count > 0){
     let gain = 0;
     if (!vowelPhase){ gain = count * S.spin.value; p.round += gain; }
-    S.phase = 'turn'; S.spin = null;
-    S.msg = (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '') + ` ${esc(p.name)} continua.`;
-    if (allRevealed()) S.msg = `Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`;
+    const found = (count === 1 ? `C'è una <b>${L}</b>!` : `Ci sono <b>${count}</b> <b>${L}</b>!`) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '');
+    if (bonus) afterBonusLetter(found);
+    else { S.phase = 'turn'; S.spin = null; S.msg = `${found} ${esc(p.name)} continua.`; }
+    if (allRevealed()){ S.phase = 'turn'; S.msg = `Tutte le lettere sono scoperte! <b>${esc(p.name)}</b>, dai la soluzione.`; }
     const anim = animateReveal([L]);
     save(); render(); anim();
+  } else if (bonus){
+    afterBonusLetter(`Nessuna <b>${L}</b>.`);
+    Sound.buzz(); save(); render();
   } else {
     nextPlayer();
     S.msg = `Nessuna <b>${L}</b>. Tocca a <b>${esc(cur().name)}</b>.`;
@@ -495,6 +595,14 @@ function solveWrong(){
   Sound.buzz(); save(); render();
 }
 
+function revealAllThen(next){
+  const hidden = lettersInPhrase().filter(L => !S.used.includes(L));
+  S.used.push(...hidden);
+  const anim = animateReveal(hidden, true);
+  save(); render();
+  anim().then(() => setTimeout(next, 700));
+}
+
 function solveRight(){
   snapshot();
   const p = cur();
@@ -505,26 +613,87 @@ function solveRight(){
     q.round = 0;
   });
   S.lastWinner = {name: p.name, won};
-  const hidden = lettersInPhrase().filter(L => !S.used.includes(L));
-  S.used.push(...hidden);
   S.phase = 'mancheEnd';
   S.msg = `<span class="big">${esc(p.name)} risolve!</span> +${euro(won)}`;
-  const anim = animateReveal(hidden, true);
-  save(); render();
   Sound.fanfare(); confetti();
-  anim().then(() => setTimeout(showEnd, 700));
+  revealAllThen(showEnd);
 }
 
 function skipTurn(){
-  if (busy || !['turn','consonant','vowel','solve'].includes(S.phase)) return;
+  if (busy || !['turn','consonant','vowel','solve','bonusSpin'].includes(S.phase)) return;
   snapshot(); const p = cur(); nextPlayer();
   S.msg = `${esc(p.name)} passa. Tocca a <b>${esc(cur().name)}</b>.`;
   save(); render();
 }
 
+function timeUp(){
+  if (S.phase === 'finalSolve'){
+    S.msg = `<span class="big" style="color:#ff6b6f">TEMPO SCADUTO!</span> Il conduttore conferma se la risposta è arrivata in tempo.`;
+    Sound.buzz(); render(); return;
+  }
+  snapshot(); const p = cur(); nextPlayer();
+  S.msg = `<span class="big" style="color:#ff6b6f">TEMPO SCADUTO!</span> ${esc(p.name)} perde il turno. Tocca a <b>${esc(cur().name)}</b>.`;
+  Sound.buzz(); save(); render();
+}
+
+/* ---------- Gioco finale ---------- */
+function finalGiven(){ return [...new Set([...norm(S.cfg.finalLetters || '')].filter(c => /[A-Z]/.test(c)))]; }
+
+function startFinalSetup(){
+  const top = Math.max(...S.players.map(p => p.total));
+  snapshot();
+  S.final = {player: S.players.findIndex(p => p.total === top), picks: [], won: null};
+  S.current = S.final.player;
+  S.phase = 'finalPhrase'; S.category = ''; S.grid = null; S.used = [];
+  S.msg = `Gioco finale per <b>${esc(cur().name)}</b>! Il conduttore inserisce la frase.`;
+  save(); buildBoard(); render(); openPhrase();
+}
+
+function startFinal(category, phrase){
+  snapshot();
+  S.category = category.trim(); S.phrase = phrase.trim();
+  S.grid = layoutPhrase(S.phrase); S.used = [];
+  buildBoard();
+  const given = finalGiven();
+  S.used = given.slice();
+  S.phase = 'finalPick';
+  S.msg = `Lettere regalate: <b>${given.join(' ') || 'nessuna'}</b>. ${esc(cur().name)}, scegli <b>3 consonanti</b> e <b>1 vocale</b>.`;
+  const anim = animateReveal(given, true);
+  save(); render(); anim();
+}
+
+function pickFinal(L){
+  const f = S.final;
+  const cons = f.picks.filter(x => !isVowel(x)).length, vow = f.picks.length - cons;
+  if (S.used.includes(L) || f.picks.includes(L)) return;
+  if (isVowel(L) ? (cons < 3 || vow >= 1) : cons >= 3) return;
+  snapshot();
+  f.picks.push(L);
+  if (f.picks.length < 4){
+    const c2 = f.picks.filter(x => !isVowel(x)).length;
+    S.msg = `Scelte: <b>${f.picks.join(' ')}</b>. ` + (c2 < 3 ? `Ancora ${3 - c2} consonant${3 - c2 === 1 ? 'e' : 'i'}.` : `Ora una vocale.`);
+    save(); render(); return;
+  }
+  S.used.push(...f.picks);
+  S.phase = 'finalSolve';
+  S.msg = `${esc(cur().name)}, hai <b>${S.cfg.finalSeconds} secondi</b> per risolvere!`;
+  const anim = animateReveal(f.picks);
+  save(); render(); anim();
+}
+
+function finalResult(won){
+  snapshot();
+  const p = cur();
+  S.final.won = won;
+  if (won){ p.total += S.cfg.finalPrize; Sound.fanfare(); confetti(); S.msg = `<span class="big">${esc(p.name)} vince il gioco finale!</span> +${euro(S.cfg.finalPrize)}`; }
+  else { Sound.buzz(); S.msg = `Peccato, ${esc(p.name)}! Ecco la soluzione.`; }
+  S.phase = 'finalDone';
+  revealAllThen(showEnd);
+}
+
 function undo(){
   if (busy || !history.length) return;
-  S = JSON.parse(history.pop());
+  S = JSON.parse(history.pop()); actionCount++;
   save(); buildBoard(); render();
   closeModals(); openModalForPhase();
 }
@@ -591,8 +760,9 @@ function rotateWheelTo(index, turns, ms){
   });
 }
 
+const canSpinPhase = () => S && (S.phase === 'turn' || S.phase === 'bonusSpin');
 async function spinDigital(){
-  if (busy || !S || S.phase !== 'turn' || !remaining('c').length) return;
+  if (busy || !S || !canSpinPhase() || !remaining('c').length) return;
   Sound.ensure();
   busy = true; render();
   const index = Math.floor(Math.random() * SEGMENTS.length);
@@ -604,7 +774,7 @@ async function spinDigital(){
 }
 
 function chooseManual(key){
-  if (busy || !S || S.phase !== 'turn') return;
+  if (busy || !S || !canSpinPhase()) return;
   Sound.ensure();
   const isMoney = typeof key === 'number';
   if ((isMoney || key === 'BONUS') && !remaining('c').length) return;
@@ -658,11 +828,12 @@ function render(){
   $('undoBtn').disabled = busy || !history.length;
   $('soundBtn').textContent = Sound.on ? '🔊' : '🔇';
   if (!S){ $('mancheBadge').textContent = '—'; $('players').innerHTML=''; $('msg').innerHTML='Crea una nuova partita per iniziare.'; $('actions').innerHTML=''; renderKeyboard(); renderWheelControls(); return; }
-  $('mancheBadge').textContent = S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` : `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}`;
+  const sp = spec(), extra = (sp.mult > 1 ? ` · VALORI ×${sp.mult}` : '') + (sp.timer ? ` · ⏱ ${sp.timer}s` : '');
+  $('mancheBadge').textContent = S.final ? 'GIOCO FINALE' : S.tiebreak ? `SPAREGGIO · MANCHE ${S.manche}` : `MANCHE ${Math.min(S.manche, S.cfg.manches)} / ${S.cfg.manches}${extra}`;
 
   // players
   $('players').innerHTML = S.players.map((p,i) => `
-    <div class="pcard ${i===S.current && ['turn','consonant','vowel','solve'].includes(S.phase) ? 'active':''} ${isActive(i)?'':'out'}" style="--pc:${p.color}">
+    <div class="pcard ${i===S.current && PLAY_PHASES.includes(S.phase) ? 'active':''} ${isActive(i)?'':'out'}" style="--pc:${p.color}">
       <div class="pname">${esc(p.name)}</div>
       <div class="pround">${euro(p.round)}</div>
       <div class="ptotal">Totale: <b>${euro(p.total)}</b></div>
@@ -683,7 +854,7 @@ function render(){
     a.push(`<button class="btn blue" data-act="vowel" ${busy||!canVowel?'disabled':''}>Compra vocale (${euro(S.cfg.vowelCost)})</button>`);
     a.push(`<button class="btn green" data-act="solve" ${busy?'disabled':''}>Risolvi</button>`);
     a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
-  } else if (ph === 'consonant'){
+  } else if (ph === 'consonant' || ph === 'bonusSpin'){
     a.push(`<button class="btn ghost" data-act="skip" ${busy?'disabled':''}>Passa turno</button>`);
   } else if (ph === 'vowel'){
     a.push(`<button class="btn ghost" data-act="cancel">Annulla acquisto</button>`);
@@ -691,9 +862,12 @@ function render(){
     a.push(`<button class="btn green" data-act="right">✓ Soluzione esatta</button>`);
     a.push(`<button class="btn red" data-act="wrong">✗ Sbagliata</button>`);
     a.push(`<button class="btn ghost" data-act="cancel">Indietro</button>`);
-  } else if (ph === 'mancheEnd' || ph === 'gameOver'){
-    a.push(`<button class="btn" data-act="showEnd" ${busy?'disabled':''}>${ph==='gameOver'?'Classifica finale':'Continua ▶'}</button>`);
-  } else if (ph === 'phrase'){
+  } else if (ph === 'finalSolve'){
+    a.push(`<button class="btn green" data-act="finalRight" ${busy?'disabled':''}>✓ Soluzione esatta</button>`);
+    a.push(`<button class="btn red" data-act="finalWrong" ${busy?'disabled':''}>✗ Sbagliata / tempo scaduto</button>`);
+  } else if (ph === 'mancheEnd' || ph === 'gameOver' || ph === 'finalDone'){
+    a.push(`<button class="btn" data-act="showEnd" ${busy?'disabled':''}>${ph==='mancheEnd'?'Continua ▶':'Classifica finale'}</button>`);
+  } else if (ph === 'phrase' || ph === 'finalPhrase'){
     a.push(`<button class="btn" data-act="phrase">Inserisci la frase</button>`);
   }
   $('actions').innerHTML = a.join('');
@@ -709,8 +883,13 @@ function renderKeyboard(){
   const mk = L => {
     const used = S && S.used.includes(L);
     const v = isVowel(L);
-    const enabled = !busy && ((ph === 'consonant' && !v) || (ph === 'vowel' && v));
-    return `<button class="key ${v?'vowel':''} ${used?'used':''} ${enabled && !used ? 'hot':''}" data-letter="${L}" ${enabled?'':'disabled'}>${L}</button>`;
+    let enabled = !busy && ((ph === 'consonant' && !v) || (ph === 'vowel' && v));
+    const picked = ph === 'finalPick' && S.final.picks.includes(L);
+    if (ph === 'finalPick' && !busy){
+      const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
+      enabled = !used && !picked && (v ? nc === 3 && nv === 0 : nc < 3);
+    }
+    return `<button class="key ${v?'vowel':''} ${used?'used':''} ${picked?'picked':''} ${enabled && !used ? 'hot':''}" data-letter="${L}" ${enabled?'':'disabled'}>${L}</button>`;
   };
   const cons = [...ALPHA].filter(L => !isVowel(L));
   $('keyboard').innerHTML =
@@ -721,7 +900,7 @@ function renderKeyboard(){
 function renderWheelControls(){
   $('modeDigital').classList.toggle('on', mode === 'digital');
   $('modeManual').classList.toggle('on', mode === 'manual');
-  const canSpin = S && S.phase === 'turn' && !busy;
+  const canSpin = canSpinPhase() && !busy;
   const noCons = S && S.grid && !remaining('c').length;
   $('spinBtn').style.display = mode === 'digital' ? '' : 'none';
   $('manualGrid').style.display = mode === 'manual' ? '' : 'none';
@@ -743,7 +922,7 @@ function closeModals(){ document.querySelectorAll('.modal-bg').forEach(m => m.cl
 function anyModalOpen(){ return !!document.querySelector('.modal-bg.open'); }
 function openModalForPhase(){
   if (!S){ openSetup(); return; }
-  if (S.phase === 'phrase') openPhrase();
+  if (S.phase === 'phrase' || S.phase === 'finalPhrase') openPhrase();
 }
 
 function playerRow(name, i){
@@ -754,15 +933,35 @@ function playerRow(name, i){
 function openSetup(){
   const names = S ? S.players.map(p => p.name) : ['Giocatore 1','Giocatore 2','Giocatore 3'];
   $('playerInputs').innerHTML = names.map(playerRow).join('');
-  if (S){ $('numManches').value = S.cfg.manches; $('bonusValue').value = S.cfg.bonusValue; $('vowelCost').value = S.cfg.vowelCost; $('winBonus').value = S.cfg.winBonus; $('keepOthers').checked = S.cfg.keepOthers; }
+  const c = S ? S.cfg : withDefaults({manches:3});
+  $('numManches').value = c.manches; $('bonusValue').value = c.bonusValue; $('vowelCost').value = c.vowelCost; $('winBonus').value = c.winBonus; $('keepOthers').checked = c.keepOthers;
+  $('finalOn').checked = c.finalOn; $('finalPrize').value = c.finalPrize; $('finalSeconds').value = c.finalSeconds; $('finalLetters').value = [...c.finalLetters].join(' ').replace(/\s+/g,' ');
+  renderMancheTable(c.special);
   $('setupCancel').style.display = S ? '' : 'none';
   $('setupErr').textContent = '';
   closeModals(); $('setupModal').classList.add('open');
 }
+function readMancheTable(){
+  return [...$('mancheTable').querySelectorAll('[data-m]')].map(row => ({mult: +row.querySelector('.selMult').value, timer: +row.querySelector('.selTimer').value}));
+}
+function renderMancheTable(special){
+  const n = Math.max(1, Math.min(30, Math.round(+$('numManches').value || 1)));
+  const opt = (v, cur, label) => `<option value="${v}" ${+cur === v ? 'selected' : ''}>${label}</option>`;
+  let h = '<div class="mh">Manche</div><div class="mh">Valori ruota</div><div class="mh">Tempo per turno</div>';
+  for (let i = 0; i < n; i++){
+    const sp = special[i] || {mult:1, timer:0};
+    h += `<div class="ml">${i+1}</div>
+      <div data-m="${i}" style="display:contents">
+        <select class="selMult" aria-label="Valori manche ${i+1}">${opt(1,sp.mult,'Normali')}${opt(2,sp.mult,'Doppi ×2')}${opt(3,sp.mult,'Tripli ×3')}</select>
+        <select class="selTimer" aria-label="Tempo manche ${i+1}">${opt(0,sp.timer,'Nessun limite')}${[10,15,20,30,45].map(t => opt(t,sp.timer,t+' secondi')).join('')}</select>
+      </div>`;
+  }
+  $('mancheTable').innerHTML = h;
+}
 function recolorPlayerRows(){ [...$('playerInputs').children].forEach((r,i) => r.querySelector('.dot').style.background = PLAYER_COLORS[i % PLAYER_COLORS.length]); }
 
 function openPhrase(){
-  $('phraseTitle').textContent = S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}`;
+  $('phraseTitle').textContent = S.final ? `Gioco finale · ${S.players[S.final.player].name}` : S.tiebreak ? `Spareggio · manche ${S.manche}` : `Manche ${S.manche} di ${S.cfg.manches}`;
   $('catInput').value = ''; $('phraseInput').value = ''; $('phraseInput').type = 'password';
   $('phraseErr').textContent = ''; $('preview').innerHTML = '';
   closeModals(); $('phraseModal').classList.add('open');
@@ -784,7 +983,7 @@ function updatePreview(){
 }
 
 function standingsTable(){
-  const order = S.players.map((p,i)=>({...p,i})).filter(p => isActive(p.i) || !S.tiebreak).sort((a,b) => b.total - a.total);
+  const order = S.players.map((p,i)=>({...p,i})).filter(p => !S.tiebreak || S.final || S.tiebreak.includes(p.i)).sort((a,b) => b.total - a.total);
   const top = order[0] ? order[0].total : 0;
   return `<table class="standings">${order.map((p,k) => `<tr class="${p.total===top?'top':''}"><td>${k+1}. <span style="color:${p.color}">●</span> ${esc(p.name)}</td><td>${euro(p.total)}</td></tr>`).join('')}</table>`;
 }
@@ -800,7 +999,7 @@ function showEnd(){
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Guarda il tabellone</button>
       <button class="btn green" data-act="${S.tiebreak || last ? 'finish' : 'nextManche'}">${S.tiebreak || last ? 'Classifica finale 🏆' : 'Prossima manche ▶'}</button></div>`;
   } else if (S.phase === 'gameOver'){
-    const pool = S.players.map((p,i)=>({...p,i})).filter(p => isActive(p.i));
+    const pool = S.players.map((p,i)=>({...p,i})).filter(p => !S.tiebreak || S.tiebreak.includes(p.i));
     const top = Math.max(...pool.map(p => p.total));
     const winners = pool.filter(p => p.total === top);
     const tie = winners.length > 1;
@@ -810,6 +1009,15 @@ function showEnd(){
       ${standingsTable()}
       <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       ${tie ? '<button class="btn" data-act="tiebreak">Manche di spareggio</button>' : ''}
+      ${!tie && S.cfg.finalOn ? '<button class="btn" data-act="final">Gioco finale ▶</button>' : ''}
+      <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
+  } else if (S.phase === 'finalDone'){
+    const p = S.players[S.final.player];
+    el.innerHTML = `<div class="trophy">${S.final.won ? '🏆' : '⏱'}</div>
+      <h2 style="text-align:center">${S.final.won ? esc(p.name) + ' vince il gioco finale!' : 'Gioco finale non riuscito'}</h2>
+      <p style="text-align:center;margin:0">${S.final.won ? 'Premio di <b>' + euro(S.cfg.finalPrize) + '</b> aggiunto al totale.' : 'Peccato! ' + esc(p.name) + ' resta comunque il vincitore della partita.'}</p>
+      ${sol}${standingsTable()}
+      <div class="mfoot"><button class="btn ghost" data-act="closeEnd">Chiudi</button>
       <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
   } else return;
   closeModals(); $('endModal').classList.add('open');
@@ -852,7 +1060,8 @@ document.addEventListener('click', e => {
     vowel: buyVowel, solve: solveAttempt, skip: skipTurn, cancel: cancelPhase,
     right: solveRight, wrong: solveWrong, showEnd, phrase: openPhrase,
     closeEnd: closeModals, nextManche, finish: finishGame, tiebreak: startTiebreak,
-    newGame: openSetup
+    newGame: openSetup, final: startFinalSetup,
+    finalRight: () => !busy && finalResult(true), finalWrong: () => !busy && finalResult(false)
   })[ac.dataset.act]?.();
 });
 
@@ -861,8 +1070,14 @@ $('modeDigital').onclick = () => { mode = 'digital'; store.set('ruota-mode', mod
 $('modeManual').onclick = () => { mode = 'manual'; store.set('ruota-mode', mode); render(); };
 $('undoBtn').onclick = undo;
 $('soundBtn').onclick = () => { Sound.on = !Sound.on; store.set('ruota-sound', Sound.on ? 'on' : 'off'); render(); };
-$('fsBtn').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); };
-$('newBtn').onclick = () => { if (S && S.phase !== 'gameOver' && !confirm('Iniziare una nuova partita? La partita in corso andrà persa.')) return; openSetup(); };
+$('fsBtn').onclick = () => {
+  try { const pr = !document.fullscreenElement ? document.documentElement.requestFullscreen?.() : document.exitFullscreen?.(); pr?.catch?.(() => {}); } catch(e){}
+};
+$('newBtn').onclick = async () => {
+  if (S && !['gameOver','finalDone'].includes(S.phase) && !(await askConfirm('Nuova partita', 'La partita in corso andrà persa. Vuoi ricominciare?', 'Ricomincia'))) return;
+  openSetup();
+};
+$('numManches').addEventListener('input', () => renderMancheTable(readMancheTable()));
 
 $('addPlayer').onclick = () => {
   const n = $('playerInputs').children.length;
@@ -875,7 +1090,9 @@ $('setupStart').onclick = () => {
   const num = v => Math.max(0, Math.round(+v || 0));
   if (names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
   const manches = Math.max(1, num($('numManches').value));
-  newGame({names, manches, bonusValue:num($('bonusValue').value), vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked});
+  newGame({names, manches, bonusValue:num($('bonusValue').value), vowelCost:num($('vowelCost').value), winBonus:num($('winBonus').value), keepOthers:$('keepOthers').checked,
+    special: readMancheTable(), finalOn: $('finalOn').checked, finalPrize: num($('finalPrize').value),
+    finalSeconds: Math.max(3, num($('finalSeconds').value)), finalLetters: norm($('finalLetters').value).replace(/[^A-Z]/g,'')});
   save(); buildBoard(); render(); openPhrase();
 };
 
@@ -890,7 +1107,8 @@ $('phraseStart').onclick = () => {
   if (!txt.trim()){ $('phraseErr').textContent = 'Scrivi la frase.'; return; }
   if (![...txt].some(isLetter)){ $('phraseErr').textContent = 'La frase deve contenere almeno una lettera.'; return; }
   if (!layoutPhrase(txt)){ updatePreview(); return; }
-  closeModals(); startManche(cat, txt);
+  closeModals();
+  if (S.phase === 'finalPhrase') startFinal(cat, txt); else startManche(cat, txt);
 };
 ['catInput','phraseInput'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('phraseStart').click(); }));
 
@@ -906,8 +1124,29 @@ document.addEventListener('keydown', e => {
 buildWheel();
 try { const raw = store.get(STORE_KEY); if (raw) S = JSON.parse(raw); } catch(e){ S = null; }
 if (S && (!S.players || !S.cfg)) S = null;
+if (S){ S.cfg = withDefaults(S.cfg); if (S.final === undefined) S.final = null; }
 buildBoard(); render();
-if (S && (S.phase === 'mancheEnd' || S.phase === 'gameOver')) showEnd(); else openModalForPhase();
+if (S && ['mancheEnd','gameOver','finalDone'].includes(S.phase)) showEnd(); else openModalForPhase();
+
+/* ================= Timer ================= */
+const timer = {key:null, left:0, last:0, fired:false};
+function timerSecs(){
+  if (!S) return 0;
+  if (S.phase === 'finalSolve') return S.cfg.finalSeconds;
+  if (S.final || !['turn','consonant','vowel','bonusSpin'].includes(S.phase)) return 0;
+  return spec().timer || 0;
+}
+setInterval(() => {
+  const el = $('timer'), secs = timerSecs(), now = performance.now();
+  if (!secs){ el.hidden = true; timer.key = null; return; }
+  const key = actionCount + '|' + S.phase + '|' + S.current;
+  if (key !== timer.key){ timer.key = key; timer.left = secs * 1000; timer.last = now; timer.fired = false; }
+  if (!busy && !anyModalOpen() && !document.hidden) timer.left -= now - timer.last;
+  timer.last = now;
+  const shown = Math.max(0, Math.ceil(timer.left / 1000));
+  el.hidden = false; el.textContent = shown; el.classList.toggle('warn', shown <= 5);
+  if (timer.left <= 0 && !timer.fired){ timer.fired = true; timeUp(); }
+}, 200);
 
 // API di test (solo per verifica automatica)
 window.__ruota = { layoutPhrase, get state(){ return S; } };
