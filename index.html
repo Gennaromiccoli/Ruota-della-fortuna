@@ -844,7 +844,7 @@ function bonusValueSpin(value, base){
   else if (remaining('c').length){ S.phase = 'consonant'; S.spin = {value, kind:'normal'}; msg += ` Ora ${nm(p)} chiama un'altra consonante da ${euro(value)}.`; }
   else { S.phase = 'turn'; S.spin = null; msg += ` Non restano consonanti: ${nm(p)} può comprare una vocale o risolvere.`; }
   S.msg = msg;
-  setFx(count ? 'value' : 'miss', euro(value), count ? `${count} × ${L}` : `Nessuna ${L}`);
+  if (!count) setFx('miss', `NESSUNA ${L}`, euro(value));
   count ? Sound.ding() : Sound.buzz();
   const anim = animateReveal([L]);
   save(); render(); anim();
@@ -884,7 +884,6 @@ async function chooseLetter(L, confirmed){
   const found = foundText(count, L) + (gain ? ` <span class="big">+${euro(gain)}</span>` : '');
   S.spin = null; S.phase = 'turn';
   S.msg = `${found} ${nm(p)} continua.`;
-  setFx('found', `${count} × ${L}`, gain ? '+' + euro(gain) : p.name);
   if (kind === 'jolly' && !p.jolly){
     p.jolly = true; S.jollyTaken = true;
     S.msg = `${found} ${nm(p)} conquista il <b>JOLLY 🃏</b>! Potrà usarlo una volta contro BANCAROTTA, PASSA o un errore.`;
@@ -926,6 +925,11 @@ function solveWrong(){
   failTurn(S.express ? 'express' : 'error', 'Risposta sbagliata.');
 }
 
+/* Prima si girano le caselle, poi parte la scritta di festa e infine il riepilogo */
+function winSplash(kind, big, sub, then){
+  setFx(kind, big, sub); celebrate(); save(); render();
+  if (then) setTimeout(then, IS_REMOTE ? 0 : 2000);
+}
 function revealAllThen(next){
   const hidden = lettersInPhrase().filter(L => !S.used.includes(L));
   S.used.push(...hidden);
@@ -948,9 +952,8 @@ function solveRight(){
   S.express = false;
   S.phase = 'mancheEnd';
   S.msg = `<span class="big">${esc(p.name)} risolve!</span> +${euro(won)}`;
-  setFx('solve', 'RISOLTO!', `${p.name} +${euro(won)}`);
-  Sound.fanfare(); celebrate();
-  revealAllThen(showEnd);
+  Sound.fanfare();
+  revealAllThen(() => winSplash('solve', 'RISOLTO!', `${p.name} +${euro(won)}`, showEnd));
 }
 
 function skipTurn(){
@@ -1034,7 +1037,6 @@ async function expressLetter(L, confirmed){
   p.round += gain;
   S.msg = `⚡ ${foundText(count, L)}${gain ? ` <span class="big">+${euro(gain)}</span>` : ''} L'Express di ${nm(p)} prosegue.`;
   if (allRevealed()) S.msg = `⚡ Tutte le lettere sono scoperte! ${nm(p)}, risolvi.`;
-  setFx('found', `${count} × ${L}`, gain ? '+' + euro(gain) : 'Express');
   const anim = animateReveal([L]);
   save(); render(); anim();
 }
@@ -1068,9 +1070,8 @@ function lampoRight(){
   S.lastWinner = {name: p.name, won, lampo: true};
   S.phase = 'mancheEnd';
   S.msg = `<span class="big">${esc(p.name)} indovina la frase lampo!</span> +${euro(won)}`;
-  setFx('solve', 'LAMPO!', `${p.name} +${euro(won)}`);
-  Sound.fanfare(); celebrate();
-  revealAllThen(showEnd);
+  Sound.fanfare();
+  revealAllThen(() => winSplash('solve', 'LAMPO!', `${p.name} +${euro(won)}`, showEnd));
 }
 function lampoWrong(){
   if (busy || S.phase !== 'lampoBuzz') return;
@@ -1188,22 +1189,21 @@ function finalRandomReveal(){
   const i = hidden[Math.floor(Math.random() * hidden.length)];
   S.extra.push(i); lightTile(i); save(); render();
 }
-function finalSettle(result){
+function finalSettle(result, onRevealed){
   const f = S.final, k = f.idx;
   f.results[k] = result;
   const done = f.results.every(r => r !== null) || f.timeLeft <= 0;
   if (f.timeLeft <= 0) f.results = f.results.map(r => r === null ? false : r);
   S.phase = done ? 'finalWrap' : 'finalIntro';
-  revealAllThen(done ? finishFinal : () => {});
+  revealAllThen(() => { if (onRevealed) onRevealed(); if (done) setTimeout(finishFinal, onRevealed ? 1800 : 0); });
 }
 function finalRight(){
   if (busy || S.phase !== 'finalSolve') return;
   snapshot();
   const f = S.final;
   S.msg = `🟩 Busta ${f.idx + 1} vinta: <span class="big">${euro(f.prizes[f.idx])}</span>!`;
-  setFx('busta-win', euro(f.prizes[f.idx]), `Busta ${f.idx + 1} vinta`);
-  Sound.fanfare(); celebrate();
-  finalSettle(true);
+  Sound.fanfare();
+  finalSettle(true, () => winSplash('busta-win', euro(f.prizes[f.idx]), `Busta ${f.idx + 1} vinta`));
 }
 function finalStop(){
   if (busy || S.phase !== 'finalSolve') return;
