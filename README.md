@@ -32,7 +32,7 @@ Il collegamento è diretto tra TV e telefono (WebRTC con PeerJS); il servizio pu
 - In più, sulla Fire TV imposta lo screensaver su "Mai".
 
 ## Frasi della serata
-In Nuova partita → **📝 Frasi della serata** si possono preparare tutte le frasi prima di iniziare (una riga per manche, `Titolo | Frase`, più tema e 3 frasi per il gioco finale). Ogni manche parte da sola con la sua frase. Il pulsante 🎲 le pesca da un archivio di oltre 120 frasi in 12 categorie, senza ripetizioni tra una partita e l'altra.
+In Nuova partita → **📝 Frasi della serata** si possono preparare tutte le frasi prima di iniziare (una riga per manche, `Titolo | Frase`, più tema e 3 frasi per il gioco finale). Ogni manche parte da sola con la sua frase. Il pulsante 🎲 le pesca da un archivio di oltre 800 frasi in 25 generi (proverbi, modi di dire, cucina, sport, storia, geografia, personaggi, scienza, arte e libri, cinema, musica, animali, natura, feste, vacanze, fiabe e miti, tecnologia…), senza ripetizioni tra una partita e l'altra. Si possono scegliere i generi da usare.
 
 ## Ruota, giro finale e atmosfera
 - **Ruota digitale**: tocca il pulsante oppure trascinalo: più forte lo lanci, più giri fa. La lancetta rimbalza sui pioli e a volte la ruota si ferma sul filo.
