@@ -336,6 +336,14 @@ body.player header,body.player #players,body.player .stage,body.player #solution
 #spinBtn,.wheel-box{touch-action:none}
 .phone-dot{font-size:12px;margin-left:4px}
 
+/* ---------- pausa ---------- */
+.pause-ov{position:fixed;inset:0;z-index:49;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,25,.78);backdrop-filter:blur(6px)}
+.pause-box{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.pause-big{font-family:var(--display);font-size:clamp(56px,11vw,170px);letter-spacing:4px;color:var(--gold);text-shadow:0 6px 0 #7a4b00,0 0 50px rgba(255,200,60,.55);animation:pulse 1.2s ease-in-out infinite alternate}
+.pause-sub{font-family:var(--display);letter-spacing:2px;font-size:clamp(18px,2.6vw,36px);color:#fff}
+body.tvmode .pause-box .btn{display:none}
+#pauseBtn.on{border-color:var(--gold);color:var(--gold)}
+
 /* confetti */
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
@@ -350,6 +358,7 @@ body.player header,body.player #players,body.player .stage,body.player #solution
   <div class="spacer"></div>
   <span class="remote-pill" id="remotePill" hidden></span>
   <button class="hbtn" id="remoteBtn" hidden title="Usa il telefono come telecomando">📱 Telecomando</button>
+  <button class="hbtn" id="pauseBtn" data-act="togglePause" hidden title="Metti in pausa il gioco">⏸ Pausa</button>
   <button class="hbtn" id="undoBtn" title="Annulla l'ultima azione (Ctrl+Z)">↶ Annulla</button>
   <button class="hbtn" id="soundBtn" title="Audio on/off">🔊</button>
   <button class="hbtn" id="fsBtn" title="Schermo intero">⛶</button>
@@ -432,6 +441,14 @@ body.player header,body.player #players,body.player .stage,body.player #solution
     <button id="plBuzz" class="buzzer" type="button" disabled><span class="bz-ic">🔔</span><span id="plBuzzTxt">PRENOTATI</span></button>
     <div id="plList" class="pl-list"></div>
     <button class="btn ghost" id="plRename" type="button">Cambia nome</button>
+  </div>
+</div>
+
+<div class="pause-ov" id="pauseOverlay" hidden>
+  <div class="pause-box">
+    <div class="pause-big">⏸ PAUSA</div>
+    <div class="pause-sub">Il gioco riprende tra poco…</div>
+    <button class="btn" data-act="togglePause" type="button">▶ Riprendi</button>
   </div>
 </div>
 
@@ -744,9 +761,9 @@ const SAMPLE = [
   ["Mestieri","Maestra elementare"],
   ["Mestieri","Panettiere di quartiere"],
   ["Mestieri","Meccanico di fiducia"],
-  ["Mestieri","Giardiniere"],
-  ["Mestieri","Astronauta"],
-  ["Mestieri","Pasticcere"],
+  ["Mestieri","Il giardiniere pota le rose"],
+  ["Mestieri","L'astronauta in orbita"],
+  ["Mestieri","Il pasticcere sforna i dolci"],
   ["Natale","Albero di Natale addobbato"],
   ["Natale","Babbo Natale con la slitta"],
   ["Natale","Pacchi sotto l'albero"],
@@ -762,7 +779,7 @@ const SAMPLE = [
   ["Cinema","Ladri di biciclette"],
   ["Cinema","Il postino"],
   ["Cinema","La grande bellezza"],
-  ["Cinema","Mediterraneo"],
+  ["Cinema","Mediterraneo di Salvatores"],
   ["Musica","Concerto all'aperto"],
   ["Musica","Festival di Sanremo"],
   ["Musica","Chitarra elettrica"],
@@ -978,7 +995,7 @@ const SAMPLE = [
   ["Geografia","Il golfo di Napoli"],
   ["Geografia","La laguna di Venezia"],
   ["Geografia","Il circolo polare artico"],
-  ["Geografia","L'equatore"],
+  ["Geografia","La linea dell'equatore"],
   ["Geografia","I fiordi norvegesi"],
   ["Geografia","Le cascate Vittoria"],
   ["Geografia","Il canale di Panama"],
@@ -1035,7 +1052,7 @@ const SAMPLE = [
   ["Luoghi d'Italia","Il Ponte Vecchio di Firenze"],
   ["Luoghi d'Italia","L'Arena di Verona"],
   ["Luoghi d'Italia","La Galleria degli Uffizi"],
-  ["Luoghi d'Italia","Portofino"],
+  ["Luoghi d'Italia","Il borgo di Portofino"],
   ["Luoghi d'Italia","Capri e i faraglioni"],
   ["Luoghi d'Italia","Le Langhe"],
   ["Luoghi d'Italia","Piazza della Signoria"],
@@ -1080,7 +1097,7 @@ const SAMPLE = [
   ["Personaggi","Giacomo Leopardi"],
   ["Personaggi","Antonio Meucci"],
   ["Personaggi","San Francesco d'Assisi"],
-  ["Personaggi","Caravaggio"],
+  ["Personaggi","Michelangelo Merisi da Caravaggio"],
   ["Scienza","Il sistema solare"],
   ["Scienza","La forza di gravità"],
   ["Scienza","La tavola periodica"],
@@ -1127,7 +1144,7 @@ const SAMPLE = [
   ["Arte e libri","Don Chisciotte della Mancia"],
   ["Arte e libri","Romeo e Giulietta"],
   ["Arte e libri","L'Odissea di Omero"],
-  ["Arte e libri","L'Iliade"],
+  ["Arte e libri","L'Iliade di Omero"],
   ["Arte e libri","I Malavoglia"],
   ["Arte e libri","Il nome della rosa"],
   ["Arte e libri","Il Gattopardo"],
@@ -1162,7 +1179,7 @@ const SAMPLE = [
   ["Cinema","Ritorno al futuro"],
   ["Cinema","Guerre stellari"],
   ["Cinema","Il padrino"],
-  ["Cinema","Titanic"],
+  ["Cinema","Titanic di James Cameron"],
   ["Cinema","Il re leone"],
   ["Cinema","La bella e la bestia"],
   ["Cinema","Biancaneve e i sette nani"],
@@ -1273,7 +1290,7 @@ const SAMPLE = [
   ["Mestieri","Il veterinario"],
   ["Mestieri","Il portalettere"],
   ["Mestieri","Il falegname"],
-  ["Mestieri","L'elettricista"],
+  ["Mestieri","L'elettricista di fiducia"],
   ["Mestieri","Il parrucchiere"],
   ["Mestieri","Il cuoco stellato"],
   ["Mestieri","Il pilota di linea"],
@@ -1283,9 +1300,9 @@ const SAMPLE = [
   ["Mestieri","Il calzolaio"],
   ["Mestieri","Il fotografo"],
   ["Mestieri","Il giornalista"],
-  ["Mestieri","L'architetto"],
+  ["Mestieri","L'architetto e il progetto"],
   ["Mestieri","Il dentista"],
-  ["Mestieri","L'infermiera"],
+  ["Mestieri","L'infermiera di reparto"],
   ["Mestieri","Il muratore"],
   ["Mestieri","Il pescatore"],
   ["Mestieri","Il contadino"],
@@ -1404,7 +1421,7 @@ const SAMPLE = [
   ["Trasporti","Il semaforo rosso"],
   ["Trasporti","La Vespa e la Lambretta"],
   ["Trasporti","La mongolfiera"],
-  ["Trasporti","L'elicottero"],
+  ["Trasporti","L'elicottero del soccorso"],
   ["Trasporti","Il sottomarino"],
   ["Trasporti","La bicicletta elettrica"],
   ["Trasporti","Il monopattino"],
@@ -1538,7 +1555,8 @@ function layoutPhrase(text){
   }
   return null;
 }
-function validPhrase(txt){ return !!(txt && txt.trim() && [...txt].some(isLetter) && layoutPhrase(txt)); }
+const wordCount = txt => String(txt || '').trim().split(/\s+/).filter(w => [...w].some(isLetter)).length;
+function validPhrase(txt){ return !!(txt && txt.trim() && [...txt].some(isLetter) && wordCount(txt) >= 2 && layoutPhrase(txt)); }
 
 /* ================= Audio ================= */
 const Sound = {
@@ -2569,6 +2587,10 @@ function render(){
   $('undoBtn').disabled = busy || !(IS_REMOTE ? remoteCanUndo : history.length);
   $('soundBtn').textContent = Sound.on ? '🔊' : '🔇';
   document.body.classList.toggle('tvmode', remoteConnected());
+  $('pauseOverlay').hidden = !(S && S.paused);
+  $('pauseBtn').hidden = !S || IS_PLAYER;
+  $('pauseBtn').textContent = S && S.paused ? '▶ Riprendi' : '⏸ Pausa';
+  $('pauseBtn').classList.toggle('on', !!(S && S.paused));
   document.body.classList.toggle('nowheel', !!S && (!!S.final || ['lampo','lampoBuzz'].includes(S.phase)));
   renderSolution();
   renderLobby();
@@ -2946,6 +2968,12 @@ const ACTIONS = {
   seg: k => chooseManual(typeof k === 'number' || SEG_KEYS.includes(k) ? k : null),
   letter: a => a && /^[A-Z]$/.test(a.L) && chooseLetter(a.L, !!a.confirmed),
   setup: cfg => applySetup(cfg),
+  togglePause: () => {
+    if (!S || busy) return;
+    S.paused = !S.paused;
+    S.paused ? Sound.pass() : Sound.ding();
+    save(); render();
+  },
   hideEnd: () => { if (!S) return; S.endHiddenKey = endKey(); $('endModal').classList.remove('open'); save(); render(); },
   viewEnd: () => { if (!S) return; S.endHiddenKey = null; save(); showEnd(); },
   openEnv: k => openEnv(k), keepEnv, changeEnv,
@@ -2963,6 +2991,7 @@ const endKey = () => S ? `${S.phase}|${S.manche}` : '';
 
 function act(name, arg){
   if (LOCAL[name]) return LOCAL[name](arg);
+  if (S && S.paused && name !== 'togglePause') return;   // in pausa si può solo riprendere
   if (IS_REMOTE) return Remote.send(name, arg);
   ACTIONS[name]?.(arg);
 }
@@ -3097,6 +3126,7 @@ function onPlayerState(ps){
     ? `<div class="avatar" style="--pc:${me.color}">${ini(me.name)}</div><div><div style="font-weight:800">${esc(me.name)}${me.jolly ? ' <span class="jolly-badge">🃏 JOLLY</span>' : ''}</div><div class="big">${euro(me.round)}</div><div class="muted">Totale: <b>${euro(me.total)}</b></div></div>`
     : `<div class="avatar" style="--pc:#8fa3d9">${ini(Player.name)}</div><div><div style="font-weight:800">${esc(Player.name)}</div><div class="muted">${ps.game ? 'Partita in corso: entrerai nella prossima.' : 'Sei iscritto! Aspetta che il conduttore inizi.'}</div></div>`;
   $('plInfo').innerHTML = !ps.game ? '<div class="cat">Control room</div>Il conduttore sta preparando le manche…'
+    : ps.paused ? '<div class="cat">Pausa</div>⏸ Il gioco è in pausa: si riprende tra poco.'
     : `${ps.category ? `<div class="cat">${esc(ps.category)}</div>` : ''}<div>${esc(ps.msg || '')}</div>`;
   const bz = $('plBuzz'), won = !!me && ps.buzzer === ps.you;
   bz.disabled = !ps.canBuzz; bz.classList.toggle('win', won);
@@ -3166,18 +3196,35 @@ const Remote = {
     const peer = this.peer = new Peer(PEER_PREFIX + this.code, {debug: 0});
     peer.on('open', () => { this.idTries = 0; this.setStatus('ready'); });
     peer.on('connection', conn => {
-      const role = conn.metadata && conn.metadata.role === 'player' ? 'player' : 'host';
-      conn.on('open', () => {
-        if (role === 'player'){ this.pconns.add(conn); this.sendPlayer(conn, true); }
-        else { this.conns.add(conn); onRemoteChange(); this.sendState(conn); }
-      });
-      conn.on('data', msg => role === 'player' ? this.handlePlayer(conn, msg) : this.handle(msg));
-      const drop = () => {
-        if (role === 'player'){ if (this.pconns.delete(conn) && conn.cid) lobbyOffline(conn.cid); }
-        else if (this.conns.delete(conn)) onRemoteChange();
+      const md = conn.metadata || {};
+      const role = md.role === 'player' ? 'player' : 'host';
+      const set = role === 'player' ? this.pconns : this.conns;
+      conn.cid = String(md.cid || '').replace(/[^a-z0-9]/gi, '').slice(0, 24) || null;
+      conn.lastSeen = Date.now();
+      conn._drop = () => {
+        if (!set.delete(conn)) return;
+        if (role === 'player'){ if (conn.cid && ![...this.pconns].some(c => c.cid === conn.cid)) lobbyOffline(conn.cid); }
+        else onRemoteChange();
       };
-      conn.on('close', drop); conn.on('error', drop);
+      conn.on('open', () => {
+        conn.lastSeen = Date.now();
+        // lo stesso telefono che si ricollega sostituisce la sua connessione vecchia (niente doppioni)
+        if (conn.cid) [...set].forEach(c => { if (c !== conn && c.cid === conn.cid){ set.delete(c); try { c.close(); } catch(e){} } });
+        set.add(conn);
+        if (role === 'player') this.sendPlayer(conn, true); else { onRemoteChange(); this.sendState(conn); }
+      });
+      conn.on('data', msg => {
+        conn.lastSeen = Date.now();
+        if (msg && msg.type === 'ping'){ conn.hb = true; try { conn.send({type:'pong'}); } catch(e){} return; }
+        role === 'player' ? this.handlePlayer(conn, msg) : this.handle(msg);
+      });
+      conn.on('close', conn._drop); conn.on('error', conn._drop);
     });
+    // connessioni morte (telefono in pausa, Wi-Fi caduto): dopo 15 s di silenzio vengono tolte
+    if (!this.sweep) this.sweep = setInterval(() => {
+      const now = Date.now();
+      [...this.conns, ...this.pconns].forEach(c => { if (c.hb && now - c.lastSeen > 15000){ try { c.close(); } catch(e){} c._drop(); } });
+    }, 5000);
     peer.on('disconnected', () => setTimeout(() => { if (!peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500));
     peer.on('error', e => {
       if (e.type === 'unavailable-id'){
@@ -3193,6 +3240,7 @@ const Remote = {
   },
   handle(msg){
     if (!msg || msg.type !== 'act' || !Object.prototype.hasOwnProperty.call(ACTIONS, msg.name)) return;
+    if (S && S.paused && msg.name !== 'togglePause') return;
     Sound.ensure();
     ACTIONS[msg.name](msg.arg);
     this.broadcast(true);
@@ -3208,7 +3256,7 @@ const Remote = {
       if (S){ const i = S.players.findIndex(p => !p.cid && p.name.toLowerCase() === name.toLowerCase()); if (i >= 0){ S.players[i].cid = cid; save(); } }
       lobbyUpsert(cid, name);
     } else if (msg.type === 'buzz'){
-      if (!S || !conn.cid) return;
+      if (!S || !conn.cid || S.paused) return;
       const i = S.players.findIndex(p => p.cid === conn.cid);
       if (i >= 0){ Sound.ensure(); buzz(i); }
     }
@@ -3224,7 +3272,7 @@ const Remote = {
     const txt = String(S.msg || '').replace(/<[^>]*>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
     return Object.assign(base, {game: true, you, phase: S.phase, current: S.current, category: S.category, msg: txt,
       players: S.players.map(p => ({name: p.name, color: p.color, round: p.round, total: p.total, jolly: !!p.jolly})),
-      canBuzz: S.phase === 'lampo' && you >= 0 && isActive(you) && !out, out, buzzer: S.phase === 'lampoBuzz' ? S.current : -1});
+      paused: !!S.paused, canBuzz: !S.paused && S.phase === 'lampo' && you >= 0 && isActive(you) && !out, out, buzzer: S.phase === 'lampoBuzz' ? S.current : -1});
   },
   sendState(conn){ try { conn.send(this.payload()); } catch(e){} },
   sendPlayer(conn, force){
@@ -3249,27 +3297,66 @@ const Remote = {
   startPhone(code, role = 'host'){
     this.code = code;
     if (!this.available()) { this.setStatus('unavailable'); return; }
+    // identità fissa del telefono: la TV la usa per riconoscerlo quando si ricollega
+    let cid = role === 'player' ? Player.cid : store.get('ruota-host-cid');
+    if (!cid){ cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); store.set('ruota-host-cid', cid); }
     this.setStatus('connecting');
+    this.lastHeard = 0;
+    const dropConn = () => { const c = this.conn; this.conn = null; if (c){ try { c.close(); } catch(e){} } };
+    const newPeer = () => {
+      const pp = this.peer = new Peer({debug: 0});
+      pp.on('open', () => go());
+      pp.on('disconnected', () => setTimeout(() => { if (!pp.destroyed && pp.disconnected){ try { pp.reconnect(); } catch(e){ try { pp.destroy(); } catch(_){} go(); } } }, 800));
+      pp.on('error', e => {
+        if (e.type === 'peer-unavailable'){ this.setStatus('notfound'); this.later(go); return; }
+        this.setStatus('offline');
+        if (['unavailable-id','invalid-id','network','server-error','socket-error','socket-closed'].includes(e.type)){ try { pp.destroy(); } catch(_){} }
+        this.later(go);
+      });
+    };
     const go = () => {
-      if (this.conn && this.conn.open) return;
-      if (!this.peer || this.peer.destroyed){
-        this.peer = new Peer({debug: 0});
-        this.peer.on('open', go);
-        const pp = this.peer; pp.on('disconnected', () => setTimeout(() => { if (!pp.destroyed && pp.disconnected) pp.reconnect(); }, 1000));
-        this.peer.on('error', e => { this.setStatus(e.type === 'peer-unavailable' ? 'notfound' : 'offline'); this.later(go); });
-        return;
-      }
+      if (this.conn && this.conn.open && Date.now() - this.lastHeard < 12000) return;
+      if (!this.peer || this.peer.destroyed){ newPeer(); return; }
+      if (this.peer.disconnected){ try { this.peer.reconnect(); } catch(e){ try { this.peer.destroy(); } catch(_){} newPeer(); } return; }
       if (!this.peer.open) return;
-      const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true, metadata: {role}});
-      const timeout = setTimeout(() => { if (!conn.open){ try { conn.close(); } catch(e){} this.later(go); } }, 9000);
-      conn.on('open', () => { clearTimeout(timeout); this.setStatus('ready'); if (role === 'player') Player.onOpen(); });
-      conn.on('data', msg => role === 'player' ? onPlayerState(msg) : onRemoteState(msg));
-      conn.on('close', () => { clearTimeout(timeout); if (this.conn === conn){ this.setStatus('lost'); this.later(go); } });
-      conn.on('error', () => { this.setStatus('lost'); this.later(go); });
+      dropConn();
+      const conn = this.conn = this.peer.connect(PEER_PREFIX + code, {serialization: 'json', reliable: true, metadata: {role, cid}});
+      const timeout = setTimeout(() => { if (this.conn === conn && !conn.open){ dropConn(); this.later(go); } }, 9000);
+      conn.on('open', () => {
+        clearTimeout(timeout); this.lastHeard = Date.now(); this.setStatus('ready');
+        try { conn.send({type:'ping'}); } catch(e){}
+        if (role === 'player') Player.onOpen();
+      });
+      conn.on('data', msg => {
+        this.lastHeard = Date.now();
+        if (this.status !== 'ready') this.setStatus('ready');
+        if (msg && msg.type === 'pong') return;
+        role === 'player' ? onPlayerState(msg) : onRemoteState(msg);
+      });
+      conn.on('close', () => { clearTimeout(timeout); if (this.conn === conn){ this.conn = null; this.setStatus('lost'); this.later(go); } });
+      conn.on('error', () => { if (this.conn === conn){ dropConn(); this.setStatus('lost'); this.later(go); } });
     };
     this.reconnect = go;
     go();
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) go(); });
+    // battito: un ping ogni 4 s; se la TV tace da 12 s la connessione è morta e si rifà
+    setInterval(() => {
+      const c = this.conn;
+      if (!c || !c.open) return;
+      try { c.send({type:'ping'}); } catch(e){}
+      if (this.lastHeard && Date.now() - this.lastHeard > 12000){ dropConn(); this.setStatus('lost'); go(); }
+    }, 4000);
+    // tornando sulla pagina: prova subito la connessione e, se non risponde, si ricollega
+    const wake = () => {
+      if (document.hidden) return;
+      const c = this.conn;
+      if (!c || !c.open){ go(); return; }
+      const t = Date.now();
+      try { c.send({type:'ping'}); } catch(e){}
+      setTimeout(() => { if (this.lastHeard < t){ dropConn(); this.setStatus('lost'); go(); } }, 2500);
+    };
+    document.addEventListener('visibilitychange', wake);
+    window.addEventListener('pageshow', wake);
+    window.addEventListener('online', () => go());
   },
   later(fn){ clearTimeout(this.retry); this.retry = setTimeout(fn, 2500); },
   send(name, arg){
@@ -3284,7 +3371,7 @@ function remoteConnected(){ return !IS_REMOTE && Remote.conns.size > 0; }
 function renderRemoteStatus(){
   const pill = $('remotePill');
   const tvText = {off:'', unavailable:'', connecting:'📱 …', offline:'📱 offline', ready: Remote.conns.size ? `📱 ${Remote.conns.size} collegat${Remote.conns.size === 1 ? 'o' : 'i'}` : '📱 Telecomando'};
-  const phText = {off:'', unavailable:'Telecomando non disponibile', connecting:'Collegamento alla TV…', offline:'Rete non disponibile, riprovo…', notfound:`TV con codice ${Remote.code} non trovata, riprovo…`, lost:'Collegamento perso, riprovo…', ready:`✓ Collegato alla TV (${Remote.code})`};
+  const phText = {off:'', unavailable:'Telecomando non disponibile', connecting:'Collegamento alla TV…', offline:'Rete non disponibile, riprovo…', notfound:`TV con codice ${Remote.code} non trovata, riprovo…`, lost:'Ricollegamento alla TV…', ready:`✓ Collegato alla TV (${Remote.code})`};
   if (IS_PLAYER){
     const pp = $('plStatus');
     pp.textContent = phText[Remote.status] || '';
@@ -3452,8 +3539,8 @@ $('setupStart').onclick = () => {
   const cfg = readSetup();
   if (cfg.names.length < 1){ $('setupErr').textContent = 'Inserisci almeno un concorrente.'; return; }
   const bad = cfg.script.findIndex(e => !validPhrase(e.txt));
-  if (bad >= 0){ $('scriptBox').open = true; $('scriptErr').textContent = `Frasi della serata, riga ${bad + 1}: la frase manca o non entra nel tabellone.`; return; }
-  if (cfg.finalScript && (cfg.finalScript.phrases.length !== 3 || !cfg.finalScript.phrases.every(validPhrase))){ $('scriptBox').open = true; $('scriptErr').textContent = 'Gioco finale: servono il tema e 3 frasi valide, una per riga.'; return; }
+  if (bad >= 0){ $('scriptBox').open = true; $('scriptErr').textContent = `Frasi della serata, riga ${bad + 1}: la frase manca, ha una sola parola o non entra nel tabellone.`; return; }
+  if (cfg.finalScript && (cfg.finalScript.phrases.length !== 3 || !cfg.finalScript.phrases.every(validPhrase))){ $('scriptBox').open = true; $('scriptErr').textContent = 'Gioco finale: servono il tema e 3 frasi di almeno due parole, una per riga.'; return; }
   closeModals();
   act('setup', cfg);
 };
@@ -3467,6 +3554,7 @@ $('phraseStart').onclick = () => {
   const cat = $('catInput').value, txt = $('phraseInput').value;
   if (!txt.trim()){ $('phraseErr').textContent = 'Scrivi la frase.'; return; }
   if (![...txt].some(isLetter)){ $('phraseErr').textContent = 'La frase deve contenere almeno una lettera.'; return; }
+  if (wordCount(txt) < 2){ $('phraseErr').textContent = 'Serve una frase di almeno due parole.'; return; }
   if (!layoutPhrase(txt)){ updatePreview(); return; }
   closeModals();
   act('phrase', {cat, txt});
@@ -3481,12 +3569,13 @@ $('finalRandom').onclick = () => {
 $('finalStart').onclick = () => {
   const phrases = [0,1,2].map(k => $('fp' + k).value.trim());
   const bad = phrases.findIndex(x => !validPhrase(x));
-  if (bad >= 0){ $('finalErr').textContent = `La frase della busta ${bad + 1} manca o non entra nel tabellone.`; return; }
+  if (bad >= 0){ $('finalErr').textContent = `La frase della busta ${bad + 1} manca, ha una sola parola o non entra nel tabellone.`; return; }
   closeModals();
   act('finalPhrases', {theme: $('finalTheme').value, phrases});
 };
 
 document.addEventListener('keydown', e => {
+  if (['MediaPlayPause','MediaPause','MediaPlay','Pause'].includes(e.key) && S && !IS_PLAYER){ e.preventDefault(); act('togglePause'); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !anyModalOpen()){ e.preventDefault(); act('undo'); return; }
   if (anyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) return;
@@ -3513,7 +3602,7 @@ setInterval(() => {
   const now = performance.now(), dt = Math.min(1000, now - lastTick); lastTick = now;
   if (IS_REMOTE){ showTimer(remoteTimer); return; }
   if (!S){ setTimerShown(null); return; }
-  const paused = busy || (anyModalOpen() && !remoteConnected()) || document.hidden;
+  const paused = busy || S.paused || (anyModalOpen() && !remoteConnected()) || document.hidden;
 
   // Manche lampo: una lettera alla volta
   if (S.phase === 'lampo'){

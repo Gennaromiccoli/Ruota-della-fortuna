@@ -65,4 +65,6 @@ Il vincitore affronta tre frasi con un tema comune e un solo cronometro (60 seco
 
 "Stop" passa alla busta successiva. Ogni frase risolta **conquista** una busta (gli importi restano nascosti). Alla fine il concorrente sceglie quale busta conquistata aprire, vede l'importo e decide se **tenerla** o **cambiarla** con un'altra conquistata; l'ultima rimasta va tenuta. Si vince **una sola busta**; al termine si scoprono tutti gli importi.
 
+**⏸ Pausa** (anche col tasto Play/Pausa del telecomando della TV) ferma cronometri e lettere automatiche e blocca i comandi finché non si riprende.
+
 **↶ Annulla** (o Ctrl+Z) torna indietro di un'azione in caso di errore. La partita viene salvata nel browser e si riprende ricaricando la pagina.
