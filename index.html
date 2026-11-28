@@ -123,7 +123,11 @@ body.celebrate .bulb{animation-duration:.5s}
 @keyframes envGlow{to{box-shadow:0 0 36px rgba(255,211,77,.8)}}
 .env.won{background:linear-gradient(160deg,#6cf0a6,#1f9d5a);color:#fff;animation:envFlip .6s}
 .env.lost{background:linear-gradient(160deg,#ff9295,#c9302c);color:#fff;animation:envFlip .6s}
-.env.lost .p{text-decoration:line-through;opacity:.85}
+.env.lost .p,.env.discard .p{text-decoration:line-through;opacity:.85}
+.env.pick{cursor:pointer;outline:4px solid #fff;animation:envGlow .8s ease-in-out infinite alternate}
+.env.open,.env.kept{background:linear-gradient(160deg,#fff2a8,var(--gold) 55%,var(--gold2));color:#1a1200;animation:envFlip .6s}
+.env.kept{box-shadow:0 0 40px rgba(255,211,77,.9);transform:scale(1.06)}
+.env.discard{background:linear-gradient(160deg,#5b6a9e,#2c3766);color:#d8def5}
 @keyframes envFlip{from{transform:rotateY(90deg)}}
 
 .panel{background:linear-gradient(180deg,rgba(16,42,125,.85),rgba(11,29,92,.85));border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
@@ -487,7 +491,7 @@ body.player header,body.player #players,body.player .stage,body.player #solution
     <details>
       <summary>Gioco finale delle 3 buste</summary>
       <label class="check"><input type="checkbox" id="finalOn"> Gioco finale per il vincitore</label>
-      <p class="hint" style="text-align:left;margin:8px 0 0">Tre frasi con un tema comune e un solo cronometro. Busta 1: lettere regalate + 3 consonanti e 1 vocale. Busta 2: iniziali e finali di ogni parola. Busta 3: le lettere compaiono da sole. "Stop" passa alla busta dopo; ogni frase risolta vince il premio della sua busta.</p>
+      <p class="hint" style="text-align:left;margin:8px 0 0">Tre frasi con un tema comune e un solo cronometro. Busta 1: lettere regalate + 3 consonanti e 1 vocale. Busta 2: iniziali e finali di ogni parola. Busta 3: il concorrente chiama le lettere, ogni lettera che manca toglie 3 secondi. "Stop" passa alla busta dopo. Ogni frase risolta conquista una busta; alla fine si apre una busta conquistata alla volta e si decide se tenerla o cambiarla: se ne vince una sola.</p>
       <div class="grid2">
         <div><label for="finalSeconds">Secondi in tutto</label><input type="number" id="finalSeconds" min="10" max="300" value="60"></div>
         <div><label for="finalLetters">Lettere regalate (busta 1)</label><input type="text" id="finalLetters" value="R S T L N E" autocomplete="off"></div>
@@ -550,7 +554,7 @@ body.player header,body.player #players,body.player .stage,body.player #solution
     <div class="row"><input type="password" id="fp0" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp0" type="button" title="Mostra / nascondi">👁</button></div>
     <label for="fp1">Busta 2 · Inizio e fine parola</label>
     <div class="row"><input type="password" id="fp1" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp1" type="button" title="Mostra / nascondi">👁</button></div>
-    <label for="fp2">Busta 3 · Lettere a sorpresa</label>
+    <label for="fp2">Busta 3 · Chiama le lettere (−3 secondi se manca)</label>
     <div class="row"><input type="password" id="fp2" autocomplete="off" spellcheck="false"><button class="xbtn" data-eye="fp2" type="button" title="Mostra / nascondi">👁</button></div>
     <div class="err" id="finalErr"></div>
     <div class="mfoot">
@@ -621,7 +625,7 @@ const STORE_KEY = 'tabellone-ruota-v2';
 const BUSTE = [
   {key:'31',   name:'3 consonanti + 1 vocale'},
   {key:'edge', name:'Inizio e fine parola'},
-  {key:'rand', name:'Lettere a sorpresa'}
+  {key:'call', name:'Chiama le lettere'}
 ];
 const TV_PRESET = [
   {type:'lampo', mult:1, timer:0, jolly:false, mistero:false, express:false},
@@ -897,7 +901,7 @@ function save(){ if (S) store.set(STORE_KEY, JSON.stringify(S)); }
 function snapshot(){ history.push(JSON.stringify(S)); if (history.length > 200) history.shift(); actionCount++; }
 const cur = () => S.players[S.current];
 const isActive = i => S.final ? i === S.final.player : (!S.tiebreak || S.tiebreak.includes(i));
-const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','jollyAsk','mysteryAsk','expressAsk','express','lampoBuzz','speedSpin','speedTurn','speedSolve','finalIntro','finalPick','finalSolve'];
+const PLAY_PHASES = ['turn','consonant','vowel','solve','bonusPick','bonusSpin','jollyAsk','mysteryAsk','expressAsk','express','lampoBuzz','speedSpin','speedTurn','speedSolve','finalIntro','finalPick','finalSolve','finalChoose','finalKeep'];
 const setFx = (kind, big, sub) => { S.fx = {id: Date.now() + Math.random(), kind, big: String(big), sub: sub ? String(sub) : ''}; };
 const nm = p => `<b>${esc(p.name)}</b>`;
 
@@ -954,6 +958,7 @@ function mancheLabel(sp){
 }
 
 function startManche(category, phrase){
+  closeModals();
   snapshot();
   S.category = category.trim();
   S.phrase = phrase.trim();
@@ -1119,6 +1124,7 @@ async function chooseLetter(L, confirmed){
   if (busy || !S || (anyModalOpen() && !confirmed && !remoteConnected())) return;
   const ph = S.phase;
   if (ph === 'finalPick') return pickFinal(L);
+  if (ph === 'finalSolve' && S.final && S.final.idx === 2) return finalCall(L);
   if (ph === 'bonusPick') return bonusPick(L);
   if (ph === 'express') return expressLetter(L, confirmed);
   if (ph === 'speedTurn') return speedLetter(L, confirmed);
@@ -1423,7 +1429,7 @@ function startFinalSetup(){
   if (busy || S.phase !== 'gameOver' || !S.cfg.finalOn || S.final) return;
   const top = Math.max(...S.players.map(p => p.total));
   snapshot();
-  S.final = {player: S.players.findIndex(p => p.total === top), theme:'', phrases:[], prizes:[], idx:-1, results:[null,null,null], picks:[], timeLeft: S.cfg.finalSeconds * 1000, won: 0};
+  S.final = {player: S.players.findIndex(p => p.total === top), theme:'', phrases:[], prizes:[], idx:-1, results:[null,null,null], picks:[], timeLeft: S.cfg.finalSeconds * 1000, won: 0, opened: [], kept: null};
   S.current = S.final.player;
   S.phase = 'finalPhrase'; S.category = ''; S.grid = null; S.used = []; S.extra = []; S.phrase = '';
   S.prevTotals = S.players.map(p => p.total);
@@ -1448,7 +1454,8 @@ function applyFinalPhrases(a){
   f.prizes = shuffle(pool).slice(0, 3);
   f.idx = -1; f.results = [null,null,null]; f.timeLeft = S.cfg.finalSeconds * 1000;
   S.phase = 'finalIntro'; S.category = f.theme; S.grid = null; S.phrase = '';
-  S.msg = `Tema: <b>${esc(f.theme || 'libero')}</b>. Tre buste, <b>${S.cfg.finalSeconds} secondi</b> in tutto. Ogni frase risolta apre una busta verde!`;
+  f.opened = []; f.kept = null;
+  S.msg = `Tema: <b>${esc(f.theme || 'libero')}</b>. Tre buste, <b>${S.cfg.finalSeconds} secondi</b> in tutto. Ogni frase risolta conquista una busta: alla fine ne aprirai una sola.`;
   buildBoard(true); save(); render();
 }
 function finalNext(){
@@ -1477,7 +1484,7 @@ function finalNext(){
     anim = animateTiles(tiles.map(tileEl).filter(Boolean), true);
   } else {
     S.phase = 'finalSolve';
-    S.msg = `Busta 3 · le lettere compaiono da sole. Il tempo corre!`;
+    S.msg = `Busta 3 · ${nm(cur())} chiama le lettere: ogni lettera che manca costa <b>3 secondi</b>!`;
   }
   save(); render(); if (anim) anim();
 }
@@ -1499,11 +1506,25 @@ function pickFinal(L){
   const anim = animateReveal(f.picks);
   save(); render(); anim();
 }
-function finalRandomReveal(){
-  const hidden = hiddenTiles();
-  if (hidden.length <= 1) return;   // l'ultima lettera la deve trovare il concorrente
-  const i = hidden[Math.floor(Math.random() * hidden.length)];
-  S.extra.push(i); lightTile(i); save(); render();
+/* Busta 3: lettera presente = si accende; lettera assente = meno 3 secondi */
+function finalCall(L){
+  const f = S.final;
+  if (S.used.includes(L)) return;
+  snapshot();
+  S.used.push(L);
+  const count = countOf(L);
+  if (count){
+    const tiles = [...document.querySelectorAll('#board .tile.letter')].filter(t => t.dataset.n === L && !t.classList.contains('shown'));
+    tiles.forEach((t, i) => setTimeout(() => lightTile(+t.dataset.i), i * 160));
+    S.msg = `${foundText(count, L)} ${nm(cur())}, un'altra lettera o la soluzione?`;
+    Sound.ding();
+  } else {
+    f.timeLeft = Math.max(0, f.timeLeft - 3000);
+    S.msg = `Nessuna <b>${L}</b>: <span class="big red">−3 secondi!</span>`;
+    setFx('time', '−3 SECONDI', `Nessuna ${L}`); Sound.buzz();
+  }
+  save(); render();
+  if (f.timeLeft <= 0) finalTimeUp();
 }
 function finalSettle(result, onRevealed){
   const f = S.final, k = f.idx;
@@ -1511,22 +1532,65 @@ function finalSettle(result, onRevealed){
   const done = f.results.every(r => r !== null) || f.timeLeft <= 0;
   if (f.timeLeft <= 0) f.results = f.results.map(r => r === null ? false : r);
   S.phase = done ? 'finalWrap' : 'finalIntro';
-  revealAllThen(() => { if (onRevealed) onRevealed(); if (done) setTimeout(finishFinal, onRevealed ? 1800 : 0); });
+  revealAllThen(() => { if (onRevealed) onRevealed(); if (done) setTimeout(goChoose, onRevealed ? 1800 : 0); });
+}
+/* Fine delle tre frasi: si sceglie quale busta conquistata aprire */
+const earnedEnv = () => S.final.results.map((r,k) => r === true ? k : -1).filter(k => k >= 0);
+function goChoose(){
+  const f = S.final, n = earnedEnv().length;
+  if (!n) return finishFinal();
+  S.phase = 'finalChoose';
+  S.msg = n === 1 ? `${nm(cur())} ha conquistato <b>una busta</b>: aprila!` : `${nm(cur())} ha conquistato <b>${n} buste</b>. Quale apri? Ne vincerai una sola.`;
+  setFx('final', 'SCEGLI LA BUSTA', `${n} bust${n === 1 ? 'a conquistata' : 'e conquistate'}`); Sound.whoosh();
+  save(); render();
+}
+function openEnv(k){
+  k = +k;
+  const f = S.final;
+  if (busy || S.phase !== 'finalChoose' || f.results[k] !== true || f.opened.includes(k)) return;
+  snapshot();
+  f.opened.push(k);
+  const left = earnedEnv().filter(j => !f.opened.includes(j));
+  setFx('busta-win', euro(f.prizes[k]), `Busta ${k + 1}`); Sound.drum();
+  if (!left.length){
+    f.kept = k;
+    S.phase = 'finalWrap';
+    S.msg = `Nella busta ${k + 1} ci sono <span class="big">${euro(f.prizes[k])}</span>: è l'ultima, ${nm(cur())} la tiene!`;
+    save(); render(); setTimeout(finishFinal, 2400); return;
+  }
+  S.phase = 'finalKeep';
+  S.msg = `Nella busta ${k + 1} ci sono <span class="big">${euro(f.prizes[k])}</span>. ${nm(cur())} la tiene o la cambia con un'altra busta conquistata?`;
+  save(); render();
+}
+function keepEnv(){
+  if (busy || S.phase !== 'finalKeep') return;
+  snapshot();
+  const f = S.final;
+  f.kept = f.opened[f.opened.length - 1];
+  finishFinal();
+}
+function changeEnv(){
+  if (busy || S.phase !== 'finalKeep') return;
+  snapshot();
+  const f = S.final, k = f.opened[f.opened.length - 1];
+  S.phase = 'finalChoose';
+  S.msg = `Busta ${k + 1} scartata (${euro(f.prizes[k])}). Scegli un'altra busta.`;
+  Sound.pass(); save(); render();
 }
 function finalRight(){
   if (busy || S.phase !== 'finalSolve') return;
   snapshot();
   const f = S.final;
-  S.msg = `🟩 Busta ${f.idx + 1} vinta: <span class="big">${euro(f.prizes[f.idx])}</span>!`;
+  S.msg = `🟩 Busta ${f.idx + 1} conquistata!`;
   Sound.fanfare();
-  finalSettle(true, () => winSplash('busta-win', euro(f.prizes[f.idx]), `Busta ${f.idx + 1} vinta`));
+  finalSettle(true, () => winSplash('busta-win', `BUSTA ${f.idx + 1}`, 'CONQUISTATA'));
 }
 function finalStop(){
   if (busy || S.phase !== 'finalSolve') return;
   snapshot();
   const f = S.final;
-  S.msg = `🟥 Stop sulla busta ${f.idx + 1}: dentro c'erano ${euro(f.prizes[f.idx])}.`;
-  setFx('busta-lose', 'STOP', `Busta ${f.idx + 1}: ${euro(f.prizes[f.idx])}`);
+  S.msg = `🟥 Stop: la busta ${f.idx + 1} è persa.`;
+  setFx('busta-lose', 'STOP', `Busta ${f.idx + 1} persa`);
   Sound.buzz();
   finalSettle(false);
 }
@@ -1542,7 +1606,7 @@ function finalTimeUp(){
 function finishFinal(){
   const f = S.final, p = S.players[f.player];
   f.results = f.results.map(r => r === null ? false : r);
-  f.won = f.prizes.reduce((s, v, k) => s + (f.results[k] ? v : 0), 0);
+  f.won = f.kept !== null && f.kept !== undefined ? f.prizes[f.kept] : 0;
   p.total += f.won;
   S.phase = 'finalDone';
   S.msg = f.won ? `<span class="big">${esc(p.name)} vince ${euro(f.won)} nel gioco finale!</span>` : `Nessuna busta vinta per ${nm(p)}.`;
@@ -1831,6 +1895,8 @@ function render(){
   const segTxt = S.lastSeg ? `↓ ${S.lastSeg}` : '';
   if (segTxt !== lastSegShown){ wr.textContent = segTxt; lastSegShown = segTxt; wr.classList.remove('pop'); void wr.offsetWidth; if (segTxt) wr.classList.add('pop'); }
 
+  // la finestra di fine manche non resta aperta quando il gioco è andato avanti (o è stata chiusa dal telefono)
+  if ($('endModal').classList.contains('open') && (!END_PHASES.includes(S.phase) || (!IS_REMOTE && S.endHiddenKey === endKey()))) $('endModal').classList.remove('open');
   renderActions(); renderKeyboard(); renderWheelControls(); updateBoard();
   Remote.broadcast();
 }
@@ -1857,13 +1923,19 @@ function renderPlayers(){
 function renderEnvelopes(){
   const el = $('envelopes');
   if (!S.final || !S.final.prizes.length){ el.hidden = true; return; }
-  const f = S.final;
+  const f = S.final, opened = f.opened || [], done = S.phase === 'finalDone';
+  const canClick = IS_REMOTE || !remoteConnected();
   el.hidden = false;
   el.innerHTML = BUSTE.map((b,k) => {
-    const r = f.results[k];
+    const r = f.results[k], isOpen = opened.includes(k);
     const active = f.idx === k && ['finalPick','finalSolve'].includes(S.phase);
-    const cls = r === true ? 'won' : r === false ? 'lost' : active ? 'active' : '';
-    return `<div class="env ${cls}"><div class="n">BUSTA ${k+1}</div><div class="t">${b.name}</div>${r === null ? '' : `<div class="p">${euro(f.prizes[k])}</div>`}${r === true ? '<div class="ic">✓</div>' : r === false ? '<div class="ic">✗</div>' : ''}</div>`;
+    let cls = '', sub = b.name, amount = '', attrs = '';
+    if (done){ amount = euro(f.prizes[k]); cls = f.kept === k ? 'kept' : r ? 'discard' : 'lost'; sub = f.kept === k ? '★ VINTA' : r ? 'scartata' : 'persa'; }
+    else if (isOpen){ amount = euro(f.prizes[k]); const cur = f.kept === k || (S.phase === 'finalKeep' && opened[opened.length - 1] === k) || (S.phase === 'finalWrap' && opened[opened.length - 1] === k); cls = cur ? 'open' : 'discard'; sub = cur ? 'aperta' : 'scartata'; }
+    else if (r === true){ const pick = S.phase === 'finalChoose'; cls = 'won' + (pick ? ' pick' : ''); sub = pick ? 'tocca per aprire' : 'conquistata'; if (pick && canClick) attrs = `data-act="openEnv" data-arg="${k}" role="button" tabindex="0"`; }
+    else if (r === false){ cls = 'lost'; sub = 'persa'; }
+    else if (active) cls = 'active';
+    return `<div class="env ${cls}" ${attrs}><div class="n">BUSTA ${k+1}</div><div class="t">${sub}</div>${amount ? `<div class="p">${amount}</div>` : ''}${cls.startsWith('won') ? '<div class="ic">✓</div>' : cls === 'lost' ? '<div class="ic">✗</div>' : cls === 'kept' ? '<div class="ic">★</div>' : ''}</div>`;
   }).join('');
 }
 
@@ -1895,6 +1967,8 @@ function renderActions(){
     case 'finalPhrase': if (!remoteConnected()) a.push(btn('openFinalPhrase', 'Prepara le buste')); break;
     case 'finalIntro': { const k = S.final.results.findIndex(r => r === null); a.push(btn('finalNext', k < 0 ? 'Risultato finale' : `✉ Apri la busta ${k+1}`, 'green')); break; }
     case 'finalSolve': a.push(btn('finalRight', '✓ Esatta', 'green'), btn('finalStop', '✋ STOP · passa', 'red')); break;
+    case 'finalChoose': earnedEnv().filter(k => !S.final.opened.includes(k)).forEach(k => a.push(btn('openEnv', `✉ Apri la busta ${k+1}`, 'green', false, k))); break;
+    case 'finalKeep': { const k = S.final.opened[S.final.opened.length - 1]; a.push(btn('keepEnv', `✓ Tiene ${euro(S.final.prizes[k])}`, 'green'), btn('changeEnv', '↺ Cambia busta', 'ghost')); break; }
   }
   $('actions').innerHTML = a.join('');
 }
@@ -1910,6 +1984,7 @@ function renderKeyboard(){
       else if (ph === 'vowel') enabled = v;
       else if (ph === 'express') enabled = !v || cur().round >= cost();
       else if (ph === 'speedTurn') enabled = true;
+      else if (ph === 'finalSolve' && S.final && S.final.idx === 2) enabled = !used;
       else if (ph === 'finalPick'){
         const nc = S.final.picks.filter(x => !isVowel(x)).length, nv = S.final.picks.length - nc;
         enabled = !used && !S.final.picks.includes(L) && (v ? nc === 3 && nv === 0 : nc < 3);
@@ -2075,6 +2150,7 @@ function standingsBars(){
 const ranking = () => IS_REMOTE ? standingsTable() : standingsBars();
 function showEnd(){
   if (!S) return;
+  if (!IS_REMOTE && S.endHiddenKey && S.endHiddenKey === endKey()) return;
   const el = $('endContent');
   const sol = `<div class="solution">${esc((S.phrase || '').toUpperCase())}</div>`;
   if (S.phase === 'mancheEnd'){
@@ -2102,7 +2178,7 @@ function showEnd(){
       <button class="btn green" data-act="newGame">Nuova partita</button></div>`;
   } else if (S.phase === 'finalDone'){
     const f = S.final, p = S.players[f.player];
-    const rows = BUSTE.map((b,k) => `<tr class="${f.results[k] ? 'top' : ''}"><td>${f.results[k] ? '🟩' : '🟥'} Busta ${k+1} · ${b.name}<br><small>${esc((f.phrases[k] || '').toUpperCase())}</small></td><td>${euro(f.prizes[k])}</td></tr>`).join('');
+    const rows = BUSTE.map((b,k) => `<tr class="${f.kept === k ? 'top' : ''}"><td>${f.kept === k ? '★' : f.results[k] ? '🟩' : '🟥'} Busta ${k+1} · ${b.name} · ${f.kept === k ? 'vinta' : f.results[k] ? 'conquistata, non tenuta' : 'persa'}<br><small>${esc((f.phrases[k] || '').toUpperCase())}</small></td><td>${euro(f.prizes[k])}</td></tr>`).join('');
     el.innerHTML = `<div class="trophy">${f.won ? '🏆' : '✉'}</div>
       <h2 style="text-align:center">${f.won ? `${esc(p.name)} vince ${euro(f.won)}!` : 'Nessuna busta vinta'}</h2>
       <table class="standings">${rows}</table>
@@ -2152,10 +2228,20 @@ const ACTIONS = {
   seg: k => chooseManual(typeof k === 'number' || SEG_KEYS.includes(k) ? k : null),
   letter: a => a && /^[A-Z]$/.test(a.L) && chooseLetter(a.L, !!a.confirmed),
   setup: cfg => applySetup(cfg),
+  hideEnd: () => { if (!S) return; S.endHiddenKey = endKey(); $('endModal').classList.remove('open'); save(); render(); },
+  viewEnd: () => { if (!S) return; S.endHiddenKey = null; save(); showEnd(); },
+  openEnv: k => openEnv(k), keepEnv, changeEnv,
   phrase: a => a && applyPhrase(String(a.cat || ''), String(a.txt || ''))
 };
 // Azioni che riguardano solo lo schermo di chi le preme
-const LOCAL = { showEnd, openPhrase, openFinalPhrase, closeEnd: closeModals, newGame: () => askNewGame() };
+// "Guarda il tabellone" e "Continua" premuti sul telefono valgono anche per la TV
+const LOCAL = {
+  showEnd: () => { showEnd(); if (IS_REMOTE) Remote.send('viewEnd'); },
+  closeEnd: () => { closeModals(); if (IS_REMOTE) Remote.send('hideEnd'); },
+  openPhrase, openFinalPhrase, newGame: () => askNewGame()
+};
+const END_PHASES = ['mancheEnd','gameOver','finalDone'];
+const endKey = () => S ? `${S.phase}|${S.manche}` : '';
 
 function act(name, arg){
   if (LOCAL[name]) return LOCAL[name](arg);
@@ -2717,7 +2803,6 @@ setInterval(() => {
   if (S.final && ['finalIntro','finalPick','finalSolve','finalWrap'].includes(S.phase)){
     if (S.phase === 'finalSolve' && !paused){
       S.final.timeLeft = Math.max(0, S.final.timeLeft - dt);
-      if (S.final.idx === 2){ randAcc += dt; if (randAcc >= 2200){ randAcc = 0; finalRandomReveal(); } }
     }
     setTimerShown(Math.ceil(S.final.timeLeft / 1000));
     if (S.phase === 'finalSolve' && S.final.timeLeft <= 0) finalTimeUp();

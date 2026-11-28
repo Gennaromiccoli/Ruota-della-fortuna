@@ -61,8 +61,8 @@ Ogni manche si configura a parte; il pulsante **📺 Scaletta stile TV** prepara
 Il vincitore affronta tre frasi con un tema comune e un solo cronometro (60 secondi di default):
 1. **Busta 1**: lettere regalate (R S T L N E) + 3 consonanti e 1 vocale scelte dal concorrente.
 2. **Busta 2**: si vedono la prima e l'ultima lettera di ogni parola.
-3. **Busta 3**: le lettere compaiono da sole una alla volta.
+3. **Busta 3**: il concorrente chiama le lettere; ogni lettera che manca toglie **3 secondi**.
 
-"Stop" passa alla busta successiva. Ogni frase risolta apre una busta verde con un premio nascosto (estratto tra quelli indicati, fino a 200.000 €); le altre diventano rosse e mostrano il premio perso.
+"Stop" passa alla busta successiva. Ogni frase risolta **conquista** una busta (gli importi restano nascosti). Alla fine il concorrente sceglie quale busta conquistata aprire, vede l'importo e decide se **tenerla** o **cambiarla** con un'altra conquistata; l'ultima rimasta va tenuta. Si vince **una sola busta**; al termine si scoprono tutti gli importi.
 
 **↶ Annulla** (o Ctrl+Z) torna indietro di un'azione in caso di errore. La partita viene salvata nel browser e si riprende ricaricando la pagina.
